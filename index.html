@@ -105,6 +105,12 @@
         #dashboard { padding-top: 10px; }
         
         .filter-container { background: white; padding: 10px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+        
+        /* SEARCH BOX */
+        .search-container { width: 100%; margin-bottom: 10px; }
+        .search-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 1rem; background: #f9fafb url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 10px center; padding-left: 36px; transition: all 0.2s; }
+        .search-input:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
+
         .filter-tabs { display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px; gap: 4px; }
         .filter-pill { border: none; background: transparent; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; color: var(--text-sub); cursor: pointer; border-radius: 6px; transition: all 0.2s; }
         .filter-pill.active { background: white; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
@@ -121,7 +127,9 @@
         .report-clickable-area { flex-grow: 1; padding: 16px; cursor: pointer; background: transparent; }
         .report-clickable-area:active { background-color: rgba(0,0,0,0.02); }
         
-        .report-info h3 { margin: 0 0 6px 0; font-size: 1.05rem; color: var(--text-main); font-weight: 600; }
+        .report-info h3 { margin: 0 0 6px 0; font-size: 1.05rem; color: var(--text-main); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .report-id { font-size: 0.75rem; font-weight: normal; color: var(--text-sub); background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+
         .report-info p { margin: 0; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .report-info i { width: 16px; text-align: center; }
         
@@ -156,19 +164,68 @@
         .participant-tag { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .participant-remove { cursor: pointer; font-weight: bold; font-size: 1.1rem; opacity: 0.6; }
 
-        .point-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; border-left: 4px solid var(--secondary); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        /* POINT ITEM STYLE - Reverted to spacious but with side arrows */
+        .point-item { 
+            background: white; border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 16px; 
+            border-left: 4px solid var(--secondary); 
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            position: relative;
+            display: flex; 
+            align-items: flex-start;
+        }
+        .point-item:active { cursor: grabbing; }
+        .point-item.dragging { opacity: 0.5; background: #f9fafb; border: 2px dashed var(--primary); }
+        
+        /* CONTENT PART (Left) */
+        .point-content-wrapper { flex-grow: 1; }
+        
+        /* ACTIONS PART (Right) */
+        .point-sort-column {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-left: 12px;
+            min-width: 24px;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 4px;
+        }
+
+        .sort-btn {
+            background: #f1f5f9;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 0;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            width: 28px;
+        }
+        .sort-btn:hover { background: #e2e8f0; color: var(--primary); }
+
         .point-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .point-item.resolved { border-left-color: var(--success); }
         .point-item.age-fresh { border-left-color: var(--status-fresh); }
         .point-item.age-warning { border-left-color: var(--status-warning); }
         .point-item.age-critical { border-left-color: var(--status-critical); }
         
-        .point-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        /* Original Header Styles */
+        .point-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .point-title { font-weight: 600; font-size: 1.1rem; color: #111827; }
-        .point-meta { font-size: 0.85rem; color: var(--text-sub); display: flex; gap: 12px; align-items: center; margin-top: 8px;}
-        .point-meta i { color: #9ca3af; margin-right: 4px; }
         
-        .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .point-meta-row { font-size: 0.85rem; color: var(--text-sub); display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+        .point-desc { color: #4b5563; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; white-space: nowrap; }
         .status-resolved { background: var(--success-bg); color: #065f46; }
         .badge-fresh { background: var(--status-fresh-bg); color: #1e40af; }
         .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
@@ -258,6 +315,11 @@
             <button class="icon-btn" onclick="window.askAdminTools()" style="color:var(--primary);" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
         </div>
         <div class="filter-container">
+             <!-- NEW SEARCH INPUT -->
+             <div class="search-container">
+                <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, von:Name)" oninput="window.renderReportList()">
+            </div>
+            
             <div class="filter-tabs" id="filter-type-container">
                 <button class="filter-pill active" onclick="window.setFilterType('all')" data-i18n="filter_all">Alle</button>
                 <button class="filter-pill" onclick="window.setFilterType('AMS')">AMS</button>
@@ -414,10 +476,10 @@
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF herunterladen", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Adressat (Verantwortlich)", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich"
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF herunterladen", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Adressat (Verantwortlich)", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, von:Name)"
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Download as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Assignee (Responsible)", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible"
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Download as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Assignee (Responsible)", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, from:Name)"
             }
         };
 
@@ -600,6 +662,9 @@
                     }
                 }
             });
+            
+            // Search Placeholder Update
+            document.getElementById('search-input').placeholder = t.search_placeholder;
 
             // Update placeholders
             // ... (can be added if needed, for now standard)
@@ -757,7 +822,10 @@
             if(uniqueYears.includes(filterYear)) yearSelect.value = filterYear;
             else if(filterYear !== 'all') yearSelect.value = 'all';
             else yearSelect.value = currentVal;
-
+            
+            // SEARCH FILTERING
+            const searchInput = document.getElementById('search-input');
+            const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             const list = document.getElementById('report-list');
             if(allReports.length === 0) {
@@ -765,15 +833,41 @@
                 return;
             }
 
-            // FILTERING LOGIC
+            // FILTERING LOGIC (Type, Year AND Search)
             let filteredReports = allReports.filter(r => {
                 const rType = r.header.type || 'AMS'; // Default backward compatibility
                 const rYear = r.header.date_from ? r.header.date_from.substring(0,4) : '';
                 
+                // Base filters
                 const matchType = (filterType === 'all') || (rType === filterType);
                 const matchYear = (filterYear === 'all') || (rYear === filterYear);
                 
-                return matchType && matchYear;
+                // Search Logic
+                let matchSearch = true;
+                if(searchQuery) {
+                    const rId = (r.readable_id || r.id).toLowerCase(); // Check Readable ID first
+                    const rCustomer = (r.header.customer || '').toLowerCase();
+                    const rAuthor = (r.header.author || '').toLowerCase();
+                    
+                    // Specific Search: "von:max"
+                    if(searchQuery.startsWith('von:')) {
+                        const authorQuery = searchQuery.replace('von:', '').trim();
+                        matchSearch = rAuthor.includes(authorQuery);
+                    } else {
+                        // General Search: ID, Customer, Content in Points
+                        let inPoints = false;
+                        if(r.points) {
+                            inPoints = r.points.some(p => 
+                                (p.title && p.title.toLowerCase().includes(searchQuery)) || 
+                                (p.desc && p.desc.toLowerCase().includes(searchQuery))
+                            );
+                        }
+                        
+                        matchSearch = rId.includes(searchQuery) || rCustomer.includes(searchQuery) || inPoints;
+                    }
+                }
+                
+                return matchType && matchYear && matchSearch;
             });
 
             // SORTING LOGIC
@@ -822,6 +916,9 @@
                 const openCount = (r.points || []).filter(p => p.status === 'open').length;
                 const total = (r.points || []).length;
                 
+                // Readable ID Logic (Fallback to sliced ID if new field is missing)
+                const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
+                
                 // Determine CSS Class based on open points and age
                 let statusClass = '';
                 let dashboardBadge = '';
@@ -841,7 +938,10 @@
                 <div class="report-list-item ${statusClass}">
                     <div class="report-clickable-area" onclick="window.openReport('${r.id}')">
                         <div class="report-info">
-                            <h3><span class="report-type-badge">${rType}</span> ${title}</h3>
+                            <h3>
+                                <span><span class="report-type-badge">${rType}</span> ${title}</span>
+                                <span class="report-id">${displayId}</span>
+                            </h3>
                             <p><i class="fa-solid fa-user"></i> ${r.header.author || '-'}</p>
                             <p>
                                 <i class="fa-solid fa-list-check"></i> 
@@ -1003,8 +1103,12 @@
         };
 
         window.createNewReport = function() {
+            // NEW: Generate Readable ID (5 digits random)
+            const readableId = Math.floor(10000 + Math.random() * 90000).toString();
+            
             const newReport = {
                 id: Date.now().toString(),
+                readable_id: readableId, // Store it
                 created_at: Date.now(),
                 header: { 
                     type: 'AMS', 
@@ -1079,6 +1183,62 @@
             if(tabId === 'export') window.renderPDFPreview();
         };
 
+        // NEW: DRAG & DROP LOGIC
+        let draggedItemIndex = null;
+
+        window.handleDragStart = (e, i) => {
+            draggedItemIndex = i;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', i);
+            e.target.classList.add('dragging');
+            // Required for Firefox
+            setTimeout(() => { e.target.style.opacity = '0.5'; }, 0);
+        };
+
+        window.handleDragOver = (e) => {
+            e.preventDefault(); // Necessary to allow dropping
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        };
+        
+        window.handleDragEnd = (e) => {
+             e.target.classList.remove('dragging');
+             e.target.style.opacity = '1';
+             draggedItemIndex = null;
+        };
+
+        window.handleDrop = (e, newIndex) => {
+            e.stopPropagation();
+            if (draggedItemIndex !== null && draggedItemIndex !== newIndex) {
+                // Swap elements in local array
+                const item = points[draggedItemIndex];
+                points.splice(draggedItemIndex, 1);
+                points.splice(newIndex, 0, item);
+                
+                // Save to Firestore
+                const r = allReports.find(x => x.id === currentReportId);
+                if(r) { r.points = points; saveReportToFirestore(r); }
+                
+                // Re-render
+                window.renderPointsList();
+            }
+            return false;
+        };
+        
+        // NEW: MOVE UP/DOWN Logic (Mobile Fallback)
+        window.movePoint = (index, direction) => {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < points.length) {
+                const item = points[index];
+                points.splice(index, 1);
+                points.splice(newIndex, 0, item);
+                
+                const r = allReports.find(x => x.id === currentReportId);
+                if(r) { r.points = points; saveReportToFirestore(r); }
+                window.renderPointsList();
+            }
+        };
+
         window.renderPointsList = function() {
             const container = document.getElementById('points-list');
             const t = translations[currentLang];
@@ -1102,31 +1262,29 @@
                     ageBadge = `<span class="status-badge status-resolved">${t.status_resolved}</span>`;
                 }
 
-                // Prepare images preview
-                let imgPreview = '';
-                if(p.images && p.images.length > 0) {
-                    imgPreview = `<div style="display:flex; gap:5px; margin: 8px 0; overflow-x:auto;">
-                        ${p.images.map(img => {
-                            const src = typeof img === 'string' ? img : img.src;
-                            return `<img src="${src}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb;">`;
-                        }).join('')}
-                    </div>`;
-                }
+                // Add Move Buttons
+                const moveUp = i > 0 ? `<button class="sort-btn" onclick="event.stopPropagation(); window.movePoint(${i}, -1)"><i class="fa-solid fa-chevron-up"></i></button>` : '';
+                const moveDown = i < points.length - 1 ? `<button class="sort-btn" onclick="event.stopPropagation(); window.movePoint(${i}, 1)"><i class="fa-solid fa-chevron-down"></i></button>` : '';
 
                 return `
-                <div class="point-item ${ageClass}" onclick="window.openModal(${i})">
-                    <div class="point-header">
-                        <div style="flex:1">
-                            ${p.ticket ? `<span class="ticket-link"><i class="fa-solid fa-ticket"></i> CRM ${p.ticket}</span>` : ''}
-                            <span class="point-title">${p.title}</span>
+                <div class="point-item ${ageClass}" draggable="true" ondragstart="window.handleDragStart(event, ${i})" ondragover="window.handleDragOver(event)" ondrop="window.handleDrop(event, ${i})" ondragend="window.handleDragEnd(event)" onclick="window.openModal(${i})">
+                    <div class="point-content-wrapper">
+                        <div class="point-header-row">
+                            <div class="point-title">
+                                ${p.ticket ? `<span class="ticket-link"><i class="fa-solid fa-ticket"></i> CRM ${p.ticket}</span>` : ''}
+                                ${p.title}
+                            </div>
+                            <div>${ageBadge}</div>
                         </div>
-                        ${ageBadge}
+                        <div class="point-desc">${(p.desc || '').substring(0, 80)}...</div>
+                        <div class="point-meta-row">
+                            <span><i class="fa-solid fa-user"></i> ${p.assignee || t.no_assignee}</span>
+                            ${p.images && p.images.length ? `<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>` : ''}
+                        </div>
                     </div>
-                    <div style="margin-bottom:8px; color:#4b5563;">${(p.desc || '').substring(0, 80)}...</div>
-                    ${imgPreview}
-                    <div class="point-meta">
-                        <span><i class="fa-solid fa-user"></i> ${p.assignee || t.no_assignee}</span>
-                        ${p.images && p.images.length ? `<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>` : ''}
+                    <div class="point-sort-column">
+                        ${moveUp}
+                        ${moveDown}
                     </div>
                 </div>
             `}).join('');
@@ -1305,206 +1463,106 @@
         };
 
         // --- IMAGES ---
-        window.handleImageUpload = function() {
+        window.handleImageUpload = async function() {
             const files = document.getElementById('p_images').files;
-            if(files.length) {
-                document.getElementById('img-spinner').style.display='inline-block';
-                let done = 0;
-                Array.from(files).forEach(f => {
+            if(!files.length) return;
+            
+            document.getElementById('img-spinner').style.display = 'inline-block';
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // 1. Resize/Compress using Canvas
+                const processedBlob = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = e => {
                         const img = new Image();
                         img.onload = () => {
                             const cvs = document.createElement('canvas');
                             let w = img.width, h = img.height;
-                            // HIGH RES ALLOWED NOW: Max 2048px (was 800)
+                            // 2K Resolution
                             if(w > 2048) { h *= 2048/w; w = 2048; } 
                             cvs.width = w; cvs.height = h;
                             const ctx = cvs.getContext('2d');
                             ctx.drawImage(img, 0, 0, w, h);
-                            // Quality 0.8 (was 0.5)
-                            cvs.toBlob(resolve, 'image/jpeg', 0.8); 
+                            
+                            cvs.toBlob(blob => {
+                                if (blob) resolve(blob);
+                                else reject(new Error("Canvas to Blob failed"));
+                            }, 'image/jpeg', 0.8); 
                         };
+                        img.onerror = reject;
                         img.src = e.target.result;
                     };
-                    reader.readAsDataURL(f);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
                 });
-            }
-        };
-        
-        window.renderModalImages = function() {
-            document.getElementById('modal-img-preview').innerHTML = tempImages.map((imgObj, i) => {
-                const src = imgObj.src;
-                const isLarge = imgObj.isLarge;
-                const icon = isLarge ? 'fa-compress' : 'fa-expand';
-                const activeClass = isLarge ? 'active-large' : '';
-                const btnText = isLarge ? 'GROSS' : 'NORMAL';
-                
-                return `
-                <div class="img-thumb-container ${isLarge ? 'is-large' : ''}">
-                    <img src="${src}" class="img-thumb">
-                    <div class="img-btn-remove" onclick="window.removeTempImage(${i})">&times;</div>
-                    <div class="img-btn-size ${activeClass}" onclick="window.toggleImageSize(${i})">
-                        <i class="fa-solid ${icon}"></i> <span>${btnText}</span>
-                    </div>
-                </div>
-            `}).join('');
-        };
-        
-        window.removeTempImage = function(i) { tempImages.splice(i,1); window.renderModalImages(); };
-        
-        window.toggleImageSize = function(i) {
-            if(tempImages[i]) {
-                tempImages[i].isLarge = !tempImages[i].isLarge;
-                window.renderModalImages();
-            }
-        };
 
-        // --- EXPORT/IMPORT ---
-        window.exportBackup = function() {
-            // Direkter Aufruf nur noch intern
-            window.performExport();
-        };
-
-        window.performExport = function() {
-            const a = document.createElement('a');
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allReports));
-            a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a); a.click(); a.remove();
-        }
-
-        window.importBackup = function(input) {
-            const f = input.files[0];
-            if(!f) return;
-            const r = new FileReader();
-            r.onload = e => {
+                // 2. Upload to Firebase Storage
                 try {
-                    const d = JSON.parse(e.target.result);
-                    if(Array.isArray(d)) {
-                        if(confirm('OK=Überschreiben, Abbrechen=Anfügen')) {
-                            // Batch upload would be better but simple loop for now
-                            d.forEach(x => saveReportToFirestore(x));
-                        }
-                        else d.forEach(x => { 
-                            if(!allReports.find(y => y.id === x.id)) saveReportToFirestore(x);
-                        });
-                        alert('Import wird verarbeitet...');
-                    } else if (d.id && d.header) {
-                        saveReportToFirestore(d);
-                        alert('Bericht wird importiert...');
-                    } else {
-                        alert('Ungültiges Format');
-                    }
-                } catch(err) { alert('Fehler beim Import'); }
-            };
-            r.readAsText(f);
-            input.value = '';
-        };
-
-        // --- PDF ---
-        window.generatePDF = function() {
-            const r = allReports.find(x => x.id === currentReportId);
-            let filename = 'Bericht.pdf';
-            if(r) {
-                const datePart = r.header.date_from || new Date().toISOString().split('T')[0];
-                const customerPart = (r.header.customer || 'Kunde').replace(/[^a-z0-9äöüß]/gi, '_');
-                filename = `Bericht_${customerPart}_${datePart}.pdf`;
+                    const reportId = currentReportId || 'temp_uploads'; 
+                    const path = `images/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
+                    const storageRef = ref(storage, path);
+                    
+                    await uploadBytes(storageRef, processedBlob);
+                    const downloadURL = await getDownloadURL(storageRef);
+                    
+                    // 3. Add to local state
+                    tempImages.push({
+                        src: downloadURL,
+                        isLarge: false
+                    });
+                    
+                } catch (error) {
+                    console.error("Upload failed", error);
+                    alert("Upload fehlgeschlagen: " + error.message);
+                }
             }
-
-            const opt = { 
-                margin: 15, 
-                filename: filename, 
-                image: { type: 'jpeg', quality: 0.90 }, // Slightly lower PDF quality to keep size down with larger images
-                html2canvas: { scale: 2, useCORS: true }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-            html2pdf().set(opt).from(document.getElementById('pdf-preview')).save().catch(e => console.error(e));
-        };
-
-        // --- HELPERS ---
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            return [Math.ceil((((d - yearStart) / 86400000) + 1) / 7), d.getUTCFullYear()];
-        }
-        window.listen = function(id) {
-            if(!('webkitSpeechRecognition' in window)) return alert('Browser nicht unterstützt');
-            const r = new webkitSpeechRecognition();
-            r.lang = currentLang === 'de' ? "de-DE" : "en-US";
-            const btn = document.querySelector(`button[onclick*="${id}"]`);
-            btn.classList.add('listening');
-            r.start();
-            r.onresult = e => { 
-                const txt = e.results[0][0].transcript;
-                const field = document.getElementById(id);
-                field.value += " " + txt; 
-                btn.classList.remove('listening'); 
-                if(id.startsWith('h_')) window.updateCurrentReportHeader();
-            };
-            r.onerror = () => btn.classList.remove('listening');
-            r.onend = () => btn.classList.remove('listening');
-        };
-        window.renderPDFPreview = function() {
-            const r = allReports.find(x => x.id === currentReportId);
-            if(!r) return;
-            const h = r.header;
-            const pList = r.header.participants ? r.header.participants.join(', ') : '-';
-            const t = translations[currentLang];
             
-            const formatDate = (d) => {
-                if (!d) return '';
-                const parts = d.split('-');
-                if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
-                return d;
-            };
-
-            const html = points.map(p => {
-                const safeImages = (p.images || []).map(img => {
-                    if (typeof img === 'string') return { src: img, isLarge: false };
-                    return img;
-                });
-                const statusText = p.status === 'open' ? t.status_open : t.status_resolved;
-                const assigneeHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
-
-                return `
-                <div style="margin-bottom:25px; page-break-inside: avoid;">
-                    <div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;">
-                        <div>${p.ticket ? `<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> ` : ''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div>
-                        <span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${statusText}</span>
-                    </div>
-                    <p>${p.desc}</p>
-                    ${assigneeHtml}
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-                        ${safeImages.map(img => {
-                            const style = img.isLarge 
-                                ? 'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' 
-                                : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;';
-                            return `<img src="${img.src}" style="${style}">`;
-                        }).join('')}
-                    </div>
-                </div>
-            `}).join('');
-            
-            document.getElementById('pdf-preview').innerHTML = `
-                <div class="pdf-header" style="display:flex; justify-content:space-between;">
-                    <div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString('de-DE')}</p></div>
-                    <img src="${LOGO_SRC}" style="height:40px;">
-                </div>
-                <div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;">
-                    <div><strong>${t.lbl_customer}:</strong> ${h.customer}</div>
-                    <div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div>
-                    <div><strong>${t.lbl_author}:</strong> ${h.author}</div>
-                    <div><strong>${t.lbl_participants}:</strong> ${pList}</div>
-                </div>
-                ${html}
-            `;
+            document.getElementById('img-spinner').style.display = 'none';
+            window.renderModalImages();
         };
-        window.toggleFullScreen = function() {
-            if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>{});
-            else if(document.exitFullscreen) document.exitFullscreen().catch(e=>{});
+
+        window.renderModalImages = () => document.getElementById('modal-img-preview').innerHTML = tempImages.map((img,i)=>`<div class="img-thumb-container ${img.isLarge?'is-large':''}"><img src="${img.src}" class="img-thumb"><div class="img-btn-remove" onclick="window.removeTempImage(${i})">&times;</div><div class="img-btn-size ${img.isLarge?'active-large':''}" onclick="window.toggleImageSize(${i})"><i class="fa-solid ${img.isLarge?'fa-compress':'fa-expand'}"></i> <span>${img.isLarge?'GROSS':'NORMAL'}</span></div></div>`).join('');
+        window.removeTempImage = (i) => { tempImages.splice(i,1); window.renderModalImages(); };
+        window.toggleImageSize = (i) => { if(tempImages[i]) { tempImages[i].isLarge=!tempImages[i].isLarge; window.renderModalImages(); } };
+
+        window.performExport = () => { const a=document.createElement('a'); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(allReports)); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); };
+        window.importBackup = (input) => { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ try { const d=JSON.parse(e.target.result); if(Array.isArray(d)) { if(confirm('OK=Überschreiben, Abbrechen=Anfügen')) d.forEach(x=>saveReportToFirestore(x)); else d.forEach(x=>{ if(!allReports.find(y=>y.id===x.id))saveReportToFirestore(x); }); alert("Import verarbeitet."); } else if(d.id) { saveReportToFirestore(d); alert("Importiert."); } } catch(err){alert("Fehler");} }; r.readAsText(f); input.value=''; };
+
+        window.generatePDF = () => {
+             const r=allReports.find(x=>x.id===currentReportId);
+             let fn='Bericht.pdf';
+             if(r) { const d=r.header.date_from||''; const c=(r.header.customer||'Kunde').replace(/[^a-z0-9äöüß]/gi,'_'); fn=`Bericht_${c}_${d}.pdf`; }
+             const opt = { 
+                 margin: 15, 
+                 filename: fn, 
+                 image: { type: 'jpeg', quality: 0.90 }, 
+                 html2canvas: { scale: 2, useCORS: true }, 
+                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+             };
+             html2pdf().set(opt).from(document.getElementById('pdf-preview')).save().catch(e=>console.error(e));
         };
+        
+        function getWeekNumber(d) { d=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1)); return [Math.ceil((((d - yearStart) / 86400000) + 1) / 7), d.getUTCFullYear()]; }
+        window.listen = (id) => { if(!('webkitSpeechRecognition' in window)) return alert('Browser nicht unterstützt'); const r=new webkitSpeechRecognition(); r.lang=currentLang==='de'?"de-DE":"en-US"; const btn=document.querySelector(`button[onclick*="${id}"]`); btn.classList.add('listening'); r.start(); r.onresult=e=>{ document.getElementById(id).value+=" "+e.results[0][0].transcript; btn.classList.remove('listening'); if(id.startsWith('h_'))window.updateCurrentReportHeader(); }; r.onerror=()=>{btn.classList.remove('listening');}; r.onend=()=>{btn.classList.remove('listening');}; };
+
+        window.renderPDFPreview = () => {
+             const r=allReports.find(x=>x.id===currentReportId); if(!r)return;
+             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-'; const t=translations[currentLang];
+             const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
+             
+             const html = points.map(p => {
+                 const safeImages = (p.images||[]).map(img => { const src=typeof img==='string'?img:img.src; const isLarge=typeof img==='string'?false:img.isLarge; return {src,isLarge}; });
+                 const stTxt = p.status==='open'?t.status_open:t.status_resolved;
+                 const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
+                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s}">`; }).join('')}</div></div>`;
+             }).join('');
+             
+             document.getElementById('pdf-preview').innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${LOGO_SRC}" style="height:40px;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${h.author}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}`;
+        };
+        window.toggleFullScreen = () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>{}); else if(document.exitFullscreen) document.exitFullscreen().catch(e=>{}); };
     </script>
 </body>
 </html>
