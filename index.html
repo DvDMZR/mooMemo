@@ -155,7 +155,7 @@
         .mic-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 8px; z-index: 10; transition: color 0.2s; }
         .mic-btn:hover { color: var(--primary); }
         .mic-btn.listening { color: var(--danger); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.1); } 100% { transform: translateY(-50%) scale(1); } }
+        @keyframes pulse { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.1); } 100% { transform: translateY(-50%) scale(1.1); } }
         
         /* DEZENTE AI BUTTONS */
         .ai-btn { 
@@ -485,6 +485,9 @@
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- KONFIGURATION START ---
+        // GLOBAL API KEY FOR AI
+        const GEMINI_API_KEY = ""; // <--- HIER KEY EINFÜGEN
+
         const myFirebaseConfig = {
             apiKey: "AIzaSyDw4L6j1QPHUsA9ExJdZwbmGyLWvo0VGBI",
             authDomain: "moomemo-a9012.firebaseapp.com",
@@ -500,8 +503,6 @@
         let appId;
         
         // --- ÄNDERUNG: ZWINGENDE VERWENDUNG DER USER-CONFIG ---
-        // Wir ignorieren hier bewusst die __firebase_config der Preview-Umgebung,
-        // damit die App immer auf das User-Projekt zugreift (wo die Regeln stimmen).
         firebaseConfig = myFirebaseConfig;
         appId = myAppId;
 
@@ -676,6 +677,10 @@
         }
 
         async function translateReport() {
+            if (!GEMINI_API_KEY) {
+                alert("Fehler: Kein KI-Schlüssel hinterlegt. Bitte 'GEMINI_API_KEY' im Code eintragen.");
+                return;
+            }
             const targetLanguage = prompt("In welche Sprache soll der Bericht übersetzt werden? (z.B. Englisch, Spanisch, Polnisch)");
             if(!targetLanguage) return;
             const r = allReports.find(x => x.id === currentReportId);
@@ -683,7 +688,7 @@
             showToast(translations[currentLang].ai_translating);
             const translationData = { header: { customer: r.header.customer, author: r.header.author }, points: r.points.map(p => ({ title: p.title, desc: p.desc, assignee: p.assignee })) };
             const userPrompt = `Translate the following JSON object to ${targetLanguage}. Maintain the exact JSON structure. Only translate the values of the fields 'customer', 'author', 'title', 'desc', 'assignee'. Do not translate keys. Return ONLY the valid JSON string.\n\nJSON: ${JSON.stringify(translationData)}`;
-            const apiKey = ""; // INSERT KEY HERE
+            const apiKey = GEMINI_API_KEY; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: userPrompt }] }], config: { responseMimeType: "application/json" } }) });
