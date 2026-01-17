@@ -157,122 +157,44 @@
         .mic-btn.listening { color: var(--danger); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.1); } 100% { transform: translateY(-50%) scale(1.1); } }
         
-        /* DEZENTE AI BUTTONS */
-        .ai-btn { 
-            background: transparent; 
-            color: var(--primary); 
-            border: 1px solid var(--primary); 
-            padding: 6px 12px; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            font-size: 0.85rem; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            width: auto; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 6px; 
-        }
+        .ai-btn { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; width: auto; display: inline-flex; align-items: center; gap: 6px; }
         .ai-btn:hover { background: #f1f5f9; }
         
-        /* Specific override for the magic wand button to be just an icon */
-        #btn-improve-text {
-            border: none;
-            padding: 8px;
-            font-size: 1.1rem;
-            margin-top: 5px;
-        }
-
-        /* --- DISABLED AI BTN --- */
-        .ai-btn-disabled {
-            opacity: 0.5 !important;
-            cursor: not-allowed !important;
-            background: #f3f4f6 !important;
-            border-color: #d1d5db !important;
-            color: #9ca3af !important;
-        }
+        #btn-improve-text { border: none; padding: 8px; font-size: 1.1rem; margin-top: 5px; }
+        .ai-btn-disabled { opacity: 0.5 !important; cursor: not-allowed !important; background: #f3f4f6 !important; border-color: #d1d5db !important; color: #9ca3af !important; }
 
         .participant-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
         .participant-tag { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .participant-remove { cursor: pointer; font-weight: bold; font-size: 1.1rem; opacity: 0.6; }
 
-        /* POINT ITEM STYLE - Compact, no image, side arrows */
-        .point-item { 
-            background: white; border-radius: 12px; 
-            padding: 16px; 
-            margin-bottom: 12px; 
-            border-left: 4px solid var(--secondary); 
-            cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-            position: relative;
-            display: flex; 
-            align-items: flex-start;
-        }
+        .point-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--secondary); cursor: grab; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative; display: flex; align-items: flex-start; }
         .point-item:active { cursor: grabbing; }
         .point-item.dragging { opacity: 0.5; background: #f9fafb; border: 2px dashed var(--primary); }
-        
-        /* CONTENT PART (Left) */
         .point-content-wrapper { flex-grow: 1; }
-        
-        /* ACTIONS PART (Right) */
-        .point-sort-column {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-left: 12px;
-            min-width: 24px;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 4px;
-        }
-
-        .sort-btn {
-            background: #f1f5f9;
-            border: none;
-            color: var(--secondary);
-            cursor: pointer;
-            padding: 0;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            transition: all 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 28px;
-            width: 28px;
-        }
+        .point-sort-column { display: flex; flex-direction: column; gap: 4px; margin-left: 12px; min-width: 24px; align-items: center; justify-content: flex-start; padding-top: 4px; }
+        .sort-btn { background: #f1f5f9; border: none; color: var(--secondary); cursor: pointer; padding: 0; border-radius: 4px; font-size: 0.75rem; transition: all 0.1s; display: flex; align-items: center; justify-content: center; height: 28px; width: 28px; }
         .sort-btn:hover { background: #e2e8f0; color: var(--primary); }
-
         .point-item:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
         .point-item.resolved { border-left-color: var(--success); }
         .point-item.age-fresh { border-left-color: var(--status-fresh); }
         .point-item.age-warning { border-left-color: var(--status-warning); }
         .point-item.age-critical { border-left-color: var(--status-critical); }
-        
-        /* Original Header Styles */
         .point-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
         .point-title { font-weight: 600; font-size: 1.1rem; color: #111827; }
-        
         .point-meta-row { font-size: 0.85rem; color: var(--text-sub); display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
         .point-desc { color: #4b5563; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
         .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; white-space: nowrap; }
         .status-resolved { background: var(--success-bg); color: #065f46; }
         .badge-fresh { background: var(--status-fresh-bg); color: #1e40af; }
         .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
         .badge-critical { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
         .ticket-link { color: var(--primary); text-decoration: none; font-weight: 600; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-right: 8px; margin-bottom: 4px; }
 
         .img-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; } 
-        
         .img-thumb-container { position: relative; display: inline-block; transition: transform 0.1s; }
         .img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: block; }
         .img-thumb-container.is-large .img-thumb { border-color: var(--success); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-        
         .img-btn-remove { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 22px; height: 22px; text-align: center; line-height: 22px; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10; }
-        
         .img-btn-size { position: absolute; bottom: -10px; right: -10px; background: var(--secondary); color: white; border-radius: 12px; padding: 3px 8px; text-align: center; font-size: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 4px; z-index: 10; transition: all 0.2s; border: 1px solid white; }
         .img-btn-size:hover { transform: scale(1.05); }
         .img-btn-size.active-large { background: var(--success); }
@@ -322,8 +244,8 @@
             <button class="back-btn" id="nav-back-btn" onclick="window.goToDashboard()" data-i18n="overview">
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/GEA_Group_Logo.svg/1024px-GEA_Group_Logo.svg.png" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.4.6)</span>
+            <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
+            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.4.9)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -347,7 +269,6 @@
             <button class="icon-btn" onclick="window.askAdminTools()" style="color:var(--primary);" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
         </div>
         <div class="filter-container">
-             <!-- NEW SEARCH INPUT -->
              <div class="search-container">
                 <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, von:Name)" oninput="window.renderReportList()">
             </div>
@@ -437,7 +358,7 @@
         <div class="modal-content" style="max-width:350px; text-align:center;">
             <span class="close-modal" onclick="window.closeSettings()">&times;</span>
             <h3 style="color:var(--text-main)"><i class="fa-solid fa-gear"></i> <span data-i18n="settings_title">Einstellungen</span></h3>
-            <p style="font-size:0.8rem; color:#aaa;">Version: 1.4.6</p>
+            <p style="font-size:0.8rem; color:#aaa;">Version: 1.4.9</p>
             
             <p data-i18n="settings_lang">App Sprache / App Language</p>
             <div class="lang-toggle-container">
@@ -481,7 +402,28 @@
     </div>
     
     <div class="modal-overlay" id="admin-tools-modal">
-        <div class="modal-content" style="max-width:400px; text-align:center;"><span class="close-modal" onclick="window.closeAdminToolsModal()">&times;</span><div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-toolbox"></i></div><h3 style="color:var(--text-main)" data-i18n="admin_area">Admin Bereich</h3><p style="color:var(--text-sub)" data-i18n="data_backup">Datensicherung & Wiederherstellung</p><div style="display:flex; flex-direction:column; gap:15px; margin-top:25px;"><button class="btn btn-secondary" onclick="window.performExport()" style="margin-top:0"><i class="fa-solid fa-download"></i> <span data-i18n="backup_save">Backup speichern (Export)</span></button><button class="btn btn-secondary" onclick="document.getElementById('import-input').click(); window.closeAdminToolsModal();" style="margin-top:0"><i class="fa-solid fa-upload"></i> <span data-i18n="backup_load">Backup importieren</span></button></div></div>
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <span class="close-modal" onclick="window.closeAdminToolsModal()">&times;</span>
+            <div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-toolbox"></i></div>
+            <h3 style="color:var(--text-main)" data-i18n="admin_area">Admin Bereich</h3>
+            
+            <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:20px; border:1px solid #e2e8f0;">
+                <p style="font-weight:700; margin-top:0; font-size:0.9rem;">Globaler API Key (Cloud)</p>
+                <input type="password" id="admin-api-key-input" placeholder="Hier Key eingeben..." style="text-align:center; margin-bottom:10px; width:100%; box-sizing:border-box; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                <button class="btn btn-primary" onclick="window.saveGlobalApiKey()" style="margin-top:0; font-size:0.85rem; width:100%;">
+                    In Cloud speichern
+                </button>
+                <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;">
+                    Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.
+                </p>
+            </div>
+
+            <p style="color:var(--text-sub); margin-top:25px;" data-i18n="data_backup">Datensicherung</p>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                <button class="btn btn-secondary" onclick="window.performExport()" style="margin-top:0"><i class="fa-solid fa-download"></i> <span data-i18n="backup_save">Backup speichern</span></button>
+                <button class="btn btn-secondary" onclick="document.getElementById('import-input').click(); window.closeAdminToolsModal();" style="margin-top:0"><i class="fa-solid fa-upload"></i> <span data-i18n="backup_load">Backup importieren</span></button>
+            </div>
+        </div>
     </div>
 
     <div id="toast"></div>
@@ -490,7 +432,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
@@ -505,9 +447,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        // GLOBAL API KEY FOR AI
-        const GEMINI_API_KEY = "AIzaSyCmO6aBLZuWTVuaKQc__qsYEF5kJ0NqaSQ"; 
-        const APP_VERSION = "1.4.6";
+        const APP_VERSION = "1.4.9";
         console.log("mooMemo Version:", APP_VERSION);
         // --- KONFIGURATION ENDE ---
 
@@ -530,13 +470,16 @@
         let tempImages = []; 
         let pendingPinAction = null; 
         let headerUpdateTimeout = null; 
-        const LOGO_SRC = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/GEA_Group_Logo.svg/1024px-GEA_Group_Logo.svg.png";
+        const LOGO_SRC = "https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85";
         
         let filterType = 'all';
         let filterYear = 'all';
         let sortMethod = 'date_desc'; 
         let currentLang = 'de';
         let aiTargetLang = 'de'; 
+        
+        // DYNAMIC API KEY
+        let globalGeminiKey = ""; 
 
         const translations = {
             de: {
@@ -616,7 +559,6 @@
                 }
             } catch(e) { 
                 console.error("Auth failed", e);
-                // Don't alert immediately, just show status
                 if(document.getElementById('sync-text')) document.getElementById('sync-text').textContent = "Auth Fehler";
                 if(document.getElementById('sync-status')) document.getElementById('sync-status').classList.add('offline');
             }
@@ -710,25 +652,115 @@
             window.showToast("Funktion aktuell deaktiviert.");
         };
 
+        // --- NEW: FETCH GLOBAL CONFIG ---
+        window.fetchGlobalConfig = async function() {
+            try {
+                // IMPORTANT: The path must match strict rules
+                // artifacts/{appId}/public/data/app_config/secrets
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'secrets');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.gemini_key) {
+                        globalGeminiKey = data.gemini_key;
+                        console.log("Global Config Loaded");
+                    }
+                }
+            } catch(e) {
+                console.warn("Could not fetch global config (maybe not set yet):", e);
+            }
+        };
+
+        // --- NEW: SAVE GLOBAL API KEY ---
+        window.saveGlobalApiKey = async function() {
+            const key = document.getElementById('admin-api-key-input').value.trim();
+            if(!key) { alert("Bitte Key eingeben"); return; }
+            
+            try {
+                // Ensure document exists
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'secrets');
+                await setDoc(docRef, { gemini_key: key }, { merge: true });
+                globalGeminiKey = key;
+                alert("Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.");
+                document.getElementById('admin-api-key-input').value = '';
+                window.closeAdminToolsModal();
+            } catch(e) {
+                console.error(e);
+                alert("Fehler beim Speichern: " + e.message);
+            }
+        };
+
         window.improveDescription = async function() {
             const descField = document.getElementById('p_desc');
             const desc = descField.value.trim();
             if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+            
+            // PRIORITY: Global Cloud Key -> Local Storage Key
+            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
+            
+            if(!apiKey) {
+                alert("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
+                return;
+            }
+
             const btn = document.getElementById('btn-improve-text');
             const originalButtonHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
             const userPrompt = `Act as a professional technical editor. Rewrite the following text to be professional, precise, and factual. Strictly maintain the original meaning and technical details. Do not add information, do not embellish. Detect the input language automatically. The output must be solely the rewritten text in: ${aiTargetLang === 'de' ? 'German' : 'English'}.\n\nText: "${desc}"`;
-            const apiKey = GEMINI_API_KEY; 
+            
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            let attempt = 0;
+            let success = false;
+            
             try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: userPrompt }] }], generationConfig: { temperature: 0.2 } }) });
-                if(!response.ok) throw new Error("API Error");
-                const result = await response.json();
-                if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    descField.value = result.candidates[0].content.parts[0].text.trim();
-                    window.showToast("Text erfolgreich überarbeitet!");
+                while(attempt < 3 && !success) {
+                    try {
+                        const response = await fetch(apiUrl, { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify({ 
+                                contents: [{ parts: [{ text: userPrompt }] }], 
+                                generationConfig: { temperature: 0.2 } 
+                            }) 
+                        });
+                        
+                        if (response.status === 403) {
+                            throw new Error("API Key ungültig oder gesperrt.");
+                        }
+
+                        if (response.status === 429 || response.status >= 500) {
+                            attempt++;
+                            console.warn(`API Busy/Limit (Status ${response.status}). Retrying ${attempt}/3...`);
+                            await new Promise(r => setTimeout(r, 1000 * attempt)); 
+                            continue;
+                        }
+                        
+                        if(!response.ok) {
+                            const errText = await response.text();
+                            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                        }
+                        
+                        const result = await response.json();
+                        if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                            descField.value = result.candidates[0].content.parts[0].text.trim();
+                            window.showToast("Text erfolgreich überarbeitet!");
+                            success = true;
+                        }
+                    } catch(innerEx) {
+                        console.warn("Attempt failed", innerEx);
+                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx; 
+                        attempt++;
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
                 }
-            } catch(e) { console.error(e); window.showToast(translations[currentLang].ai_error); }
+            } catch(e) { 
+                console.error("Final API Failure:", e); 
+                alert(e.message);
+            }
+            
             btn.innerHTML = originalButtonHTML;
         };
 
@@ -886,6 +918,7 @@
         
         window.setLanguage = function(lang) {
             currentLang = lang;
+            localStorage.setItem('mooMemo_lang', lang); // PERSISTENCE
             const t = translations[lang];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -909,6 +942,7 @@
         
         window.setAiTargetLang = function(lang) {
             aiTargetLang = lang;
+            localStorage.setItem('mooMemo_ai_lang', lang); // PERSISTENCE
             const container = document.getElementById('ai-lang-container');
             const buttons = container.getElementsByClassName('lang-btn');
             for(let btn of buttons) {
@@ -1300,7 +1334,19 @@
             if (user) {
                 currentUser = user;
                 window.updateSyncStatus(true);
-                window.setupRealtimeListener();
+                // NEW: FETCH GLOBAL CONFIG & PERSISTENT SETTINGS
+                
+                // Load Settings
+                const savedLang = localStorage.getItem('mooMemo_lang');
+                if(savedLang) window.setLanguage(savedLang);
+                
+                const savedAiLang = localStorage.getItem('mooMemo_ai_lang');
+                if(savedAiLang) window.setAiTargetLang(savedAiLang);
+
+                // Fetch Key & Listen
+                window.fetchGlobalConfig().then(() => {
+                    window.setupRealtimeListener();
+                });
             } else {
                 window.updateSyncStatus(false);
                 window.initAuth();
