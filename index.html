@@ -152,6 +152,29 @@
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
 
         .input-group { position: relative; }
+        
+        /* MERGED INPUT GROUP FOR ADDING USERS */
+        .input-group-merged {
+            display: flex;
+            align-items: stretch;
+            margin-bottom: 8px;
+        }
+        .input-group-merged input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: 0;
+            flex: 1;
+        }
+        .input-group-merged .btn {
+            margin: 0;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            width: auto;
+            padding: 0 18px;
+            height: auto;
+            font-size: 1.1rem;
+        }
+        
         .mic-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 8px; z-index: 10; transition: color 0.2s; }
         .mic-btn:hover { color: var(--primary); }
         .mic-btn.listening { color: var(--danger); animation: pulse 1.5s infinite; }
@@ -163,9 +186,30 @@
         #btn-improve-text { border: none; padding: 8px; font-size: 1.1rem; margin-top: 5px; }
         .ai-btn-disabled { opacity: 0.5 !important; cursor: not-allowed !important; background: #f3f4f6 !important; border-color: #d1d5db !important; color: #9ca3af !important; }
 
-        .participant-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-        .participant-tag { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        .participant-remove { cursor: pointer; font-weight: bold; font-size: 1.1rem; opacity: 0.6; }
+        /* REUSED STYLES FOR AUTHORS AND PARTICIPANTS */
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        /* CHANGED: Tags are now Dark Blue with White Text */
+        .tag-item { 
+            background: var(--primary); 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        /* CHANGED: Remove cross is white */
+        .tag-remove { 
+            cursor: pointer; 
+            font-weight: 800; 
+            font-size: 1.1rem; 
+            opacity: 0.8; 
+            color: white; 
+        }
+        .tag-remove:hover { opacity: 1; }
 
         /* POINT ITEM STYLE */
         .point-item { 
@@ -343,6 +387,10 @@
 </head>
 <body>
 
+    <!-- DATALIST FOR AUTOCOMPLETE (Will be populated by JS) -->
+    <datalist id="list-names"></datalist>
+    <datalist id="list-assignees"></datalist>
+
     <!-- APP HEADER -->
     <div class="app-logo-header">
         <div style="display:flex; align-items:center;">
@@ -350,7 +398,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.0)</span>
+            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.1)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -414,10 +462,20 @@
             <div class="input-group"><input type="text" id="h_customer" placeholder="z.B. Müller GmbH" oninput="window.updateCurrentReportHeader()"><button class="mic-btn" onclick="window.listen('h_customer')"><i class="fa-solid fa-microphone"></i></button></div>
             <br><label data-i18n="lbl_date">Datum (von - bis)</label>
             <div style="display:flex; gap:15px;"><input type="date" id="h_date_from" onchange="window.updateCurrentReportHeader()"><input type="date" id="h_date_to" onchange="window.updateCurrentReportHeader()"></div>
-            <br><label data-i18n="lbl_author">Verfasser</label><input type="text" id="h_author" placeholder="Name" oninput="window.updateCurrentReportHeader()">
+            
+            <br><label data-i18n="lbl_author">Verfasser</label>
+            <div id="authors-list" class="tag-list"></div>
+            <div class="input-group-merged">
+                <input type="text" id="new_author" placeholder="Name wählen..." oninput="window.handleInputAutofill(this, 'list-names', window.addAuthor)" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addAuthor();}">
+                <button class="btn btn-primary" onclick="window.addAuthor()"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            
             <br><hr style="border:0; border-top:1px solid #eee; margin:25px 0;"><label data-i18n="lbl_participants">Teilnehmer</label>
-            <div id="participants-list" class="participant-list"></div>
-            <div class="input-group" style="display:flex; gap:10px;"><input type="text" id="new_participant" placeholder="..." style="flex:1;"><button class="btn btn-primary" style="width:auto; margin:0;" onclick="window.addParticipant()"><i class="fa-solid fa-plus"></i></button></div>
+            <div id="participants-list" class="tag-list"></div>
+            <div class="input-group-merged">
+                <input type="text" id="new_participant" placeholder="Name wählen..." oninput="window.handleInputAutofill(this, 'list-names', window.addParticipant)" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addParticipant();}">
+                <button class="btn btn-primary" onclick="window.addParticipant()"><i class="fa-solid fa-plus"></i></button>
+            </div>
         </div>
         <button class="btn btn-primary" onclick="window.switchTab('points')" data-i18n="btn_next_points">Weiter zu den Punkten</button>
     </div>
@@ -490,7 +548,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.5.0</div>
+                        <div class="info-version">mooMemo v1.5.1</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -531,7 +589,7 @@
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
             </button>
             <br>
-            <label data-i18n="lbl_assignee">Adressat (Verantwortlich)</label><div class="input-group"><input type="text" id="p_assignee" placeholder="..."><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
             
             <label><span data-i18n="lbl_images">Bilder hinzufügen</span> <div class="spinner" id="img-spinner"></div></label>
@@ -606,11 +664,33 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.0";
+        const APP_VERSION = "1.5.1";
         const APP_AUTHOR = "David Mazur";
         
+        // --- KONFIGURATION NAMEN ---
+        const CONST_NAMES = [
+            "Marc Kleinheinrich", "Markus Krampe", "Salih Cetinkilic", "Stephan Dutka", 
+            "Jakub Mechlinski", "Adam Antolik", "Ron Oostdam", "Dick Valk", 
+            "Herman Lubbers", "Karsten Kristensen", "Victor Del Rincon", "Thorsten Gerling", 
+            "David Mazur", "Lena Krippendorf", "Stefan Marten", "Walter Weymann", 
+            "Jan Mühlnickel", "Simon Kirchhof", "Katrin Schilkowski", "Ibrar Aslam", 
+            "Ismail Songur", "Tobias Haupt", "Manuel Bury", "Philipp Wiemann", 
+            "Armin Höhnscheid", "Christina Jerichen", "Dennis Jeffries", "Kevin Preece"
+        ];
+        const CONST_DEPARTMENTS = ["T&I", "QM", "Customer Care", "TSS", "Händler", "Dealer"];
+
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+             {
+                ver: "1.5.1",
+                date: "2026-01-23",
+                changes: [
+                    "Funktion: Mehrere Verfasser pro Bericht optimiert.",
+                    "Autofill für Namen (Verfasser, Teilnehmer, Verantwortlich).",
+                    "Optimierung der PDF-Ausgabe.",
+                    "UI-Textanpassungen (Verantwortlich statt Adressat)."
+                ]
+            },
             {
                 ver: "1.5.0",
                 date: "2026-01-23",
@@ -669,10 +749,10 @@
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF herunterladen", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Adressat (Verantwortlich)", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, von:Name)", ai_translating: "Übersetze Bericht..."
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF herunterladen", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, von:Name)", ai_translating: "Übersetze Bericht..."
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Download as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Assignee (Responsible)", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, from:Name)", ai_translating: "Translating Report..."
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Download as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, from:Name)", ai_translating: "Translating Report..."
             }
         };
 
@@ -754,7 +834,12 @@
         
         window.renderParticipantsList = function(l) { 
             const el = document.getElementById('participants-list');
-            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Teilnehmer</span>' : l.map((p,i)=>`<div class="participant-tag">${p} <span class="participant-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join(''); 
+            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Teilnehmer</span>' : l.map((p,i)=>`<div class="tag-item">${p} <span class="tag-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join(''); 
+        };
+
+        window.renderAuthorsList = function(l) { 
+            const el = document.getElementById('authors-list');
+            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Verfasser</span>' : l.map((p,i)=>`<div class="tag-item">${p} <span class="tag-remove" onclick="window.removeAuthor(${i})">&times;</span></div>`).join(''); 
         };
 
         window.renderModalImages = function() { 
@@ -817,7 +902,9 @@
 
         window.renderPDFPreviewWithData = function(r) {
              if(!r) return;
-             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-'; const t=translations[currentLang];
+             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-'; 
+             const aList=r.header.authors?r.header.authors.join(', '):(r.header.author || '-');
+             const t=translations[currentLang];
              const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
              
              const html = r.points.map(p => {
@@ -828,7 +915,7 @@
              }).join('');
              
              const previewEl = document.getElementById('pdf-preview');
-             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${LOGO_SRC}" style="height:40px;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${h.author}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}`;
+             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${LOGO_SRC}" style="height:40px;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}`;
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(allReports.find(x=>x.id===currentReportId));
@@ -1059,6 +1146,10 @@
                 const newReports = [];
                 snapshot.forEach(doc => newReports.push(doc.data()));
                 allReports = newReports;
+                
+                // UPDATE AUTOFILL NAMES (Using STRICT list now)
+                window.updateNameSuggestions();
+
                 window.renderReportList();
                 
                 // AUTO RESTORE LOGIC - Check if we had an open report
@@ -1099,30 +1190,12 @@
         window.setFilterYear = function(year) { filterYear = year; window.renderReportList(); };
         window.setSortMethod = function(method) { sortMethod = method; window.renderReportList(); };
 
-        // SETTINGS LOGIC
-        window.openSettings = function() { 
-            document.getElementById('settings-modal').style.display = 'flex'; 
-            // Load key from storage
-            const storedKey = localStorage.getItem('moo_gemini_api_key');
-            if(storedKey) document.getElementById('settings-api-key').value = storedKey;
-        };
-        
+        window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; };
         window.closeSettings = function() { document.getElementById('settings-modal').style.display = 'none'; };
-        
-        window.saveSettings = function() {
-            const key = document.getElementById('settings-api-key').value.trim();
-            if(key) {
-                localStorage.setItem('moo_gemini_api_key', key);
-                window.showToast("Einstellungen gespeichert.");
-            } else {
-                localStorage.removeItem('moo_gemini_api_key');
-                window.showToast("API Key entfernt.");
-            }
-            window.closeSettings();
-        };
         
         window.setLanguage = function(lang) {
             currentLang = lang;
+            localStorage.setItem('mooMemo_lang', lang); // PERSISTENCE
             const t = translations[lang];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -1141,12 +1214,20 @@
             window.renderReportList();
             if(document.getElementById('points').classList.contains('active')) window.renderPointsList();
             if(document.getElementById('status').classList.contains('active')) window.renderStatusList();
-            // Don't auto-close settings, user might want to edit key
+            window.closeSettings();
         };
         
         window.setAiTargetLang = function(lang) {
-            // Deprecated logic? No, still used in improveDescription prompt
-            aiTargetLang = lang; 
+            aiTargetLang = lang;
+            localStorage.setItem('mooMemo_ai_lang', lang); // PERSISTENCE
+            const container = document.getElementById('ai-lang-container');
+            const buttons = container.getElementsByClassName('lang-btn');
+            for(let btn of buttons) {
+                btn.classList.remove('active');
+                if((lang === 'de' && btn.innerText === 'Deutsch') || (lang === 'en' && btn.innerText === 'English')) {
+                    btn.classList.add('active');
+                }
+            }
         };
 
         window.goToDashboard = function() {
@@ -1180,7 +1261,11 @@
             document.getElementById('h_customer').value = report.header.customer || '';
             document.getElementById('h_date_from').value = report.header.date_from || '';
             document.getElementById('h_date_to').value = report.header.date_to || '';
-            document.getElementById('h_author').value = report.header.author || '';
+            // AUTHOR HANDLING
+            let auths = report.header.authors || [];
+            if (!auths.length && report.header.author) auths = [report.header.author];
+            window.renderAuthorsList(auths);
+            
             window.renderParticipantsList(report.header.participants || []);
 
             document.getElementById('dashboard').classList.remove('active');
@@ -1197,7 +1282,7 @@
                 id: Date.now().toString(), 
                 readable_id: readableId, 
                 created_at: Date.now(), 
-                header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', author: '', participants: [] }, 
+                header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', authors: [], participants: [] }, 
                 points: [] 
             };
             window.saveReportToFirestore(r).then(() => window.openReport(r.id));
@@ -1213,7 +1298,7 @@
                     report.header.customer = document.getElementById('h_customer').value;
                     report.header.date_from = document.getElementById('h_date_from').value;
                     report.header.date_to = document.getElementById('h_date_to').value;
-                    report.header.author = document.getElementById('h_author').value;
+                    // report.header.author is deprecated, using header.authors array now (updated via add/remove funcs)
                     window.saveReportToFirestore(report);
                 }
             }, 500);
@@ -1295,6 +1380,46 @@
                 document.getElementById('auth-pin').value = '';
             }
         };
+        
+        // --- NEW: AUTOFILL LOGIC (Only on input >= 2 chars) ---
+        // Also checks if input matches an option exactly to auto-add
+        window.handleInputAutofill = function(input, listId, addCallback) {
+             const val = input.value;
+             if(val.length >= 2) { // Changed from > 0 to >= 2
+                 input.setAttribute('list', listId);
+             } else {
+                 input.removeAttribute('list');
+             }
+
+             // Auto-Add if match found in list
+             if (addCallback) {
+                 const opts = document.getElementById(listId).options;
+                 for (let i = 0; i < opts.length; i++) {
+                     if (opts[i].value === val) {
+                         addCallback(); // Call the add function immediately
+                         return;
+                     }
+                 }
+             }
+        };
+
+        window.updateNameSuggestions = function() {
+            // STRICT MODE: Only use CONST_NAMES
+            const names = CONST_NAMES.slice().sort();
+            const assignees = [...CONST_NAMES, ...CONST_DEPARTMENTS].sort();
+            
+            // Populate "list-names" (For Authors/Participants)
+            const listNames = document.getElementById('list-names');
+            if(listNames) {
+                listNames.innerHTML = names.map(n => `<option value="${n}">`).join('');
+            }
+
+            // Populate "list-assignees" (For Responsible Person)
+            const listAssignees = document.getElementById('list-assignees');
+            if(listAssignees) {
+                listAssignees.innerHTML = assignees.map(n => `<option value="${n}">`).join('');
+            }
+        };
 
         window.addParticipant = function() {
             const input = document.getElementById('new_participant');
@@ -1302,9 +1427,15 @@
             if(!name || !currentReportId) return;
             const r = allReports.find(x => x.id === currentReportId);
             if(!r.header.participants) r.header.participants = [];
-            r.header.participants.push(name);
+            
+            // Prevent duplicates
+            if(!r.header.participants.includes(name)) {
+                r.header.participants.push(name);
+                window.saveReportToFirestore(r);
+            }
+            
             input.value = '';
-            window.saveReportToFirestore(r);
+            input.removeAttribute('list'); // Hide suggestions after adding
             window.renderParticipantsList(r.header.participants);
         };
 
@@ -1313,6 +1444,36 @@
             r.header.participants.splice(i, 1);
             window.saveReportToFirestore(r);
             window.renderParticipantsList(r.header.participants);
+        };
+        
+        window.addAuthor = function() {
+            const input = document.getElementById('new_author');
+            const name = input.value.trim();
+            if(!name || !currentReportId) return;
+            const r = allReports.find(x => x.id === currentReportId);
+            
+            // Migration check
+            if(!r.header.authors) r.header.authors = [];
+            if(r.header.authors.length === 0 && r.header.author) r.header.authors.push(r.header.author);
+            
+            // Prevent duplicates
+            if(!r.header.authors.includes(name)) {
+                r.header.authors.push(name);
+                window.saveReportToFirestore(r);
+            }
+
+            input.value = '';
+            input.removeAttribute('list'); // Hide suggestions
+            window.renderAuthorsList(r.header.authors);
+        };
+
+        window.removeAuthor = function(i) {
+            const r = allReports.find(x => x.id === currentReportId);
+            if(r.header.authors) {
+                r.header.authors.splice(i, 1);
+                window.saveReportToFirestore(r);
+                window.renderAuthorsList(r.header.authors);
+            }
         };
         
         window.closeModal = function() { document.getElementById('modal').style.display = 'none'; };
@@ -1527,7 +1688,7 @@
         window.handleImageUpload = function() {
             window.processFiles(document.getElementById('p_images').files);
         };
-        
+
         // --- INFO & SETTINGS LOGIC ---
         window.toggleInfoSection = function() {
             const content = document.getElementById('info-content');
