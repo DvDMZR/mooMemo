@@ -167,27 +167,70 @@
         .participant-tag { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .participant-remove { cursor: pointer; font-weight: bold; font-size: 1.1rem; opacity: 0.6; }
 
-        .point-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; border-left: 4px solid var(--secondary); cursor: grab; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative; display: flex; align-items: flex-start; }
+        /* POINT ITEM STYLE */
+        .point-item { 
+            background: white; border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            border-left: 4px solid var(--secondary); 
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            position: relative;
+            display: flex; 
+            align-items: flex-start;
+        }
         .point-item:active { cursor: grabbing; }
         .point-item.dragging { opacity: 0.5; background: #f9fafb; border: 2px dashed var(--primary); }
+        
         .point-content-wrapper { flex-grow: 1; }
-        .point-sort-column { display: flex; flex-direction: column; gap: 4px; margin-left: 12px; min-width: 24px; align-items: center; justify-content: flex-start; padding-top: 4px; }
-        .sort-btn { background: #f1f5f9; border: none; color: var(--secondary); cursor: pointer; padding: 0; border-radius: 4px; font-size: 0.75rem; transition: all 0.1s; display: flex; align-items: center; justify-content: center; height: 28px; width: 28px; }
+        
+        .point-sort-column {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-left: 12px;
+            min-width: 24px;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 4px;
+        }
+
+        .sort-btn {
+            background: #f1f5f9;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 0;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            width: 28px;
+        }
         .sort-btn:hover { background: #e2e8f0; color: var(--primary); }
+
         .point-item:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
         .point-item.resolved { border-left-color: var(--success); }
         .point-item.age-fresh { border-left-color: var(--status-fresh); }
         .point-item.age-warning { border-left-color: var(--status-warning); }
         .point-item.age-critical { border-left-color: var(--status-critical); }
+        
         .point-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
         .point-title { font-weight: 600; font-size: 1.1rem; color: #111827; }
+        
         .point-meta-row { font-size: 0.85rem; color: var(--text-sub); display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
         .point-desc { color: #4b5563; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
         .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; white-space: nowrap; }
         .status-resolved { background: var(--success-bg); color: #065f46; }
         .badge-fresh { background: var(--status-fresh-bg); color: #1e40af; }
         .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
         .badge-critical { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
         .ticket-link { color: var(--primary); text-decoration: none; font-weight: 600; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin-right: 8px; margin-bottom: 4px; }
 
         .img-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; } 
@@ -234,6 +277,68 @@
         .lang-toggle-container { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
         .lang-btn { border: 2px solid var(--primary); background: white; color: var(--primary); padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .lang-btn.active { background: var(--primary); color: white; }
+
+        /* --- DRAG & DROP STYLES --- */
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+        }
+        .drop-zone:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f1f5f9;
+        }
+        .drop-zone.dragover {
+            border-color: var(--primary);
+            background: #e0f2fe; /* Light Blue */
+            color: var(--primary);
+            transform: scale(1.02);
+        }
+        .drop-zone i {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .drop-zone span {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* --- INFO & LEGAL SECTION IN SETTINGS --- */
+        .settings-section { margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .info-toggle-btn {
+            background: transparent; border: none; width: 100%; text-align: left; padding: 10px;
+            font-weight: 600; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; border-radius: 8px; transition: background 0.2s;
+        }
+        .info-toggle-btn:hover { background: #f8fafc; color: var(--primary); }
+        .info-content { display: none; padding: 10px; font-size: 0.85rem; color: var(--text-sub); text-align: left; animation: fadeIn 0.3s; }
+        .info-content.open { display: block; }
+        .info-logo-area { text-align: center; margin-bottom: 15px; }
+        .info-version { font-weight: 700; color: var(--primary); font-size: 1rem; }
+        .info-author { font-size: 0.8rem; margin-top: 4px; }
+        .changelog-btn { width: 100%; margin-top: 10px; font-size: 0.8rem; padding: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; color: var(--text-main); }
+        .legal-text { margin-top: 15px; font-size: 0.75rem; line-height: 1.4; border-top: 1px dashed #e2e8f0; padding-top: 10px; }
+
+        /* CHANGELOG MODAL STYLES */
+        .changelog-list { text-align: left; margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .cl-item { margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .cl-ver { font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; }
+        .cl-date { font-weight: 400; font-size: 0.75rem; color: #94a3b8; }
+        .cl-changes { margin: 5px 0 0 0; padding-left: 20px; font-size: 0.9rem; color: #475569; }
+        .cl-changes li { margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -245,7 +350,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.4.9)</span>
+            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.0)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -358,7 +463,6 @@
         <div class="modal-content" style="max-width:350px; text-align:center;">
             <span class="close-modal" onclick="window.closeSettings()">&times;</span>
             <h3 style="color:var(--text-main)"><i class="fa-solid fa-gear"></i> <span data-i18n="settings_title">Einstellungen</span></h3>
-            <p style="font-size:0.8rem; color:#aaa;">Version: 1.4.9</p>
             
             <p data-i18n="settings_lang">App Sprache / App Language</p>
             <div class="lang-toggle-container">
@@ -366,13 +470,54 @@
                 <button class="lang-btn" data-lang="en" onclick="window.setLanguage('en')">EN</button>
             </div>
             
-            <hr style="margin: 20px 0; border-top: 1px solid #eee;">
-            
-            <p style="font-weight:600; margin-bottom:5px;">KI Zielsprache (Textverbesserung)</p>
+            <p style="font-weight:600; margin-bottom:5px; margin-top:15px;">KI Zielsprache (Textverbesserung)</p>
             <div class="lang-toggle-container" id="ai-lang-container">
                 <button class="lang-btn active" onclick="window.setAiTargetLang('de')">Deutsch</button>
                 <button class="lang-btn" onclick="window.setAiTargetLang('en')">English</button>
             </div>
+            
+            <!-- CHANGELOG BUTTON MOVED HERE -->
+            <button class="btn btn-secondary changelog-btn" onclick="window.openChangelog()" style="margin-top: 20px; width: 100%;">
+                <i class="fa-solid fa-list-ul"></i> Was ist neu? (Changelog)
+            </button>
+
+            <!-- APP INFO & LEGAL SECTION -->
+            <div class="settings-section">
+                <button class="info-toggle-btn" onclick="window.toggleInfoSection()">
+                    <span><i class="fa-solid fa-circle-info" style="color:var(--primary); margin-right:5px;"></i> App-Info & Rechtliches</span>
+                    <i class="fa-solid fa-chevron-down" id="info-chevron"></i>
+                </button>
+                <div id="info-content" class="info-content">
+                    <div class="info-logo-area">
+                        <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
+                        <div class="info-version">mooMemo v1.5.0</div>
+                        <div class="info-author">© 2026 David Mazur</div>
+                    </div>
+                    
+                    <div class="legal-text">
+                        <strong>Impressum & Kontakt:</strong><br>
+                        Angaben gemäß § 5 TMG:<br><br>
+                        David Mazur<br>
+                        c/o GEA Farm Technologies GmbH<br>
+                        Siemensstraße 25-27<br>
+                        59199 Bönen<br><br>
+                        Kontakt:<br>
+                        E-Mail: david.mazur@gea.com<br>
+                        <br>
+                        <em>Lizenziert zur internen Nutzung durch die GEA Farm Technologies GmbH.</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NEW CHANGELOG MODAL -->
+    <div class="modal-overlay" id="changelog-modal">
+        <div class="modal-content" style="max-width:500px;">
+            <span class="close-modal" onclick="document.getElementById('changelog-modal').style.display='none'">&times;</span>
+            <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-rocket"></i> Was ist neu?</h3>
+            <div id="changelog-container" class="changelog-list"></div>
+            <button class="btn btn-primary" onclick="document.getElementById('changelog-modal').style.display='none'">Verstanden</button>
         </div>
     </div>
     
@@ -388,7 +533,21 @@
             <br>
             <label data-i18n="lbl_assignee">Adressat (Verantwortlich)</label><div class="input-group"><input type="text" id="p_assignee" placeholder="..."><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
-            <label><span data-i18n="lbl_images">Bilder hinzufügen</span> <div class="spinner" id="img-spinner"></div></label><input type="file" id="p_images" multiple accept="image/*" capture="environment" onchange="window.handleImageUpload()"><div id="modal-img-preview" class="img-grid"></div>
+            
+            <label><span data-i18n="lbl_images">Bilder hinzufügen</span> <div class="spinner" id="img-spinner"></div></label>
+            
+            <!-- DROP ZONE -->
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('p_images').click()" 
+                 ondragover="event.preventDefault(); this.classList.add('dragover');" 
+                 ondragleave="this.classList.remove('dragover');" 
+                 ondrop="event.preventDefault(); this.classList.remove('dragover'); window.processFiles(event.dataTransfer.files);">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Bilder hier ablegen oder klicken</span>
+                <input type="file" id="p_images" multiple accept="image/*" style="display:none" onchange="window.handleImageUpload()">
+            </div>
+
+            <div id="modal-img-preview" class="img-grid"></div>
+            
             <button class="btn btn-success" onclick="window.savePoint()"><span data-i18n="btn_save">Speichern</span></button><button class="btn" style="background:#fee2e2; color:#991b1b; margin-top:10px;" onclick="window.askDeletePoint()" id="btn-delete"><span data-i18n="btn_delete">Löschen</span></button>
         </div>
     </div>
@@ -447,7 +606,34 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.4.9";
+        const APP_VERSION = "1.5.0";
+        const APP_AUTHOR = "David Mazur";
+        
+        // CHANGELOG DEFINITION
+        const CHANGELOG = [
+            {
+                ver: "1.5.0",
+                date: "2026-01-23",
+                changes: [
+                    "Bilder Upload per Drag & Drop am PC.",
+                    "Mobile: Auswahl zwischen Kamera und Galerie gefixt.",
+                    "Neuer Info-Bereich: Changelog & Impressum.",
+                    "Copyright & Kontaktinformationen aktualisiert.",
+                    "Kleinere Anpassungen & Fehlerbehebungen."
+                ]
+            },
+            {
+                ver: "1.4.9",
+                date: "2026-01-17",
+                changes: [
+                    "Cloud-Speicher für API Keys.",
+                    "Settings bleiben nach Neustart erhalten.",
+                    "Verbesserte Bildqualität & Zoom.",
+                    "Logo-Update (GEA)."
+                ]
+            }
+        ];
+
         console.log("mooMemo Version:", APP_VERSION);
         // --- KONFIGURATION ENDE ---
 
@@ -913,12 +1099,30 @@
         window.setFilterYear = function(year) { filterYear = year; window.renderReportList(); };
         window.setSortMethod = function(method) { sortMethod = method; window.renderReportList(); };
 
-        window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; };
+        // SETTINGS LOGIC
+        window.openSettings = function() { 
+            document.getElementById('settings-modal').style.display = 'flex'; 
+            // Load key from storage
+            const storedKey = localStorage.getItem('moo_gemini_api_key');
+            if(storedKey) document.getElementById('settings-api-key').value = storedKey;
+        };
+        
         window.closeSettings = function() { document.getElementById('settings-modal').style.display = 'none'; };
+        
+        window.saveSettings = function() {
+            const key = document.getElementById('settings-api-key').value.trim();
+            if(key) {
+                localStorage.setItem('moo_gemini_api_key', key);
+                window.showToast("Einstellungen gespeichert.");
+            } else {
+                localStorage.removeItem('moo_gemini_api_key');
+                window.showToast("API Key entfernt.");
+            }
+            window.closeSettings();
+        };
         
         window.setLanguage = function(lang) {
             currentLang = lang;
-            localStorage.setItem('mooMemo_lang', lang); // PERSISTENCE
             const t = translations[lang];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -937,20 +1141,12 @@
             window.renderReportList();
             if(document.getElementById('points').classList.contains('active')) window.renderPointsList();
             if(document.getElementById('status').classList.contains('active')) window.renderStatusList();
-            window.closeSettings();
+            // Don't auto-close settings, user might want to edit key
         };
         
         window.setAiTargetLang = function(lang) {
-            aiTargetLang = lang;
-            localStorage.setItem('mooMemo_ai_lang', lang); // PERSISTENCE
-            const container = document.getElementById('ai-lang-container');
-            const buttons = container.getElementsByClassName('lang-btn');
-            for(let btn of buttons) {
-                btn.classList.remove('active');
-                if((lang === 'de' && btn.innerText === 'Deutsch') || (lang === 'en' && btn.innerText === 'English')) {
-                    btn.classList.add('active');
-                }
-            }
+            // Deprecated logic? No, still used in improveDescription prompt
+            aiTargetLang = lang; 
         };
 
         window.goToDashboard = function() {
@@ -1268,9 +1464,10 @@
             r.onend = () => btn.classList.remove('listening');
         };
         
-        window.handleImageUpload = async function() {
-            const files = document.getElementById('p_images').files;
-            if(!files.length) return;
+        // --- NEW FILE UPLOAD HANDLER ---
+        
+        window.processFiles = async function(files) {
+            if(!files || !files.length) return;
             
             document.getElementById('img-spinner').style.display = 'inline-block';
             
@@ -1278,33 +1475,33 @@
                 const file = files[i];
                 
                 // 1. Resize/Compress using Canvas
-                const processedBlob = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const cvs = document.createElement('canvas');
-                            let w = img.width, h = img.height;
-                            // 2K Resolution
-                            if(w > 2048) { h *= 2048/w; w = 2048; } 
-                            cvs.width = w; cvs.height = h;
-                            const ctx = cvs.getContext('2d');
-                            ctx.drawImage(img, 0, 0, w, h);
-                            
-                            cvs.toBlob(blob => {
-                                if (blob) resolve(blob);
-                                else reject(new Error("Canvas to Blob failed"));
-                            }, 'image/jpeg', 0.8); 
-                        };
-                        img.onerror = reject;
-                        img.src = e.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-
-                // 2. Upload to Firebase Storage
                 try {
+                    const processedBlob = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const cvs = document.createElement('canvas');
+                                let w = img.width, h = img.height;
+                                // 2K Resolution
+                                if(w > 2048) { h *= 2048/w; w = 2048; } 
+                                cvs.width = w; cvs.height = h;
+                                const ctx = cvs.getContext('2d');
+                                ctx.drawImage(img, 0, 0, w, h);
+                                
+                                cvs.toBlob(blob => {
+                                    if (blob) resolve(blob);
+                                    else reject(new Error("Canvas to Blob failed"));
+                                }, 'image/jpeg', 0.8); 
+                            };
+                            img.onerror = reject;
+                            img.src = e.target.result;
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+
+                    // 2. Upload to Firebase Storage
                     const reportId = currentReportId || 'temp_uploads'; 
                     const path = `images/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
                     const storageRef = ref(storage, path);
@@ -1317,7 +1514,6 @@
                         src: downloadURL,
                         isLarge: false
                     });
-                    
                 } catch (error) {
                     console.error("Upload failed", error);
                     alert("Upload fehlgeschlagen: " + error.message);
@@ -1326,6 +1522,52 @@
             
             document.getElementById('img-spinner').style.display = 'none';
             window.renderModalImages();
+        };
+
+        window.handleImageUpload = function() {
+            window.processFiles(document.getElementById('p_images').files);
+        };
+        
+        // --- INFO & SETTINGS LOGIC ---
+        window.toggleInfoSection = function() {
+            const content = document.getElementById('info-content');
+            const icon = document.getElementById('info-chevron');
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.className = "fa-solid fa-chevron-down";
+            } else {
+                content.classList.add('open');
+                icon.className = "fa-solid fa-chevron-up";
+            }
+        };
+
+        window.openChangelog = function() {
+            const container = document.getElementById('changelog-container');
+            let html = '';
+            CHANGELOG.forEach(entry => {
+                html += `
+                    <div class="cl-item">
+                        <div class="cl-ver">
+                            <span>v${entry.ver}</span>
+                            <span class="cl-date">${entry.date}</span>
+                        </div>
+                        <ul class="cl-changes">
+                            ${entry.changes.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.getElementById('changelog-modal').style.display = 'flex';
+        };
+
+        window.checkVersion = function() {
+            const storedVer = localStorage.getItem('mooMemo_version');
+            if (!storedVer || storedVer !== APP_VERSION) {
+                // New version detected!
+                localStorage.setItem('mooMemo_version', APP_VERSION);
+                window.openChangelog();
+            }
         };
 
         // --- STARTUP LOGIC ---
@@ -1342,6 +1584,9 @@
                 
                 const savedAiLang = localStorage.getItem('mooMemo_ai_lang');
                 if(savedAiLang) window.setAiTargetLang(savedAiLang);
+
+                // Check Version for Changelog
+                window.checkVersion();
 
                 // Fetch Key & Listen
                 window.fetchGlobalConfig().then(() => {
