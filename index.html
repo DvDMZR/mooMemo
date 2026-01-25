@@ -398,7 +398,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.1)</span>
+            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.2)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -548,7 +548,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.5.1</div>
+                        <div class="info-version">mooMemo v1.5.2</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -664,7 +664,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.1";
+        const APP_VERSION = "1.5.2";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -681,6 +681,14 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.5.2",
+                date: "2026-01-25",
+                changes: [
+                    "Fix: Zeichenkodierung korrigiert (Umlaute werden nun korrekt dargestellt).",
+                    "Code-Optimierungen und Bereinigung."
+                ]
+            },
              {
                 ver: "1.5.1",
                 date: "2026-01-23",
@@ -1176,7 +1184,7 @@
             }, (error) => {
                 console.error("Sync error:", error);
                 if (error.code === 'permission-denied') {
-                    alert("⚠️ ZUGRIFF VERWEIGERT: Bitte stelle sicher, dass in der Firebase Konsole unter 'Firestore Database' -> 'Rules' der Zugriff erlaubt ist (allow read, write: if true;).");
+                    alert("âš ï¸ ZUGRIFF VERWEIGERT: Bitte stelle sicher, dass in der Firebase Konsole unter 'Firestore Database' -> 'Rules' der Zugriff erlaubt ist (allow read, write: if true;).");
                 }
                 window.updateSyncStatus(false);
             });
@@ -1381,11 +1389,11 @@
             }
         };
         
-        // --- NEW: AUTOFILL LOGIC (Only on input >= 2 chars) ---
+        // --- NEW: AUTOFILL LOGIC (Only on input > 0 chars) ---
         // Also checks if input matches an option exactly to auto-add
         window.handleInputAutofill = function(input, listId, addCallback) {
              const val = input.value;
-             if(val.length >= 2) { // Changed from > 0 to >= 2
+             if(val.length > 0) {
                  input.setAttribute('list', listId);
              } else {
                  input.removeAttribute('list');
