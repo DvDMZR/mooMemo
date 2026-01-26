@@ -1591,19 +1591,82 @@
             r.readAsText(f); input.value=''; 
         };
         
-        window.generatePDF = function() {
+        // Helper function to convert image URL to Base64 data URL
+        window.convertImageToBase64 = function(imgElement) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+                        resolve(dataURL);
+                    } catch(e) {
+                        console.warn('Canvas conversion failed for image:', e);
+                        resolve(imgElement.src); // Fallback to original
+                    }
+                };
+                img.onerror = function() {
+                    console.warn('Image load failed:', imgElement.src);
+                    resolve(imgElement.src); // Fallback to original
+                };
+                // Add cache buster to avoid CORS cache issues
+                const separator = imgElement.src.includes('?') ? '&' : '?';
+                img.src = imgElement.src + separator + 't=' + Date.now();
+            });
+        };
+
+        // Convert all images in PDF preview to Base64 before export
+        window.convertAllImagesToBase64 = async function() {
+            const previewEl = document.getElementById('pdf-preview');
+            if (!previewEl) return;
+
+            const images = previewEl.querySelectorAll('img');
+            const promises = [];
+
+            for (const img of images) {
+                // Skip if already Base64 or data URL
+                if (img.src.startsWith('data:')) continue;
+
+                promises.push(
+                    window.convertImageToBase64(img).then(dataURL => {
+                        img.src = dataURL;
+                    })
+                );
+            }
+
+            await Promise.all(promises);
+        };
+
+        window.generatePDF = async function() {
              const r=allReports.find(x=>x.id===currentReportId);
              let fn='Bericht.pdf';
              if(r) { const d=r.header.date_from||''; const c=(r.header.customer||'Kunde').replace(/[^a-z0-9äöüß]/gi,'_'); fn=`Bericht_${c}_${d}.pdf`; }
-             const opt = { 
-                 margin: 15, 
-                 filename: fn, 
-                 image: { type: 'jpeg', quality: 0.90 }, 
-                 html2canvas: { scale: 2, useCORS: true }, 
+
+             // Show loading indicator
+             window.showToast('PDF wird erstellt...');
+
+             // Convert all images to Base64 first to avoid CORS issues
+             await window.convertAllImagesToBase64();
+
+             const opt = {
+                 margin: 15,
+                 filename: fn,
+                 image: { type: 'jpeg', quality: 0.90 },
+                 html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
                  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                  pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
              };
-             html2pdf().set(opt).from(document.getElementById('pdf-preview')).save().catch(e=>console.error(e));
+             html2pdf().set(opt).from(document.getElementById('pdf-preview')).save().then(() => {
+                 window.showToast('PDF erfolgreich erstellt!');
+             }).catch(e => {
+                 console.error(e);
+                 window.showToast('PDF-Export fehlgeschlagen');
+             });
         };
         
         window.executeDelete = function() {}; // Stub
