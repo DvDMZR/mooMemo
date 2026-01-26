@@ -744,7 +744,7 @@
         let tempImages = []; 
         let pendingPinAction = null; 
         let headerUpdateTimeout = null; 
-        const LOGO_SRC = "https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85";
+        const LOGO_SRC = "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgODUgMjciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTcxLjc2MSAwLjczMTM0Nkg2NS4zMzY5TDYxLjA1NDIgOS4yOTg4M0w2NS44MTkzIDkuMjk5ODNMNjguNTY2MSAzLjgxMjFMNzkuODU3NCAyNi40MzM4SDg0LjYyMjVMNzEuNzYxIDAuNzMxMzQ2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik02OS42MiAxMS40NDM2TDEzLjk0NDggMTEuNDQxNkwxMS44MDM0IDE1LjcyNTNIMjAuMzY4OVYyMi4xNTA5SDEyLjc3N0M4LjA4Mjc4IDIyLjE1MDkgNC4yNjM2OCAxOC4zMjQ2IDQuMjYzNjggMTMuNTg2NUM0LjI2MzY4IDguODQ4NDEgOC4wODI3OCA1LjAxNDg5IDEyLjc3NyA1LjAxNDg5SDIyLjUwMjJWMC43MjkwNzNMMTIuNzc3IDAuNzI5MDc0QzUuNzMxNzMgMC43MjkwNzQgMCA2LjQ5Njk0IDAgMTMuNTg2NUMwIDIwLjY3NjEgNS43MzE3MyAyNi40MzQ3IDEyLjc3NyAyNi40MzQ3SDI0LjY1MTZWMTUuNzI1M0gzMS4wNzU2VjI2LjQzNDdINDguMjA2NEw1MC4zNDc4IDIyLjE1MDlIMzUuMzU4M1YxNS43MjUzSDU3LjgxNTdMNTIuNDg5MSAyNi40MzQ3SDU3LjI1MTlMNjIuNjA2IDE1LjcyNTNINzEuNzYxM0w2OS42MiAxMS40NDM2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik0zNS4zNTg0IDUuMDEzOTZMNTAuMzQ3NiA1LjAxNTA0VjAuNzMxMjkyTDMxLjA3MzIgMC43MjgxNDJMMzEuMDczNiA5LjI5OTc3SDM1LjM1ODRWNS4wMTM5NloiIGZpbGw9IiMwMzAzQjgiLz48L3N2Zz4K";
         
         let filterType = 'all';
         let filterYear = 'all';
@@ -807,7 +807,27 @@
         };
 
         // --- IMAGE TO BASE64 HELPER (for PDF export) ---
-        window.convertImageToBase64 = function(url) {
+        window.convertImageToBase64 = async function(url) {
+            // Skip if already base64
+            if(url.startsWith('data:')) return url;
+
+            // Try fetch API first (better CORS handling for Firebase Storage)
+            try {
+                const response = await fetch(url, { mode: 'cors' });
+                if(response.ok) {
+                    const blob = await response.blob();
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = () => resolve(url);
+                        reader.readAsDataURL(blob);
+                    });
+                }
+            } catch(e) {
+                console.warn('Fetch failed for image, trying Image element:', url);
+            }
+
+            // Fallback: try Image element with crossOrigin
             return new Promise((resolve) => {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
@@ -818,16 +838,16 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0);
                     try {
-                        const dataUrl = canvas.toDataURL('image/png');
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
                         resolve(dataUrl);
                     } catch(e) {
                         console.warn('Could not convert image to base64:', url, e);
-                        resolve(url); // fallback to original URL
+                        resolve(url);
                     }
                 };
                 img.onerror = function() {
                     console.warn('Could not load image for base64 conversion:', url);
-                    resolve(url); // fallback to original URL
+                    resolve(url);
                 };
                 img.src = url;
             });
@@ -937,13 +957,18 @@
 
         window.renderPDFPreviewWithData = function(r) {
              if(!r) return;
-             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-'; 
+             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-';
              const aList=r.header.authors?r.header.authors.join(', '):(r.header.author || '-');
              const t=translations[currentLang];
              const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
-             
+
              const html = r.points.map(p => {
-                 const safeImages = (p.images||[]).map(img => { const src=typeof img==='string'?img:img.src; const isLarge=typeof img==='string'?false:img.isLarge; return {src,isLarge}; });
+                 // Use base64 if available (for PDF export), fallback to src URL
+                 const safeImages = (p.images||[]).map(img => {
+                     const src = typeof img==='string' ? img : (img.base64 || img.src);
+                     const isLarge = typeof img==='string' ? false : img.isLarge;
+                     return {src, isLarge};
+                 });
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
                  const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
                  return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s}">`; }).join('')}</div></div>`;
@@ -1692,15 +1717,15 @@
         
         window.processFiles = async function(files) {
             if(!files || !files.length) return;
-            
+
             document.getElementById('img-spinner').style.display = 'inline-block';
-            
+
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                
-                // 1. Resize/Compress using Canvas
+
+                // 1. Resize/Compress using Canvas - return both blob and base64
                 try {
-                    const processedBlob = await new Promise((resolve, reject) => {
+                    const { blob: processedBlob, base64 } = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onload = e => {
                             const img = new Image();
@@ -1708,15 +1733,18 @@
                                 const cvs = document.createElement('canvas');
                                 let w = img.width, h = img.height;
                                 // 2K Resolution
-                                if(w > 2048) { h *= 2048/w; w = 2048; } 
+                                if(w > 2048) { h *= 2048/w; w = 2048; }
                                 cvs.width = w; cvs.height = h;
                                 const ctx = cvs.getContext('2d');
                                 ctx.drawImage(img, 0, 0, w, h);
-                                
+
+                                // Get base64 data URL for PDF export
+                                const base64DataUrl = cvs.toDataURL('image/jpeg', 0.8);
+
                                 cvs.toBlob(blob => {
-                                    if (blob) resolve(blob);
+                                    if (blob) resolve({ blob, base64: base64DataUrl });
                                     else reject(new Error("Canvas to Blob failed"));
-                                }, 'image/jpeg', 0.8); 
+                                }, 'image/jpeg', 0.8);
                             };
                             img.onerror = reject;
                             img.src = e.target.result;
@@ -1726,16 +1754,17 @@
                     });
 
                     // 2. Upload to Firebase Storage
-                    const reportId = currentReportId || 'temp_uploads'; 
+                    const reportId = currentReportId || 'temp_uploads';
                     const path = `images/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
                     const storageRef = ref(storage, path);
-                    
+
                     await uploadBytes(storageRef, processedBlob);
                     const downloadURL = await getDownloadURL(storageRef);
-                    
-                    // 3. Add to local state
+
+                    // 3. Add to local state with both URL and base64 for PDF
                     tempImages.push({
                         src: downloadURL,
+                        base64: base64,
                         isLarge: false
                     });
                 } catch (error) {
@@ -1743,7 +1772,7 @@
                     alert("Upload fehlgeschlagen: " + error.message);
                 }
             }
-            
+
             document.getElementById('img-spinner').style.display = 'none';
             window.renderModalImages();
         };
