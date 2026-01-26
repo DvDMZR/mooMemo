@@ -799,11 +799,38 @@
             return '';
         };
 
-        window.getWeekNumber = function(d) { 
-            d=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); 
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7)); 
-            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1)); 
-            return [Math.ceil((((d - yearStart) / 86400000) + 1) / 7), d.getUTCFullYear()]; 
+        window.getWeekNumber = function(d) {
+            d=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return [Math.ceil((((d - yearStart) / 86400000) + 1) / 7), d.getUTCFullYear()];
+        };
+
+        // --- IMAGE TO BASE64 HELPER (for PDF export) ---
+        window.convertImageToBase64 = function(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    try {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        resolve(dataUrl);
+                    } catch(e) {
+                        console.warn('Could not convert image to base64:', url, e);
+                        resolve(url); // fallback to original URL
+                    }
+                };
+                img.onerror = function() {
+                    console.warn('Could not load image for base64 conversion:', url);
+                    resolve(url); // fallback to original URL
+                };
+                img.src = url;
+            });
         };
 
         // --- UI HELPERS ---
@@ -1591,19 +1618,47 @@
             r.readAsText(f); input.value=''; 
         };
         
-        window.generatePDF = function() {
+        window.generatePDF = async function() {
              const r=allReports.find(x=>x.id===currentReportId);
              let fn='Bericht.pdf';
              if(r) { const d=r.header.date_from||''; const c=(r.header.customer||'Kunde').replace(/[^a-z0-9äöüß]/gi,'_'); fn=`Bericht_${c}_${d}.pdf`; }
-             const opt = { 
-                 margin: 15, 
-                 filename: fn, 
-                 image: { type: 'jpeg', quality: 0.90 }, 
-                 html2canvas: { scale: 2, useCORS: true }, 
-                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-             };
-             html2pdf().set(opt).from(document.getElementById('pdf-preview')).save().catch(e=>console.error(e));
+
+             // Show loading indicator
+             const btn = document.querySelector('[onclick="window.generatePDF()"]');
+             const originalBtnText = btn ? btn.innerHTML : '';
+             if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PDF wird erstellt...';
+
+             try {
+                 // Convert all images in pdf-preview to Base64 to avoid CORS issues
+                 const previewEl = document.getElementById('pdf-preview');
+                 const images = previewEl.querySelectorAll('img');
+
+                 for(const img of images) {
+                     const originalSrc = img.src;
+                     // Skip if already a data URL
+                     if(originalSrc.startsWith('data:')) continue;
+                     const base64Src = await window.convertImageToBase64(originalSrc);
+                     img.src = base64Src;
+                 }
+
+                 const opt = {
+                     margin: 15,
+                     filename: fn,
+                     image: { type: 'jpeg', quality: 0.90 },
+                     html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                 };
+                 await html2pdf().set(opt).from(previewEl).save();
+             } catch(e) {
+                 console.error('PDF generation error:', e);
+                 window.showToast('Fehler bei PDF-Erstellung');
+             } finally {
+                 // Restore button text
+                 if(btn) btn.innerHTML = originalBtnText;
+                 // Re-render preview to restore original URLs (for subsequent exports)
+                 window.renderPDFPreview();
+             }
         };
         
         window.executeDelete = function() {}; // Stub
