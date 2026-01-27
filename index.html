@@ -984,7 +984,7 @@
              }).join('');
              
              const previewEl = document.getElementById('pdf-preview');
-             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${LOGO_SRC}" style="height:40px;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}`;
+             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${LOGO_SRC}" style="height:40px; width:auto; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}`;
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(allReports.find(x=>x.id===currentReportId));
