@@ -656,7 +656,7 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- KONFIGURATION START ---
         const myFirebaseConfig = {
@@ -1180,8 +1180,17 @@
         window.deleteReportFromFirestore = async function(id) {
             if (!currentUser) return;
             try {
+                // Bilder aus Firebase Storage löschen
+                const folderRef = ref(storage, 'images/' + id);
+                try {
+                    const fileList = await listAll(folderRef);
+                    await Promise.all(fileList.items.map(item => deleteObject(item)));
+                    console.log(fileList.items.length + ' Bild(er) aus Storage gelöscht für Report ' + id);
+                } catch(storageErr) {
+                    console.warn("Storage-Cleanup fehlgeschlagen (Report wird trotzdem gelöscht):", storageErr);
+                }
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
-            } catch(e) { 
+            } catch(e) {
                 console.error("Delete failed", e);
                 alert("Löschen fehlgeschlagen: " + e.message);
             }
