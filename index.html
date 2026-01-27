@@ -286,6 +286,11 @@
         .img-btn-size:hover { transform: scale(1.05); }
         .img-btn-size.active-large { background: var(--success); }
 
+        .img-lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9999; cursor: zoom-out; }
+        .img-lightbox-overlay img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .img-lightbox-overlay .lightbox-close { position: absolute; top: 18px; right: 24px; color: white; font-size: 2rem; cursor: pointer; z-index: 10000; background: rgba(0,0,0,0.5); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+        .img-thumb { cursor: pointer; }
+
         .fab { position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; background-color: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 15px rgba(0, 51, 102, 0.4); cursor: pointer; z-index: 90; display: none; transition: transform 0.2s, background-color 0.2s; }
         .fab:hover { transform: scale(1.05); background-color: #002850; }
 
@@ -398,7 +403,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.2)</span>
+            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.4)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -512,7 +517,7 @@
             <i class="fa-solid fa-language"></i> Automatisch übersetzen
         </button>
 
-        <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.generatePDF()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_download_pdf">Als PDF herunterladen</span></button>
+        <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.generatePDF()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_download_pdf">Als PDF herunterladen</span> <span style="background:#fef3c7; color:#b45309; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; border:1px solid #fcd34d;">BETA</span></button>
         <div id="pdf-preview"></div>
     </div>
 
@@ -548,7 +553,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.5.3</div>
+                        <div class="info-version">mooMemo v1.5.4</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -664,7 +669,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.3";
+        const APP_VERSION = "1.5.4";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -681,6 +686,15 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.5.4",
+                date: "2026-01-27",
+                changes: [
+                    "Bilder-Lightbox: Thumbnails in Punkten können per Klick vergrößert angezeigt werden.",
+                    "Bilder-Lightbox: Bilder im Export/PDF-Vorschau können per Klick als Popup vergrößert werden.",
+                    "PDF-Export als BETA gekennzeichnet."
+                ]
+            },
             {
                 ver: "1.5.3",
                 date: "2026-01-26",
@@ -887,7 +901,7 @@
 
         window.renderModalImages = function() { 
             const el = document.getElementById('modal-img-preview');
-            if(el) el.innerHTML = tempImages.map((img,i)=>`<div class="img-thumb-container ${img.isLarge?'is-large':''}"><img src="${img.src}" class="img-thumb"><div class="img-btn-remove" onclick="window.removeTempImage(${i})">&times;</div><div class="img-btn-size ${img.isLarge?'active-large':''}" onclick="window.toggleImageSize(${i})"><i class="fa-solid ${img.isLarge?'fa-compress':'fa-expand'}"></i> <span>${img.isLarge?'GROSS':'NORMAL'}</span></div></div>`).join(''); 
+            if(el) el.innerHTML = tempImages.map((img,i)=>`<div class="img-thumb-container ${img.isLarge?'is-large':''}"><img src="${img.src}" class="img-thumb" onclick="window.openLightbox(this.src)"><div class="img-btn-remove" onclick="window.removeTempImage(${i})">&times;</div><div class="img-btn-size ${img.isLarge?'active-large':''}" onclick="window.toggleImageSize(${i})"><i class="fa-solid ${img.isLarge?'fa-compress':'fa-expand'}"></i> <span>${img.isLarge?'GROSS':'NORMAL'}</span></div></div>`).join(''); 
         };
 
         window.renderPointsList = function() {
@@ -962,7 +976,7 @@
                  });
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
                  const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
-                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s}">`; }).join('')}</div></div>`;
+                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
              const devBuild = "DEV-20260127A";
@@ -1569,6 +1583,15 @@
             tempImages.splice(i, 1);
             window.renderModalImages();
         };
+
+        window.openLightbox = function(src) {
+            const el = document.getElementById('img-lightbox');
+            document.getElementById('lightbox-img').src = src;
+            el.style.display = 'flex';
+        };
+        window.closeLightbox = function() {
+            document.getElementById('img-lightbox').style.display = 'none';
+        };
         
         window.askDeletePoint = function() {
             document.getElementById('delete-point-confirm-modal').style.display = 'flex';
@@ -1834,5 +1857,9 @@
             }
         });
     </script>
+    <div class="img-lightbox-overlay" id="img-lightbox" onclick="window.closeLightbox()">
+        <div class="lightbox-close" onclick="window.closeLightbox()">&times;</div>
+        <img id="lightbox-img" src="" alt="Bild Vorschau">
+    </div>
 </body>
 </html>
