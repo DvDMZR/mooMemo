@@ -403,7 +403,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.3)</span>
+            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.4)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -517,7 +517,7 @@
             <i class="fa-solid fa-language"></i> Automatisch übersetzen
         </button>
 
-        <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.generatePDF()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_download_pdf">Als PDF herunterladen</span></button>
+        <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.generatePDF()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_download_pdf">Als PDF herunterladen</span> <span style="background:#fef3c7; color:#b45309; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; border:1px solid #fcd34d;">BETA</span></button>
         <div id="pdf-preview"></div>
     </div>
 
@@ -553,7 +553,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.5.3</div>
+                        <div class="info-version">mooMemo v1.5.4</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -669,7 +669,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.3";
+        const APP_VERSION = "1.5.4";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -687,11 +687,18 @@
         // CHANGELOG DEFINITION
         const CHANGELOG = [
             {
-                ver: "1.5.3",
-                date: "2026-01-26",
+                ver: "1.5.4",
+                date: "2026-01-27",
                 changes: [
                     "Bilder-Lightbox: Thumbnails in Punkten können per Klick vergrößert angezeigt werden.",
                     "Bilder-Lightbox: Bilder im Export/PDF-Vorschau können per Klick als Popup vergrößert werden.",
+                    "PDF-Export als BETA gekennzeichnet."
+                ]
+            },
+            {
+                ver: "1.5.3",
+                date: "2026-01-26",
+                changes: [
                     "Fix: Bilder werden nun im PDF-Export korrekt angezeigt.",
                     "Fix: Logo im PDF-Header wird nun korrekt dargestellt.",
                     "Bilder werden beim Upload als Base64 gespeichert für zuverlässigen PDF-Export."
