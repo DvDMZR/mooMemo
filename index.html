@@ -754,6 +754,7 @@
         let pendingPinAction = null; 
         let headerUpdateTimeout = null; 
         const LOGO_SRC = "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgODUgMjciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTcxLjc2MSAwLjczMTM0Nkg2NS4zMzY5TDYxLjA1NDIgOS4yOTg4M0w2NS44MTkzIDkuMjk5ODNMNjguNTY2MSAzLjgxMjFMNzkuODU3NCAyNi40MzM4SDg0LjYyMjVMNzEuNzYxIDAuNzMxMzQ2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik02OS42MiAxMS40NDM2TDEzLjk0NDggMTEuNDQxNkwxMS44MDM0IDE1LjcyNTNIMjAuMzY4OVYyMi4xNTA5SDEyLjc3N0M4LjA4Mjc4IDIyLjE1MDkgNC4yNjM2OCAxOC4zMjQ2IDQuMjYzNjggMTMuNTg2NUM0LjI2MzY4IDguODQ4NDEgOC4wODI3OCA1LjAxNDg5IDEyLjc3NyA1LjAxNDg5SDIyLjUwMjJWMC43MjkwNzNMMTIuNzc3IDAuNzI5MDc0QzUuNzMxNzMgMC43MjkwNzQgMCA2LjQ5Njk0IDAgMTMuNTg2NUMwIDIwLjY3NjEgNS43MzE3MyAyNi40MzQ3IDEyLjc3NyAyNi40MzQ3SDI0LjY1MTZWMTUuNzI1M0gzMS4wNzU2VjI2LjQzNDdINDguMjA2NEw1MC4zNDc4IDIyLjE1MDlIMzUuMzU4M1YxNS43MjUzSDU3LjgxNTdMNTIuNDg5MSAyNi40MzQ3SDU3LjI1MTlMNjIuNjA2IDE1LjcyNTNINzEuNzYxM0w2OS42MiAxMS40NDM2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik0zNS4zNTg0IDUuMDEzOTZMNTAuMzQ3NiA1LjAxNTA0VjAuNzMxMjkyTDMxLjA3MzIgMC43MjgxNDJMMzEuMDczNiA5LjI5OTc3SDM1LjM1ODRWNS4wMTM5NloiIGZpbGw9IiMwMzAzQjgiLz48L3N2Zz4K";
+        let LOGO_PNG = null; // Will be set at runtime by converting SVG to PNG
         
         let filterType = 'all';
         let filterYear = 'all';
@@ -815,52 +816,30 @@
             return [Math.ceil((((d - yearStart) / 86400000) + 1) / 7), d.getUTCFullYear()];
         };
 
-        // --- IMAGE TO BASE64 HELPER (for PDF export) ---
-        window.convertImageToBase64 = async function(url) {
-            // Skip if already base64
-            if(url.startsWith('data:')) return url;
-
-            // Try fetch API first (better CORS handling for Firebase Storage)
-            try {
-                const response = await fetch(url, { mode: 'cors' });
-                if(response.ok) {
-                    const blob = await response.blob();
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.onerror = () => resolve(url);
-                        reader.readAsDataURL(blob);
-                    });
-                }
-            } catch(e) {
-                console.warn('Fetch failed for image, trying Image element:', url);
-            }
-
-            // Fallback: try Image element with crossOrigin
+        // --- CONVERT SVG LOGO TO PNG AT STARTUP (html2canvas can't render SVGs reliably) ---
+        window.prepareLogo = function() {
             return new Promise((resolve) => {
                 const img = new Image();
-                img.crossOrigin = 'anonymous';
                 img.onload = function() {
+                    // Render at 4x for crisp PDF output (85*4=340, 27*4=108)
                     const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
+                    canvas.width = 340;
+                    canvas.height = 108;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    try {
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-                        resolve(dataUrl);
-                    } catch(e) {
-                        console.warn('Could not convert image to base64:', url, e);
-                        resolve(url);
-                    }
+                    ctx.drawImage(img, 0, 0, 340, 108);
+                    LOGO_PNG = canvas.toDataURL('image/png');
+                    console.log('Logo PNG prepared for PDF export');
+                    resolve();
                 };
                 img.onerror = function() {
-                    console.warn('Could not load image for base64 conversion:', url);
-                    resolve(url);
+                    console.warn('Could not prepare logo PNG');
+                    resolve();
                 };
-                img.src = url;
+                img.src = LOGO_SRC;
             });
         };
+        // Run immediately
+        window.prepareLogo();
 
         // --- UI HELPERS ---
         window.updateSyncStatus = function(isOnline) {
@@ -971,6 +950,9 @@
              const t=translations[currentLang];
              const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
 
+             // Use PNG logo for PDF (html2canvas cannot render SVGs), fallback to SVG for screen
+             const logoSrc = LOGO_PNG || LOGO_SRC;
+
              const html = r.points.map(p => {
                  // Use base64 if available (for PDF export), fallback to src URL
                  const safeImages = (p.images||[]).map(img => {
@@ -982,9 +964,10 @@
                  const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
                  return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s}">`; }).join('')}</div></div>`;
              }).join('');
-             
+
+             const devBuild = "DEV-20260127A";
              const previewEl = document.getElementById('pdf-preview');
-             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${LOGO_SRC}" style="height:40px; width:auto; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}`;
+             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between; align-items:flex-start;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${logoSrc}" style="height:40px; width:126px; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(allReports.find(x=>x.id===currentReportId));
@@ -1657,29 +1640,23 @@
              let fn='Bericht.pdf';
              if(r) { const d=r.header.date_from||''; const c=(r.header.customer||'Kunde').replace(/[^a-z0-9äöüß]/gi,'_'); fn=`Bericht_${c}_${d}.pdf`; }
 
-             // Show loading indicator
              const btn = document.querySelector('[onclick="window.generatePDF()"]');
              const originalBtnText = btn ? btn.innerHTML : '';
-             if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PDF wird erstellt...';
+             if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PDF wird erstellt...'; btn.disabled = true; }
 
              try {
-                 // Convert all images in pdf-preview to Base64 to avoid CORS issues
+                 // Re-render preview fresh (logo as PNG, images as base64 where available)
+                 window.renderPDFPreview();
+
+                 // Small delay to ensure images are loaded in DOM
+                 await new Promise(resolve => setTimeout(resolve, 200));
+
                  const previewEl = document.getElementById('pdf-preview');
-                 const images = previewEl.querySelectorAll('img');
-
-                 for(const img of images) {
-                     const originalSrc = img.src;
-                     // Skip if already a data URL
-                     if(originalSrc.startsWith('data:')) continue;
-                     const base64Src = await window.convertImageToBase64(originalSrc);
-                     img.src = base64Src;
-                 }
-
                  const opt = {
                      margin: 15,
                      filename: fn,
                      image: { type: 'jpeg', quality: 0.90 },
-                     html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+                     html2canvas: { scale: 2, useCORS: true, logging: false },
                      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                  };
@@ -1688,10 +1665,7 @@
                  console.error('PDF generation error:', e);
                  window.showToast('Fehler bei PDF-Erstellung');
              } finally {
-                 // Restore button text
-                 if(btn) btn.innerHTML = originalBtnText;
-                 // Re-render preview to restore original URLs (for subsequent exports)
-                 window.renderPDFPreview();
+                 if(btn) { btn.innerHTML = originalBtnText; btn.disabled = false; }
              }
         };
         
