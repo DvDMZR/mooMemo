@@ -399,11 +399,11 @@
     <!-- APP HEADER -->
     <div class="app-logo-header">
         <div style="display:flex; align-items:center;">
-            <button class="back-btn" id="nav-back-btn" onclick="window.goToDashboard()" data-i18n="overview">
+            <button class="back-btn" id="nav-back-btn" onclick="window.goToDashboard()" data-i18n="overview" style="display:none;">
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" style="display:none;" data-i18n="app_title">mooMemo (v1.5.4)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.5.4)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -1308,7 +1308,6 @@
             document.getElementById('tab-navigation').style.display = 'none';
             document.getElementById('nav-back-btn').style.display = 'none';
             document.getElementById('header-logo').style.display = 'inline-block';
-            document.getElementById('app-title').style.display = 'none';
 
             window.renderReportList();
         };
@@ -1338,7 +1337,6 @@
             document.getElementById('tab-navigation').style.display = 'flex';
             document.getElementById('nav-back-btn').style.display = 'inline-block';
             document.getElementById('header-logo').style.display = 'none';
-            document.getElementById('app-title').style.display = 'inline-block';
             window.switchTab('header');
         };
         
