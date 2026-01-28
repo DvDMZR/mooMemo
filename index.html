@@ -430,6 +430,46 @@
         .share-link-btn:hover { background: #002850; }
         .share-link-btn.copied { background: var(--success); }
 
+        /* --- EXPORT FILTER BAR --- */
+        .export-filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .export-filter-label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+        .export-filter-btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: var(--text-sub);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .export-filter-btn:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+        .export-filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .export-filter-btn.active:hover {
+            background: #002850;
+        }
+
         /* Read-only mode indicator */
         .readonly-banner {
             background: #fef3c7;
@@ -467,7 +507,8 @@
 
         .shared-mode #export > h2,
         .shared-mode #export > .ai-btn,
-        .shared-mode #export > .btn {
+        .shared-mode #export > .btn,
+        .shared-mode #export > .export-filter-bar {
             display: none !important;
         }
 
@@ -816,6 +857,17 @@
             </div>
         </div>
 
+        <!-- EXPORT FILTER BUTTONS -->
+        <div class="export-filter-bar" id="export-filter-bar">
+            <span class="export-filter-label">Anzeigen:</span>
+            <button class="export-filter-btn active" id="filter-all-btn" onclick="window.setExportFilter('all')">
+                <i class="fa-solid fa-list"></i> Alle Punkte
+            </button>
+            <button class="export-filter-btn" id="filter-open-btn" onclick="window.setExportFilter('open')">
+                <i class="fa-solid fa-circle-exclamation"></i> Nur Offene
+            </button>
+        </div>
+
         <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.printReport()"><i class="fa-solid fa-print"></i> <span data-i18n="btn_download_pdf">Als PDF drucken / speichern</span></button>
         <div id="pdf-preview"></div>
     </div>
@@ -1089,6 +1141,7 @@
         let isReadOnly = false;
         let sharedReportId = null;
         let sharedTab = null;
+        let exportFilter = 'all'; // 'all' | 'open'
 
         // DYNAMIC API KEY
         let globalGeminiKey = ""; 
@@ -1281,7 +1334,10 @@
              // Use SVG logo directly - native browser print handles SVGs perfectly
              const logoSrc = "https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85";
 
-             const html = r.points.map(p => {
+             // Apply export filter
+             const filteredPoints = exportFilter === 'open' ? r.points.filter(p => p.status === 'open') : r.points;
+
+             const html = filteredPoints.map(p => {
                  // Use base64 if available (for PDF export), fallback to src URL
                  const safeImages = (p.images||[]).map(img => {
                      const src = typeof img==='string' ? img : (img.base64 || img.src);
@@ -1299,6 +1355,17 @@
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(allReports.find(x=>x.id===currentReportId));
+
+        window.setExportFilter = function(filter) {
+            exportFilter = filter;
+
+            // Update button states
+            document.getElementById('filter-all-btn').classList.toggle('active', filter === 'all');
+            document.getElementById('filter-open-btn').classList.toggle('active', filter === 'open');
+
+            // Re-render preview
+            window.renderPDFPreview();
+        };
 
         window.translateReport = async function() {
             // DEPRECATED / DISABLED
