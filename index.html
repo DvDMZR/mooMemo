@@ -11,7 +11,6 @@
     <title>mooMemo (Cloud)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -317,11 +316,134 @@
         .pdf-header { border-bottom: 2px solid #111827; padding-bottom: 20px; margin-bottom: 30px; }
         .pdf-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #f3f4f6; padding-bottom: 4px; }
         .pdf-row:last-child { border-bottom: none; }
-        @media print { .nav-header, .fab, .section:not(#export), .btn, .app-logo-header, #dashboard { display: none !important; } #export { display: block !important; } #pdf-preview { border: none; padding: 0; } }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            /* Hide all UI elements */
+            .nav-header, .fab, .section:not(#export), .btn, .app-logo-header, #dashboard,
+            #sync-status, .modal-overlay, #toast, .img-lightbox-overlay,
+            .share-link-container {
+                display: none !important;
+            }
+
+            /* Show only export section */
+            #export {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            #export > h2, #export > .ai-btn, #export > .btn { display: none !important; }
+
+            /* PDF Preview container */
+            #pdf-preview {
+                border: none !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                font-size: 11pt !important;
+            }
+
+            /* Page setup */
+            @page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
+
+            /* Ensure images print well */
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Page breaks */
+            .pdf-point-item {
+                page-break-inside: avoid;
+            }
+
+            /* Logo should be crisp */
+            .pdf-header img {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Preserve colors */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+            }
+        }
 
         #sync-status { position: fixed; top: 70px; right: 15px; font-size: 12px; padding: 5px 10px; border-radius: 12px; background: rgba(255,255,255,0.8); box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; align-items: center; gap: 5px; z-index: 99; }
         #sync-status.online { color: var(--success); display: flex; }
         #sync-status.offline { color: var(--danger); display: flex; }
+
+        /* --- SHARE LINK STYLES --- */
+        .share-link-container {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .share-link-container p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+        .share-link-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+        .share-link-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: white;
+            color: var(--text-main);
+        }
+        .share-link-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+        .share-link-btn:hover { background: #002850; }
+        .share-link-btn.copied { background: var(--success); }
+
+        /* Read-only mode indicator */
+        .readonly-banner {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+        .readonly-banner i { font-size: 1.1rem; }
         
         .lang-toggle-container { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
         .lang-btn { border: 2px solid var(--primary); background: white; color: var(--primary); padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
@@ -403,7 +525,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.5.4)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.6.0)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -511,13 +633,38 @@
     <!-- EXPORT -->
     <div id="export" class="section">
         <h2><i class="fa-solid fa-print"></i> <span data-i18n="h_export">Bericht Abschließen</span></h2>
-        
+
+        <!-- READ-ONLY BANNER (shown when viewing shared link) -->
+        <div id="readonly-banner" class="readonly-banner" style="display:none;">
+            <i class="fa-solid fa-eye"></i>
+            <span data-i18n="readonly_info">Du siehst einen geteilten Bericht (Nur-Lesen-Modus).</span>
+        </div>
+
+        <!-- SHARE LINK CONTAINER -->
+        <div class="share-link-container" id="share-link-container">
+            <p><i class="fa-solid fa-share-nodes"></i> <strong data-i18n="share_title">Bericht teilen</strong> - <span data-i18n="share_desc">Link kopieren und versenden</span></p>
+            <div class="share-link-row">
+                <input type="text" class="share-link-input" id="share-link-input" readonly>
+                <button class="share-link-btn" id="share-link-btn" onclick="window.copyShareLink()">
+                    <i class="fa-solid fa-copy"></i> <span data-i18n="btn_copy">Kopieren</span>
+                </button>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="share-link-btn" style="background:#64748b; font-size:0.75rem; padding:6px 10px;" onclick="window.copyShareLink('export')">
+                    <i class="fa-solid fa-file-pdf"></i> Export-Ansicht
+                </button>
+                <button class="share-link-btn" style="background:#64748b; font-size:0.75rem; padding:6px 10px;" onclick="window.copyShareLink('status')">
+                    <i class="fa-solid fa-check-double"></i> Status-Ansicht
+                </button>
+            </div>
+        </div>
+
         <!-- TRANSLATION BUTTON DISABLED -->
-        <button id="btn-translate" class="ai-btn ai-btn-disabled" onclick="" disabled title="Not Yet Available">
+        <button id="btn-translate" class="ai-btn ai-btn-disabled" onclick="" disabled title="Not Yet Available" style="display:none;">
             <i class="fa-solid fa-language"></i> Automatisch übersetzen
         </button>
 
-        <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.generatePDF()"><i class="fa-solid fa-download"></i> <span data-i18n="btn_download_pdf">Als PDF herunterladen</span> <span style="background:#fef3c7; color:#b45309; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; border:1px solid #fcd34d;">BETA</span></button>
+        <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.printReport()"><i class="fa-solid fa-print"></i> <span data-i18n="btn_download_pdf">Als PDF drucken / speichern</span></button>
         <div id="pdf-preview"></div>
     </div>
 
@@ -553,7 +700,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.5.4</div>
+                        <div class="info-version">mooMemo v1.6.0</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -669,7 +816,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.4";
+        const APP_VERSION = "1.6.0";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -686,6 +833,16 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.6.0",
+                date: "2026-01-28",
+                changes: [
+                    "NEU: Berichte per Link teilen - Empfänger können Export- oder Status-Ansicht direkt öffnen.",
+                    "Verbesserter PDF-Export: Nutzung des nativen Browser-Drucks für höhere Qualität.",
+                    "GEA-Logo wird nun gestochen scharf im PDF angezeigt (SVG statt PNG).",
+                    "html2pdf.js Abhängigkeit entfernt - schnellere Ladezeit."
+                ]
+            },
             {
                 ver: "1.5.4",
                 date: "2026-01-27",
@@ -772,19 +929,24 @@
         
         let filterType = 'all';
         let filterYear = 'all';
-        let sortMethod = 'date_desc'; 
+        let sortMethod = 'date_desc';
         let currentLang = 'de';
-        let aiTargetLang = 'de'; 
-        
+        let aiTargetLang = 'de';
+
+        // SHARE LINK PARAMETERS
+        let isReadOnly = false;
+        let sharedReportId = null;
+        let sharedTab = null;
+
         // DYNAMIC API KEY
         let globalGeminiKey = ""; 
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF herunterladen", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, von:Name)", ai_translating: "Übersetze Bericht..."
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF drucken / speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, von:Name)", ai_translating: "Übersetze Bericht...", share_title: "Bericht teilen", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus)."
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Download as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, from:Name)", ai_translating: "Translating Report..."
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Print / Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, from:Name)", ai_translating: "Translating Report...", share_title: "Share Report", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode)."
             }
         };
 
@@ -964,8 +1126,8 @@
              const t=translations[currentLang];
              const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
 
-             // Use PNG logo for PDF (html2canvas cannot render SVGs), fallback to SVG for screen
-             const logoSrc = LOGO_PNG || LOGO_SRC;
+             // Use SVG logo directly - native browser print handles SVGs perfectly
+             const logoSrc = "https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85";
 
              const html = r.points.map(p => {
                  // Use base64 if available (for PDF export), fallback to src URL
@@ -1207,17 +1369,26 @@
 
         window.setupRealtimeListener = function() {
             const q = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
-            
+            let isFirstLoad = true;
+
             onSnapshot(q, (snapshot) => {
                 const newReports = [];
                 snapshot.forEach(doc => newReports.push(doc.data()));
                 allReports = newReports;
-                
+
                 // UPDATE AUTOFILL NAMES (Using STRICT list now)
                 window.updateNameSuggestions();
 
                 window.renderReportList();
-                
+
+                // SHARED LINK MODE: Apply on first load if URL has report parameter
+                if (isFirstLoad && sharedReportId) {
+                    isFirstLoad = false;
+                    window.applySharedLinkMode();
+                    return; // Skip normal auto-restore logic
+                }
+                isFirstLoad = false;
+
                 // AUTO RESTORE LOGIC - Check if we had an open report
                 if (!currentReportId) {
                     const lastId = localStorage.getItem('mooMemo_lastReport');
@@ -1377,7 +1548,10 @@
             document.getElementById('fab-btn').style.display = (id==='points') ? 'flex' : 'none';
             if(id==='points') window.renderPointsList();
             if(id==='status') window.renderStatusList();
-            if(id==='export') window.renderPDFPreview();
+            if(id==='export') {
+                window.renderPDFPreview();
+                window.updateShareLink();
+            }
         };
 
         window.savePoint = function() {
@@ -1656,38 +1830,93 @@
             r.readAsText(f); input.value=''; 
         };
         
-        window.generatePDF = async function() {
-             const r=allReports.find(x=>x.id===currentReportId);
-             let fn='Bericht.pdf';
-             if(r) { const d=r.header.date_from||''; const c=(r.header.customer||'Kunde').replace(/[^a-z0-9äöüß]/gi,'_'); fn=`Bericht_${c}_${d}.pdf`; }
+        // --- PRINT REPORT (Native Browser Print for better quality) ---
+        window.printReport = function() {
+            // Re-render preview fresh
+            window.renderPDFPreview();
+            // Small delay to ensure images are loaded, then print
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        };
 
-             const btn = document.querySelector('[onclick="window.generatePDF()"]');
-             const originalBtnText = btn ? btn.innerHTML : '';
-             if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PDF wird erstellt...'; btn.disabled = true; }
+        // --- SHARE LINK FUNCTIONS ---
+        window.getShareLink = function(tab) {
+            if (!currentReportId) return '';
+            const baseUrl = window.location.origin + window.location.pathname;
+            let url = `${baseUrl}?report=${currentReportId}`;
+            if (tab) url += `&tab=${tab}`;
+            return url;
+        };
 
-             try {
-                 // Re-render preview fresh (logo as PNG, images as base64 where available)
-                 window.renderPDFPreview();
+        window.copyShareLink = function(tab) {
+            const link = window.getShareLink(tab || 'export');
+            navigator.clipboard.writeText(link).then(() => {
+                window.showToast(translations[currentLang].toast_copied);
+                const btn = document.getElementById('share-link-btn');
+                if (btn) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopiert!';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].btn_copy}`;
+                    }, 2000);
+                }
+            }).catch(() => {
+                // Fallback for older browsers
+                const input = document.getElementById('share-link-input');
+                input.select();
+                document.execCommand('copy');
+                window.showToast(translations[currentLang].toast_copied);
+            });
+        };
 
-                 // Small delay to ensure images are loaded in DOM
-                 await new Promise(resolve => setTimeout(resolve, 200));
+        window.updateShareLink = function() {
+            const input = document.getElementById('share-link-input');
+            if (input && currentReportId) {
+                input.value = window.getShareLink('export');
+            }
+        };
 
-                 const previewEl = document.getElementById('pdf-preview');
-                 const opt = {
-                     margin: 15,
-                     filename: fn,
-                     image: { type: 'jpeg', quality: 0.90 },
-                     html2canvas: { scale: 2, useCORS: true, logging: false },
-                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-                 };
-                 await html2pdf().set(opt).from(previewEl).save();
-             } catch(e) {
-                 console.error('PDF generation error:', e);
-                 window.showToast('Fehler bei PDF-Erstellung');
-             } finally {
-                 if(btn) { btn.innerHTML = originalBtnText; btn.disabled = false; }
-             }
+        // --- URL PARAMETER PARSING ---
+        window.parseUrlParams = function() {
+            const params = new URLSearchParams(window.location.search);
+            const reportId = params.get('report');
+            const tab = params.get('tab');
+
+            if (reportId) {
+                sharedReportId = reportId;
+                sharedTab = tab || 'export';
+                isReadOnly = true; // Shared links are read-only by default
+            }
+        };
+
+        window.applySharedLinkMode = function() {
+            if (!sharedReportId) return;
+
+            // Find and open the report
+            const report = allReports.find(r => String(r.id) === String(sharedReportId));
+            if (!report) {
+                console.warn('Shared report not found:', sharedReportId);
+                return;
+            }
+
+            // Open the report
+            window.openReport(sharedReportId);
+
+            // Switch to the requested tab
+            if (sharedTab && ['header', 'points', 'status', 'export'].includes(sharedTab)) {
+                window.switchTab(sharedTab);
+            }
+
+            // Show read-only banner in export section
+            if (isReadOnly) {
+                const banner = document.getElementById('readonly-banner');
+                if (banner) banner.style.display = 'flex';
+                // Hide share container for read-only viewers
+                const shareContainer = document.getElementById('share-link-container');
+                if (shareContainer) shareContainer.style.display = 'none';
+            }
         };
         
         window.executeDelete = function() {}; // Stub
@@ -1828,22 +2057,27 @@
         };
 
         // --- STARTUP LOGIC ---
+        // Parse URL parameters immediately at startup
+        window.parseUrlParams();
+
         // Only run after everything is defined
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 window.updateSyncStatus(true);
                 // NEW: FETCH GLOBAL CONFIG & PERSISTENT SETTINGS
-                
+
                 // Load Settings
                 const savedLang = localStorage.getItem('mooMemo_lang');
                 if(savedLang) window.setLanguage(savedLang);
-                
+
                 const savedAiLang = localStorage.getItem('mooMemo_ai_lang');
                 if(savedAiLang) window.setAiTargetLang(savedAiLang);
 
-                // Check Version for Changelog
-                window.checkVersion();
+                // Check Version for Changelog (skip if viewing shared link)
+                if (!sharedReportId) {
+                    window.checkVersion();
+                }
 
                 // Fetch Key & Listen
                 window.fetchGlobalConfig().then(() => {
