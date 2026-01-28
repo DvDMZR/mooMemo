@@ -385,33 +385,12 @@
 
         /* --- SHARE LINK STYLES --- */
         .share-link-container {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            border-radius: 12px;
-            padding: 15px;
             margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
-        .share-link-container p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: var(--text-sub);
-        }
-        .share-link-row {
-            display: flex;
-            gap: 10px;
-            align-items: stretch;
-        }
-        .share-link-input {
-            flex: 1;
-            padding: 10px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            background: white;
-            color: var(--text-main);
+        .share-link-container .share-link-btn {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
         }
         .share-link-btn {
             background: var(--primary);
@@ -731,7 +710,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.6.0)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.5.5)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -848,13 +827,9 @@
 
         <!-- SHARE LINK CONTAINER -->
         <div class="share-link-container" id="share-link-container">
-            <p><i class="fa-solid fa-share-nodes"></i> <strong data-i18n="share_title">Bericht teilen</strong> - <span data-i18n="share_desc">Link kopieren und versenden</span></p>
-            <div class="share-link-row">
-                <input type="text" class="share-link-input" id="share-link-input" readonly>
-                <button class="share-link-btn" id="share-link-btn" onclick="window.copyShareLink()">
-                    <i class="fa-solid fa-copy"></i> <span data-i18n="btn_copy">Kopieren</span>
-                </button>
-            </div>
+            <button class="share-link-btn" id="share-link-btn" onclick="window.copyShareLink()">
+                <i class="fa-solid fa-share-nodes"></i> <span data-i18n="share_title">Bericht teilen</span>
+            </button>
         </div>
 
         <!-- EXPORT FILTER BUTTONS -->
@@ -904,7 +879,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.6.0</div>
+                        <div class="info-version">mooMemo v1.5.5</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1020,7 +995,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.6.0";
+        const APP_VERSION = "1.5.5";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1038,13 +1013,13 @@
         // CHANGELOG DEFINITION
         const CHANGELOG = [
             {
-                ver: "1.6.0",
+                ver: "1.5.5",
                 date: "2026-01-28",
                 changes: [
-                    "NEU: Berichte per Link teilen - Empfänger können Export- oder Status-Ansicht direkt öffnen.",
-                    "Verbesserter PDF-Export: Nutzung des nativen Browser-Drucks für höhere Qualität.",
-                    "GEA-Logo wird nun gestochen scharf im PDF angezeigt (SVG statt PNG).",
-                    "html2pdf.js Abhängigkeit entfernt - schnellere Ladezeit."
+                    "NEU: Berichte per Link teilen - Empfänger können den Export direkt öffnen.",
+                    "Verbesserter PDF-Export: Native Browser-Druckfunktion für bessere Qualität.",
+                    "GEA-Logo wird als SVG eingebunden für scharfe Darstellung.",
+                    "Export-Filter: Nur offene Punkte anzeigen."
                 ]
             },
             {
@@ -2072,29 +2047,27 @@
             const link = window.getShareLink(tab || 'export');
             navigator.clipboard.writeText(link).then(() => {
                 window.showToast(translations[currentLang].toast_copied);
+                // Open shared view in new tab
+                window.open(link, '_blank');
                 const btn = document.getElementById('share-link-btn');
                 if (btn) {
                     btn.classList.add('copied');
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopiert!';
                     setTimeout(() => {
                         btn.classList.remove('copied');
-                        btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].btn_copy}`;
+                        btn.innerHTML = `<i class="fa-solid fa-share-nodes"></i> ${translations[currentLang].btn_copy}`;
                     }, 2000);
                 }
             }).catch(() => {
                 // Fallback for older browsers
-                const input = document.getElementById('share-link-input');
-                input.select();
-                document.execCommand('copy');
+                const link = window.getShareLink(tab || 'export');
+                window.open(link, '_blank');
                 window.showToast(translations[currentLang].toast_copied);
             });
         };
 
         window.updateShareLink = function() {
-            const input = document.getElementById('share-link-input');
-            if (input && currentReportId) {
-                input.value = window.getShareLink('export');
-            }
+            // Share link is generated on-demand when button is clicked
         };
 
         // --- URL PARAMETER PARSING ---
