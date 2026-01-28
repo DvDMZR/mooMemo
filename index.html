@@ -322,7 +322,7 @@
             /* Hide all UI elements */
             .nav-header, .fab, .section:not(#export), .btn, .app-logo-header, #dashboard,
             #sync-status, .modal-overlay, #toast, .img-lightbox-overlay,
-            .share-link-container {
+            .share-link-container, .shared-header {
                 display: none !important;
             }
 
@@ -444,6 +444,146 @@
             color: #92400e;
         }
         .readonly-banner i { font-size: 1.1rem; }
+
+        /* --- SHARED/PUBLIC VIEW MODE --- */
+        .shared-mode .app-logo-header,
+        .shared-mode .nav-header,
+        .shared-mode #dashboard,
+        .shared-mode #header,
+        .shared-mode #points,
+        .shared-mode #status,
+        .shared-mode .fab,
+        .shared-mode #sync-status,
+        .shared-mode .share-link-container,
+        .shared-mode #readonly-banner {
+            display: none !important;
+        }
+
+        .shared-mode #export {
+            display: block !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        .shared-mode #export > h2,
+        .shared-mode #export > .ai-btn {
+            display: none !important;
+        }
+
+        .shared-header {
+            display: none;
+            background: linear-gradient(135deg, var(--primary) 0%, #004080 100%);
+            color: white;
+            padding: 20px;
+            margin-bottom: 0;
+        }
+
+        .shared-mode .shared-header {
+            display: block;
+        }
+
+        .shared-header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .shared-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .shared-header-logo {
+            height: 36px;
+            filter: brightness(0) invert(1);
+        }
+
+        .shared-header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .shared-header-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        .shared-header-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .shared-header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .shared-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .shared-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .shared-btn-primary {
+            background: white;
+            color: var(--primary);
+            border-color: white;
+        }
+
+        .shared-btn-primary:hover {
+            background: #f0f0f0;
+        }
+
+        .shared-mode #export .btn {
+            max-width: 350px;
+        }
+
+        .shared-mode body,
+        .shared-mode {
+            padding-bottom: 30px !important;
+        }
+
+        /* Mobile adjustments for shared header */
+        @media (max-width: 600px) {
+            .shared-header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .shared-header-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+            .shared-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
         
         .lang-toggle-container { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
         .lang-btn { border: 2px solid var(--primary); background: white; color: var(--primary); padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
@@ -513,6 +653,30 @@
     </style>
 </head>
 <body>
+
+    <!-- SHARED VIEW HEADER (only visible in shared mode) -->
+    <div class="shared-header" id="shared-header">
+        <div class="shared-header-content">
+            <div class="shared-header-left">
+                <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="shared-header-logo">
+                <div>
+                    <div class="shared-header-title" id="shared-report-title">Besuchsbericht</div>
+                    <div class="shared-header-subtitle" id="shared-report-subtitle">Geteilter Bericht</div>
+                </div>
+                <div class="shared-header-badge">
+                    <i class="fa-solid fa-share-nodes"></i> Geteilter Export
+                </div>
+            </div>
+            <div class="shared-header-actions">
+                <button class="shared-btn" onclick="window.printReport()">
+                    <i class="fa-solid fa-print"></i> PDF drucken
+                </button>
+                <a class="shared-btn shared-btn-primary" id="shared-back-link" href="?" onclick="window.exitSharedMode()">
+                    <i class="fa-solid fa-arrow-right"></i> Zur App
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- DATALIST FOR AUTOCOMPLETE (Will be populated by JS) -->
     <datalist id="list-names"></datalist>
@@ -1894,29 +2058,62 @@
         window.applySharedLinkMode = function() {
             if (!sharedReportId) return;
 
-            // Find and open the report
+            // Find the report
             const report = allReports.find(r => String(r.id) === String(sharedReportId));
             if (!report) {
                 console.warn('Shared report not found:', sharedReportId);
+                // Show error message
+                document.body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;">
+                        <i class="fa-solid fa-file-circle-question" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i>
+                        <h2 style="color:#1f2937; margin-bottom:10px;">Bericht nicht gefunden</h2>
+                        <p style="color:#64748b; margin-bottom:20px;">Der angeforderte Bericht existiert nicht oder wurde gelöscht.</p>
+                        <a href="?" style="color:var(--primary); font-weight:600;">Zur App</a>
+                    </div>
+                `;
                 return;
             }
 
-            // Open the report
-            window.openReport(sharedReportId);
+            // ACTIVATE SHARED MODE
+            document.body.classList.add('shared-mode');
 
-            // Switch to the requested tab
-            if (sharedTab && ['header', 'points', 'status', 'export'].includes(sharedTab)) {
-                window.switchTab(sharedTab);
+            // Update shared header with report info
+            const h = report.header;
+            const formatDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d; };
+            const titleEl = document.getElementById('shared-report-title');
+            const subtitleEl = document.getElementById('shared-report-subtitle');
+
+            if (titleEl) {
+                titleEl.textContent = h.customer || 'Besuchsbericht';
+            }
+            if (subtitleEl) {
+                let subtitle = '';
+                if (h.date_from) subtitle += formatDate(h.date_from);
+                if (h.date_to && h.date_to !== h.date_from) subtitle += ' - ' + formatDate(h.date_to);
+                if (h.authors && h.authors.length) subtitle += ' | ' + h.authors.join(', ');
+                subtitleEl.textContent = subtitle || 'Geteilter Bericht';
             }
 
-            // Show read-only banner in export section
-            if (isReadOnly) {
-                const banner = document.getElementById('readonly-banner');
-                if (banner) banner.style.display = 'flex';
-                // Hide share container for read-only viewers
-                const shareContainer = document.getElementById('share-link-container');
-                if (shareContainer) shareContainer.style.display = 'none';
+            // Set back link to clean URL (removes parameters)
+            const backLink = document.getElementById('shared-back-link');
+            if (backLink) {
+                backLink.href = window.location.origin + window.location.pathname;
             }
+
+            // Open the report and render export
+            currentReportId = sharedReportId;
+            points = report.points || [];
+
+            // Render PDF preview directly
+            window.renderPDFPreviewWithData(report);
+
+            // Make export section visible
+            document.getElementById('export').classList.add('active');
+        };
+
+        window.exitSharedMode = function() {
+            // Clear URL parameters and reload
+            window.location.href = window.location.origin + window.location.pathname;
         };
         
         window.executeDelete = function() {}; // Stub
