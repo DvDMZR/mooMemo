@@ -466,7 +466,8 @@
         }
 
         .shared-mode #export > h2,
-        .shared-mode #export > .ai-btn {
+        .shared-mode #export > .ai-btn,
+        .shared-mode #export > .btn {
             display: none !important;
         }
 
@@ -663,15 +664,15 @@
                     <div class="shared-header-title" id="shared-report-title">Besuchsbericht</div>
                     <div class="shared-header-subtitle" id="shared-report-subtitle">Geteilter Bericht</div>
                 </div>
-                <div class="shared-header-badge">
-                    <i class="fa-solid fa-share-nodes"></i> Geteilter Export
+                <div class="shared-header-badge" id="shared-open-badge" style="display:none;">
+                    <i class="fa-solid fa-circle-exclamation"></i> <span id="shared-open-count">0</span> Offen
                 </div>
             </div>
             <div class="shared-header-actions">
                 <button class="shared-btn" onclick="window.printReport()">
-                    <i class="fa-solid fa-print"></i> PDF drucken
+                    <i class="fa-solid fa-file-pdf"></i> PDF Speichern
                 </button>
-                <a class="shared-btn shared-btn-primary" id="shared-back-link" href="?" onclick="window.exitSharedMode()">
+                <a class="shared-btn shared-btn-primary" id="shared-back-link" href="?">
                     <i class="fa-solid fa-arrow-right"></i> Zur App
                 </a>
             </div>
@@ -813,20 +814,7 @@
                     <i class="fa-solid fa-copy"></i> <span data-i18n="btn_copy">Kopieren</span>
                 </button>
             </div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="share-link-btn" style="background:#64748b; font-size:0.75rem; padding:6px 10px;" onclick="window.copyShareLink('export')">
-                    <i class="fa-solid fa-file-pdf"></i> Export-Ansicht
-                </button>
-                <button class="share-link-btn" style="background:#64748b; font-size:0.75rem; padding:6px 10px;" onclick="window.copyShareLink('status')">
-                    <i class="fa-solid fa-check-double"></i> Status-Ansicht
-                </button>
-            </div>
         </div>
-
-        <!-- TRANSLATION BUTTON DISABLED -->
-        <button id="btn-translate" class="ai-btn ai-btn-disabled" onclick="" disabled title="Not Yet Available" style="display:none;">
-            <i class="fa-solid fa-language"></i> Automatisch übersetzen
-        </button>
 
         <button class="btn btn-primary" style="margin-bottom:25px;" onclick="window.printReport()"><i class="fa-solid fa-print"></i> <span data-i18n="btn_download_pdf">Als PDF drucken / speichern</span></button>
         <div id="pdf-preview"></div>
@@ -2094,10 +2082,28 @@
                 subtitleEl.textContent = subtitle || 'Geteilter Bericht';
             }
 
-            // Set back link to clean URL (removes parameters)
+            // Show open points count
+            const openCount = (report.points || []).filter(p => p.status === 'open').length;
+            const openBadge = document.getElementById('shared-open-badge');
+            const openCountEl = document.getElementById('shared-open-count');
+            if (openBadge && openCountEl) {
+                openCountEl.textContent = openCount;
+                if (openCount > 0) {
+                    openBadge.style.display = 'flex';
+                    openBadge.style.background = 'rgba(239, 68, 68, 0.3)';
+                    openBadge.style.border = '1px solid rgba(239, 68, 68, 0.5)';
+                }
+            }
+
+            // Set back link to open app with this report's status tab
             const backLink = document.getElementById('shared-back-link');
             if (backLink) {
-                backLink.href = window.location.origin + window.location.pathname;
+                // Store report ID to open status tab when clicked
+                backLink.href = '#';
+                backLink.onclick = function(e) {
+                    e.preventDefault();
+                    window.openAppWithStatus(sharedReportId);
+                };
             }
 
             // Open the report and render export
@@ -2111,9 +2117,18 @@
             document.getElementById('export').classList.add('active');
         };
 
-        window.exitSharedMode = function() {
-            // Clear URL parameters and reload
-            window.location.href = window.location.origin + window.location.pathname;
+        window.openAppWithStatus = function(reportId) {
+            // Exit shared mode and open the report's status tab
+            document.body.classList.remove('shared-mode');
+            isReadOnly = false;
+            sharedReportId = null;
+
+            // Clear URL parameters
+            history.replaceState(null, '', window.location.pathname);
+
+            // Open report and switch to status tab
+            window.openReport(reportId);
+            window.switchTab('status');
         };
         
         window.executeDelete = function() {}; // Stub
