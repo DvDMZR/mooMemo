@@ -662,6 +662,191 @@
         .cl-date { font-weight: 400; font-size: 0.75rem; color: #94a3b8; }
         .cl-changes { margin: 5px 0 0 0; padding-left: 20px; font-size: 0.9rem; color: #475569; }
         .cl-changes li { margin-bottom: 4px; }
+
+        /* --- RELATED REPORTS SIDEBAR (Desktop only, positioned in margin) --- */
+        .export-layout {
+            position: relative;
+        }
+        .export-main {
+            width: 100%;
+        }
+        .related-reports-sidebar {
+            display: none;
+            position: fixed;
+            right: 20px;
+            top: 200px;
+            width: 220px;
+            max-height: calc(100vh - 220px);
+            overflow-y: auto;
+            z-index: 50;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        @media (min-width: 1400px) {
+            .related-reports-sidebar {
+                display: block;
+            }
+        }
+        .related-reports-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .related-reports-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .related-reports-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .related-reports-title i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+        .related-reports-count {
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 99px;
+            margin-left: auto;
+        }
+        .related-reports-customer {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .related-reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            padding-left: 16px;
+        }
+        .related-reports-list::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), #e2e8f0);
+            border-radius: 2px;
+        }
+        .related-report-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .related-report-item::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .related-report-item.has-open-points::before {
+            border-color: var(--danger);
+            background: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+        .related-report-item:hover {
+            background: #f1f5f9;
+            border-color: var(--primary);
+            transform: translateX(2px);
+        }
+        .related-report-item:hover::before {
+            border-color: var(--primary);
+        }
+        .related-report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .related-report-date {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.85rem;
+        }
+        .related-report-id {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+        .related-report-meta {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .related-report-meta i {
+            font-size: 0.65rem;
+        }
+        .related-report-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 99px;
+            align-self: flex-start;
+        }
+        .related-report-badge.has-open {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .related-report-badge.all-resolved {
+            background: #dcfce7;
+            color: #065f46;
+            border: 1px solid #bbf7d0;
+        }
+        .no-related-reports {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-style: italic;
+            padding: 12px;
+            text-align: center;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px dashed #e2e8f0;
+        }
+        @media print {
+            .related-reports-sidebar {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -701,7 +886,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.5.7)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.5.8)</span>
         </div>
         <div class="header-controls">
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
@@ -837,7 +1022,21 @@
             </button>
         </div>
 
-        <div id="pdf-preview"></div>
+        <!-- Export Layout with Sidebar -->
+        <div class="export-layout">
+            <div class="export-main">
+                <div id="pdf-preview"></div>
+            </div>
+
+            <!-- Related Reports Sidebar (Desktop only) -->
+            <div id="related-reports-sidebar" class="related-reports-sidebar">
+                <div class="related-reports-title">
+                    <i class="fa-solid fa-folder-tree"></i>
+                    <span>Weitere Berichte</span>
+                </div>
+                <div id="related-reports-list" class="related-reports-list"></div>
+            </div>
+        </div>
     </div>
 
     <!-- MODALS & TOAST -->
@@ -872,7 +1071,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.5.7</div>
+                        <div class="info-version">mooMemo v1.5.8</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -913,7 +1112,7 @@
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
             </button>
             <br>
-            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
             
             <label><span data-i18n="lbl_images">Bilder hinzufügen</span> <div class="spinner" id="img-spinner"></div></label>
@@ -988,7 +1187,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.7";
+        const APP_VERSION = "1.5.8";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1005,6 +1204,18 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.5.8",
+                date: "2026-01-29",
+                changes: [
+                    "NEU: Sidebar zeigt weitere Berichte des selben Kunden im Export (Desktop).",
+                    "Sidebar mit Timeline, Anzahl-Badge und Kundenname.",
+                    "Roter Indikator bei Berichten mit offenen Punkten.",
+                    "Fix: Verfasser-Änderungen werden jetzt in der Übersicht angezeigt.",
+                    "Berichte mit vollständigen Basisdaten öffnen direkt die Punkte-Ansicht.",
+                    "Übersicht: Einheitliche Badge-Styles für offene/gelöste Punkte."
+                ]
+            },
             {
                 ver: "1.5.7",
                 date: "2026-01-29",
@@ -1346,6 +1557,93 @@
             window.renderPDFPreview();
         };
 
+        window.renderRelatedReports = function() {
+            const container = document.getElementById('related-reports-list');
+            const sidebar = document.getElementById('related-reports-sidebar');
+            if (!container) return;
+
+            const currentReport = allReports.find(r => r.id === currentReportId);
+            if (!currentReport || !currentReport.header.customer) {
+                if (sidebar) sidebar.style.display = 'none';
+                return;
+            }
+
+            // Normalize customer name for matching (lowercase, trimmed)
+            const currentCustomer = currentReport.header.customer.toLowerCase().trim();
+
+            // Find other reports with the same customer (exclude current report)
+            const relatedReports = allReports.filter(r => {
+                if (r.id === currentReportId) return false;
+                const rCustomer = (r.header.customer || '').toLowerCase().trim();
+                return rCustomer === currentCustomer;
+            });
+
+            // Sort by date descending
+            relatedReports.sort((a, b) => new Date(b.header.date_from) - new Date(a.header.date_from));
+
+            // Update sidebar header with count and customer name
+            const titleEl = sidebar.querySelector('.related-reports-title');
+            if (titleEl) {
+                titleEl.innerHTML = `
+                    <i class="fa-solid fa-folder-tree"></i>
+                    <span>Berichte</span>
+                    <span class="related-reports-count">${relatedReports.length}</span>
+                `;
+            }
+
+            // Add customer name header
+            let customerHeader = sidebar.querySelector('.related-reports-customer');
+            if (!customerHeader) {
+                customerHeader = document.createElement('div');
+                customerHeader.className = 'related-reports-customer';
+                sidebar.insertBefore(customerHeader, container);
+            }
+            customerHeader.textContent = currentReport.header.customer;
+            customerHeader.title = currentReport.header.customer;
+
+            if (relatedReports.length === 0) {
+                container.innerHTML = '<div class="no-related-reports">Keine weiteren Berichte</div>';
+                return;
+            }
+
+            // Format as KW (calendar week)
+            const formatKW = (d) => {
+                if (!d) return '';
+                const date = new Date(d);
+                if (isNaN(date)) return '';
+                const [week, year] = window.getWeekNumber(date);
+                return `KW ${week}/${year}`;
+            };
+
+            container.innerHTML = relatedReports.map(r => {
+                const openCount = (r.points || []).filter(p => p.status === 'open').length;
+                const hasOpen = openCount > 0;
+                const badgeClass = hasOpen ? 'has-open' : 'all-resolved';
+                const badgeText = hasOpen ? `${openCount} Offen` : 'Erledigt';
+                const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
+                const kwStr = formatKW(r.header.date_from);
+                const authorsStr = r.header.authors && r.header.authors.length
+                    ? r.header.authors.join(', ')
+                    : (r.header.author || '-');
+
+                return `
+                    <div class="related-report-item ${hasOpen ? 'has-open-points' : ''}" onclick="window.openRelatedReport('${r.id}')">
+                        <div class="related-report-header">
+                            <span class="related-report-date">${kwStr}</span>
+                            <span class="related-report-id">${displayId}</span>
+                        </div>
+                        <span class="related-report-meta"><i class="fa-solid fa-user"></i> ${authorsStr}</span>
+                        <span class="related-report-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.openRelatedReport = function(id) {
+            window.openReport(id);
+            window.switchTab('export');
+        };
+
         window.translateReport = async function() {
             // DEPRECATED / DISABLED
             window.showToast("Funktion aktuell deaktiviert.");
@@ -1558,7 +1856,11 @@ Text: "${desc}"`;
 
             filteredReports.sort((a, b) => {
                 if(sortMethod==='date_asc') return new Date(a.header.date_from)-new Date(b.header.date_from);
-                if(sortMethod==='author') return (a.header.author||'').localeCompare(b.header.author||'');
+                if(sortMethod==='author') {
+                    const aAuthor = (a.header.authors && a.header.authors.length) ? a.header.authors[0] : (a.header.author || '');
+                    const bAuthor = (b.header.authors && b.header.authors.length) ? b.header.authors[0] : (b.header.author || '');
+                    return aAuthor.localeCompare(bAuthor);
+                }
                 if(sortMethod==='open_points') return ((b.points||[]).filter(p=>p.status==='open').length)-((a.points||[]).filter(p=>p.status==='open').length);
                 return new Date(b.header.date_from)-new Date(a.header.date_from);
             });
@@ -1571,8 +1873,19 @@ Text: "${desc}"`;
                 const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
                 let statusClass = (total>0 && openCount===0) ? 'all-resolved' : (openCount>0 ? window.getAgeClass(r.header.date_from) : '');
                 let badge = (openCount>0) ? window.getDashboardAgeBadge(r.header.date_from) : '';
-                const pointsTxt = total>0 ? `${total} ${t.tab_points} (${openCount>0?openCount+' '+t.opt_open.split(' ')[0]:'alle gelöst'})` : t.no_points;
-                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${r.header.author||'-'}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span>${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button><button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button></div></div>`;
+                // Create styled badge for points status
+                let pointsStatusBadge = '';
+                if (total > 0) {
+                    if (openCount > 0) {
+                        pointsStatusBadge = `<span class="status-badge status-open">${openCount} ${t.status_open}</span>`;
+                    } else {
+                        pointsStatusBadge = `<span class="status-badge status-resolved">${t.status_resolved}</span>`;
+                    }
+                }
+                const pointsTxt = total > 0 ? `${total} ${t.tab_points}` : t.no_points;
+                // Use authors array, fallback to deprecated author field
+                const authorsDisplay = (r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-');
+                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button><button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button></div></div>`;
             }).join('');
         };
 
@@ -1741,14 +2054,14 @@ Text: "${desc}"`;
 
         window.openReport = function(id) {
             currentReportId = id;
-            
+
             // SAVE STATE for refresh
             localStorage.setItem('mooMemo_lastReport', id);
 
             const report = allReports.find(r => String(r.id) === String(id));
             if(!report) return;
             points = report.points || [];
-            
+
             document.getElementById('h_type').value = report.header.type || 'AMS';
             document.getElementById('h_customer').value = report.header.customer || '';
             document.getElementById('h_date_from').value = report.header.date_from || '';
@@ -1757,14 +2070,22 @@ Text: "${desc}"`;
             let auths = report.header.authors || [];
             if (!auths.length && report.header.author) auths = [report.header.author];
             window.renderAuthorsList(auths);
-            
+
             window.renderParticipantsList(report.header.participants || []);
 
             document.getElementById('dashboard').classList.remove('active');
             document.getElementById('tab-navigation').style.display = 'flex';
             document.getElementById('nav-back-btn').style.display = 'inline-block';
             document.getElementById('header-logo').style.display = 'none';
-            window.switchTab('header');
+
+            // Check if Basisdaten are complete - if so, skip to points
+            const h = report.header;
+            const hasCustomer = h.customer && h.customer.trim().length > 0;
+            const hasDate = h.date_from && h.date_from.trim().length > 0;
+            const hasAuthor = (h.authors && h.authors.length > 0) || (h.author && h.author.trim().length > 0);
+            const isBasisdatenComplete = hasCustomer && hasDate && hasAuthor;
+
+            window.switchTab(isBasisdatenComplete ? 'points' : 'header');
         };
         
         window.createNewReport = function() {
@@ -1807,6 +2128,7 @@ Text: "${desc}"`;
             if(id==='export') {
                 window.renderPDFPreview();
                 window.updateShareLink();
+                window.renderRelatedReports();
             }
         };
 
@@ -1945,14 +2267,16 @@ Text: "${desc}"`;
             const name = input.value.trim();
             if(!name || !currentReportId) return;
             const r = allReports.find(x => x.id === currentReportId);
-            
+
             // Migration check
             if(!r.header.authors) r.header.authors = [];
             if(r.header.authors.length === 0 && r.header.author) r.header.authors.push(r.header.author);
-            
+
             // Prevent duplicates
             if(!r.header.authors.includes(name)) {
                 r.header.authors.push(name);
+                // Sync deprecated author field with first author
+                r.header.author = r.header.authors[0] || '';
                 window.saveReportToFirestore(r);
             }
 
@@ -1965,6 +2289,8 @@ Text: "${desc}"`;
             const r = allReports.find(x => x.id === currentReportId);
             if(r.header.authors) {
                 r.header.authors.splice(i, 1);
+                // Sync deprecated author field with first author
+                r.header.author = r.header.authors[0] || '';
                 window.saveReportToFirestore(r);
                 window.renderAuthorsList(r.header.authors);
             }
@@ -2214,6 +2540,9 @@ Text: "${desc}"`;
 
             // Render PDF preview directly
             window.renderPDFPreviewWithData(report);
+
+            // Render related reports in sidebar
+            window.renderRelatedReports();
 
             // Make export section visible
             document.getElementById('export').classList.add('active');
