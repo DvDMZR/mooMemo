@@ -1380,12 +1380,15 @@
 
         window.improveDescription = async function() {
             const descField = document.getElementById('p_desc');
+            const titleField = document.getElementById('p_title');
             const desc = descField.value.trim();
+            const title = titleField.value.trim();
+
             if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
-            
+
             // PRIORITY: Global Cloud Key -> Local Storage Key
             const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
-            
+
             if(!apiKey) {
                 alert("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
                 return;
@@ -1394,26 +1397,57 @@
             const btn = document.getElementById('btn-improve-text');
             const originalButtonHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            const userPrompt = `Act as a professional technical editor. Rewrite the following text to be professional, precise, and factual. Strictly maintain the original meaning and technical details. Do not add information, do not embellish. Detect the input language automatically. The output must be solely the rewritten text in: ${aiTargetLang === 'de' ? 'German' : 'English'}.\n\nText: "${desc}"`;
-            
+
+            const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
+            const context = "GEA FarmTechnologies Melktechnik/Fütterungstechnik";
+
+            let userPrompt;
+            if (!title) {
+                // Keine Überschrift vorhanden: Kurze Überschrift generieren + Text korrigieren
+                userPrompt = `Du bist ein technischer Redakteur für ${context}. Führe folgende Aufgaben aus:
+
+1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter) basierend auf dem Text. Die Überschrift soll prägnant den Kerninhalt erfassen.
+2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+
+Antworte NUR im folgenden JSON-Format (keine anderen Texte):
+{"headline": "Kurze Überschrift hier", "text": "Korrigierter Text hier"}
+
+Sprache: ${targetLang}
+
+Text: "${desc}"`;
+            } else {
+                // Überschrift vorhanden: Nur Rechtschreibprüfung für Titel + Text korrigieren
+                userPrompt = `Du bist ein technischer Redakteur für ${context}. Führe folgende Aufgaben aus:
+
+1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Ändere nichts anderes, bleibe möglichst nah am Original.
+2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+
+Antworte NUR im folgenden JSON-Format (keine anderen Texte):
+{"headline": "Korrigierte Überschrift hier", "text": "Korrigierter Text hier"}
+
+Sprache: ${targetLang}
+
+Überschrift: "${title}"
+Text: "${desc}"`;
+            }
+
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
+
             let attempt = 0;
             let success = false;
-            
+
             try {
                 while(attempt < 3 && !success) {
                     try {
-                        const response = await fetch(apiUrl, { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'application/json' }, 
-                            body: JSON.stringify({ 
-                                contents: [{ parts: [{ text: userPrompt }] }], 
-                                generationConfig: { temperature: 0.2 } 
-                            }) 
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: userPrompt }] }],
+                                generationConfig: { temperature: 0.1 }
+                            })
                         });
-                        
+
                         if (response.status === 403) {
                             throw new Error("API Key ungültig oder gesperrt.");
                         }
@@ -1421,33 +1455,57 @@
                         if (response.status === 429 || response.status >= 500) {
                             attempt++;
                             console.warn(`API Busy/Limit (Status ${response.status}). Retrying ${attempt}/3...`);
-                            await new Promise(r => setTimeout(r, 1000 * attempt)); 
+                            await new Promise(r => setTimeout(r, 1000 * attempt));
                             continue;
                         }
-                        
+
                         if(!response.ok) {
                             const errText = await response.text();
                             throw new Error(`API Error: ${response.status} ${response.statusText}`);
                         }
-                        
+
                         const result = await response.json();
                         if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                            descField.value = result.candidates[0].content.parts[0].text.trim();
-                            window.showToast("Text erfolgreich überarbeitet!");
-                            success = true;
+                            let aiResponse = result.candidates[0].content.parts[0].text.trim();
+                            // JSON aus der Antwort extrahieren (falls in Markdown-Block)
+                            const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                            if (jsonMatch) {
+                                try {
+                                    const parsed = JSON.parse(jsonMatch[0]);
+                                    if (parsed.headline) {
+                                        titleField.value = parsed.headline;
+                                    }
+                                    if (parsed.text) {
+                                        descField.value = parsed.text;
+                                    }
+                                    window.showToast(title ? "Rechtschreibung korrigiert!" : "Überschrift erstellt & Text korrigiert!");
+                                    success = true;
+                                } catch(parseErr) {
+                                    console.error("JSON Parse Error:", parseErr);
+                                    // Fallback: Nur den Text übernehmen
+                                    descField.value = aiResponse;
+                                    window.showToast("Text überarbeitet!");
+                                    success = true;
+                                }
+                            } else {
+                                // Kein JSON gefunden: Fallback
+                                descField.value = aiResponse;
+                                window.showToast("Text überarbeitet!");
+                                success = true;
+                            }
                         }
                     } catch(innerEx) {
                         console.warn("Attempt failed", innerEx);
-                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx; 
+                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx;
                         attempt++;
                         await new Promise(r => setTimeout(r, 1000));
                     }
                 }
-            } catch(e) { 
-                console.error("Final API Failure:", e); 
+            } catch(e) {
+                console.error("Final API Failure:", e);
                 alert(e.message);
             }
-            
+
             btn.innerHTML = originalButtonHTML;
         };
 
