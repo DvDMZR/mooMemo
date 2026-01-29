@@ -699,24 +699,56 @@
             border-radius: 4px;
         }
         .related-reports-title {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--text-sub);
-            margin-bottom: 12px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .related-reports-title i {
             color: var(--primary);
+            font-size: 0.8rem;
+        }
+        .related-reports-count {
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 99px;
+            margin-left: auto;
+        }
+        .related-reports-customer {
             font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .related-reports-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 0;
+            position: relative;
+            padding-left: 16px;
+        }
+        .related-reports-list::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), #e2e8f0);
+            border-radius: 2px;
         }
         .related-report-item {
             background: #f8fafc;
@@ -725,15 +757,38 @@
             padding: 10px 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             font-size: 0.8rem;
             transition: all 0.2s;
             cursor: pointer;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .related-report-item::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .related-report-item.has-open-points::before {
+            border-color: var(--danger);
+            background: #fef2f2;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
         }
         .related-report-item:hover {
             background: #f1f5f9;
             border-color: var(--primary);
-            transform: translateX(-2px);
+            transform: translateX(2px);
+        }
+        .related-report-item:hover::before {
+            border-color: var(--primary);
         }
         .related-report-header {
             display: flex;
@@ -1524,32 +1579,55 @@
             // Sort by date descending
             relatedReports.sort((a, b) => new Date(b.header.date_from) - new Date(a.header.date_from));
 
+            // Update sidebar header with count and customer name
+            const titleEl = sidebar.querySelector('.related-reports-title');
+            if (titleEl) {
+                titleEl.innerHTML = `
+                    <i class="fa-solid fa-folder-tree"></i>
+                    <span>Berichte</span>
+                    <span class="related-reports-count">${relatedReports.length}</span>
+                `;
+            }
+
+            // Add customer name header
+            let customerHeader = sidebar.querySelector('.related-reports-customer');
+            if (!customerHeader) {
+                customerHeader = document.createElement('div');
+                customerHeader.className = 'related-reports-customer';
+                sidebar.insertBefore(customerHeader, container);
+            }
+            customerHeader.textContent = currentReport.header.customer;
+            customerHeader.title = currentReport.header.customer;
+
             if (relatedReports.length === 0) {
-                container.innerHTML = '<div class="no-related-reports">Keine weiteren Berichte für diesen Kunden.</div>';
+                container.innerHTML = '<div class="no-related-reports">Keine weiteren Berichte</div>';
                 return;
             }
 
-            const formatDate = (d) => {
+            // Format as KW (calendar week)
+            const formatKW = (d) => {
                 if (!d) return '';
-                const p = d.split('-');
-                return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d;
+                const date = new Date(d);
+                if (isNaN(date)) return '';
+                const [week, year] = window.getWeekNumber(date);
+                return `KW ${week}/${year}`;
             };
 
             container.innerHTML = relatedReports.map(r => {
                 const openCount = (r.points || []).filter(p => p.status === 'open').length;
-                const totalPoints = (r.points || []).length;
-                const badgeClass = openCount > 0 ? 'has-open' : 'all-resolved';
-                const badgeText = openCount > 0 ? `${openCount} Offen` : 'Erledigt';
+                const hasOpen = openCount > 0;
+                const badgeClass = hasOpen ? 'has-open' : 'all-resolved';
+                const badgeText = hasOpen ? `${openCount} Offen` : 'Erledigt';
                 const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
-                const dateStr = formatDate(r.header.date_from);
+                const kwStr = formatKW(r.header.date_from);
                 const authorsStr = r.header.authors && r.header.authors.length
                     ? r.header.authors.join(', ')
                     : (r.header.author || '-');
 
                 return `
-                    <div class="related-report-item" onclick="window.openRelatedReport('${r.id}')">
+                    <div class="related-report-item ${hasOpen ? 'has-open-points' : ''}" onclick="window.openRelatedReport('${r.id}')">
                         <div class="related-report-header">
-                            <span class="related-report-date">${dateStr}</span>
+                            <span class="related-report-date">${kwStr}</span>
                             <span class="related-report-id">${displayId}</span>
                         </div>
                         <span class="related-report-meta"><i class="fa-solid fa-user"></i> ${authorsStr}</span>
