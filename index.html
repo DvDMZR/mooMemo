@@ -663,29 +663,53 @@
         .cl-changes { margin: 5px 0 0 0; padding-left: 20px; font-size: 0.9rem; color: #475569; }
         .cl-changes li { margin-bottom: 4px; }
 
-        /* --- RELATED REPORTS SECTION (Desktop only) --- */
-        .related-reports-section {
-            display: none;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px dashed #e2e8f0;
+        /* --- RELATED REPORTS SIDEBAR (Desktop only) --- */
+        .export-layout {
+            display: flex;
+            gap: 0;
         }
-        @media (min-width: 768px) {
-            .related-reports-section {
+        .export-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .related-reports-sidebar {
+            display: none;
+            width: 280px;
+            flex-shrink: 0;
+            padding: 20px;
+            padding-right: 0;
+            position: sticky;
+            top: 80px;
+            align-self: flex-start;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        @media (min-width: 1024px) {
+            .related-reports-sidebar {
                 display: block;
             }
         }
+        .related-reports-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .related-reports-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
         .related-reports-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-sub);
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .related-reports-title i {
             color: var(--primary);
+            font-size: 0.9rem;
         }
         .related-reports-list {
             display: flex;
@@ -696,36 +720,50 @@
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 10px 14px;
+            padding: 10px 12px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
             transition: all 0.2s;
             cursor: pointer;
         }
         .related-report-item:hover {
             background: #f1f5f9;
             border-color: var(--primary);
+            transform: translateX(-2px);
         }
-        .related-report-info {
+        .related-report-header {
             display: flex;
-            flex-direction: column;
-            gap: 2px;
+            justify-content: space-between;
+            align-items: center;
         }
         .related-report-date {
             font-weight: 600;
             color: var(--text-main);
+            font-size: 0.85rem;
+        }
+        .related-report-id {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            font-weight: 500;
         }
         .related-report-meta {
             font-size: 0.75rem;
             color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .related-report-meta i {
+            font-size: 0.65rem;
         }
         .related-report-badge {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 99px;
+            align-self: flex-start;
         }
         .related-report-badge.has-open {
             background: #fef2f2;
@@ -738,14 +776,17 @@
             border: 1px solid #bbf7d0;
         }
         .no-related-reports {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #94a3b8;
             font-style: italic;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px dashed #e2e8f0;
         }
         @media print {
-            .related-reports-section {
+            .related-reports-sidebar {
                 display: none !important;
             }
         }
@@ -924,15 +965,20 @@
             </button>
         </div>
 
-        <div id="pdf-preview"></div>
-
-        <!-- Related Reports Section (Desktop only) -->
-        <div id="related-reports-section" class="related-reports-section">
-            <div class="related-reports-title">
-                <i class="fa-solid fa-folder-tree"></i>
-                <span>Weitere Berichte dieses Kunden</span>
+        <!-- Export Layout with Sidebar -->
+        <div class="export-layout">
+            <div class="export-main">
+                <div id="pdf-preview"></div>
             </div>
-            <div id="related-reports-list" class="related-reports-list"></div>
+
+            <!-- Related Reports Sidebar (Desktop only) -->
+            <div id="related-reports-sidebar" class="related-reports-sidebar">
+                <div class="related-reports-title">
+                    <i class="fa-solid fa-folder-tree"></i>
+                    <span>Weitere Berichte</span>
+                </div>
+                <div id="related-reports-list" class="related-reports-list"></div>
+            </div>
         </div>
     </div>
 
@@ -1105,7 +1151,7 @@
                 ver: "1.5.8",
                 date: "2026-01-29",
                 changes: [
-                    "NEU: Export zeigt weitere Berichte des selben Kunden (nur Desktop).",
+                    "NEU: Sidebar zeigt weitere Berichte des selben Kunden im Export (Desktop).",
                     "Fix: Verfasser-Änderungen werden jetzt in der Übersicht angezeigt.",
                     "Berichte mit vollständigen Basisdaten öffnen direkt die Punkte-Ansicht.",
                     "Übersicht: Einheitliche Badge-Styles für offene/gelöste Punkte."
@@ -1454,12 +1500,12 @@
 
         window.renderRelatedReports = function() {
             const container = document.getElementById('related-reports-list');
-            const section = document.getElementById('related-reports-section');
-            if (!container || !section) return;
+            const sidebar = document.getElementById('related-reports-sidebar');
+            if (!container) return;
 
             const currentReport = allReports.find(r => r.id === currentReportId);
             if (!currentReport || !currentReport.header.customer) {
-                section.style.display = 'none';
+                if (sidebar) sidebar.style.display = 'none';
                 return;
             }
 
@@ -1477,7 +1523,7 @@
             relatedReports.sort((a, b) => new Date(b.header.date_from) - new Date(a.header.date_from));
 
             if (relatedReports.length === 0) {
-                container.innerHTML = '<div class="no-related-reports">Keine weiteren Berichte für diesen Kunden gefunden.</div>';
+                container.innerHTML = '<div class="no-related-reports">Keine weiteren Berichte für diesen Kunden.</div>';
                 return;
             }
 
@@ -1491,7 +1537,7 @@
                 const openCount = (r.points || []).filter(p => p.status === 'open').length;
                 const totalPoints = (r.points || []).length;
                 const badgeClass = openCount > 0 ? 'has-open' : 'all-resolved';
-                const badgeText = openCount > 0 ? `${openCount} Offen` : 'Alle erledigt';
+                const badgeText = openCount > 0 ? `${openCount} Offen` : 'Erledigt';
                 const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
                 const dateStr = formatDate(r.header.date_from);
                 const authorsStr = r.header.authors && r.header.authors.length
@@ -1500,10 +1546,11 @@
 
                 return `
                     <div class="related-report-item" onclick="window.openRelatedReport('${r.id}')">
-                        <div class="related-report-info">
-                            <span class="related-report-date">${dateStr} <span style="font-weight:400; color:var(--text-sub);">${displayId}</span></span>
-                            <span class="related-report-meta"><i class="fa-solid fa-user"></i> ${authorsStr} · ${totalPoints} Punkte</span>
+                        <div class="related-report-header">
+                            <span class="related-report-date">${dateStr}</span>
+                            <span class="related-report-id">${displayId}</span>
                         </div>
+                        <span class="related-report-meta"><i class="fa-solid fa-user"></i> ${authorsStr}</span>
                         <span class="related-report-badge ${badgeClass}">${badgeText}</span>
                     </div>
                 `;
@@ -2411,6 +2458,9 @@ Text: "${desc}"`;
 
             // Render PDF preview directly
             window.renderPDFPreviewWithData(report);
+
+            // Render related reports in sidebar
+            window.renderRelatedReports();
 
             // Make export section visible
             document.getElementById('export').classList.add('active');
