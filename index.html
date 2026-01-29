@@ -270,6 +270,7 @@
 
         .status-badge { padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; white-space: nowrap; }
         .status-resolved { background: var(--success-bg); color: #065f46; }
+        .status-open { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
         .badge-fresh { background: var(--status-fresh-bg); color: #1e40af; }
         .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
         .badge-critical { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
@@ -1248,7 +1249,7 @@
             
             container.innerHTML = points.map((p,i) => {
                 const statusClass = (p.status==='open') ? window.getAgeClass(rDate) : 'resolved';
-                const badge = (p.status==='open') ? window.getAgeBadge(rDate) : `<span class="status-badge status-resolved">${t.status_resolved}</span>`;
+                const badge = (p.status==='open') ? `<span class="status-badge status-open">${t.status_open}</span>` : `<span class="status-badge status-resolved">${t.status_resolved}</span>`;
                 const moveUp = i > 0 ? `<button class="sort-btn" onclick="event.stopPropagation(); window.movePoint(${i}, -1)"><i class="fa-solid fa-chevron-up"></i></button>` : '';
                 const moveDown = i < points.length - 1 ? `<button class="sort-btn" onclick="event.stopPropagation(); window.movePoint(${i}, 1)"><i class="fa-solid fa-chevron-down"></i></button>` : '';
 
@@ -1312,8 +1313,9 @@
                      return {src, isLarge};
                  });
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
+                 const badgeStyle = p.status==='open' ? 'background:#fef2f2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#065f46; border:1px solid #bbf7d0;';
                  const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
-                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.8rem; border:1px solid #ccc; padding:2px 6px;">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
              const devBuild = "DEV-20260127A";
