@@ -1276,7 +1276,7 @@
         </div>
         <div class="filter-container">
              <div class="search-container">
-                <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, von:Name)" oninput="window.renderReportList()">
+                <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, von:Name)" oninput="window.debouncedSearch()">
             </div>
             
             <div class="filter-tabs" id="filter-type-container">
@@ -1552,7 +1552,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.5.8";
+        const APP_VERSION = "1.5.9";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1569,6 +1569,19 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.5.9",
+                date: "2026-01-30",
+                changes: [
+                    "STABILITÄT: Memory Leak bei Cloud-Synchronisation behoben.",
+                    "STABILITÄT: Such-Eingabe mit Debouncing (keine Verzögerungen mehr).",
+                    "STABILITÄT: Canvas-Speicher wird nach Bildverarbeitung freigegeben.",
+                    "STABILITÄT: Spracherkennung wird sauber beendet.",
+                    "STABILITÄT: Race Condition beim Speichern verhindert.",
+                    "STABILITÄT: Exponential Backoff bei API-Fehlern.",
+                    "STABILITÄT: Timeout für KI-Aufrufe (max. 30s)."
+                ]
+            },
             {
                 ver: "1.5.8",
                 date: "2026-01-29",
@@ -1700,7 +1713,13 @@
         let exportFilter = 'all'; // 'all' | 'open'
 
         // DYNAMIC API KEY
-        let globalGeminiKey = ""; 
+        let globalGeminiKey = "";
+
+        // --- STABILITY: Memory Management ---
+        let firestoreUnsubscribe = null; // Store listener for cleanup
+        let searchDebounceTimer = null;  // Debounce search input
+        let saveInProgress = false;      // Prevent concurrent saves
+        let activeSpeechRecognition = null; // Track active speech recognition 
 
         const translations = {
             de: {
@@ -1765,6 +1784,9 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, 340, 108);
                     LOGO_PNG = canvas.toDataURL('image/png');
+                    // STABILITY: Clean up canvas memory
+                    canvas.width = 0;
+                    canvas.height = 0;
                     console.log('Logo PNG prepared for PDF export');
                     resolve();
                 };
@@ -2113,17 +2135,26 @@ Text: "${desc}"`;
             let attempt = 0;
             let success = false;
 
+            // STABILITY: Timeout for API calls (30 seconds)
+            const API_TIMEOUT = 30000;
+
             try {
                 while(attempt < 3 && !success) {
                     try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+
                         const response = await fetch(apiUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{ parts: [{ text: userPrompt }] }],
                                 generationConfig: { temperature: 0.1 }
-                            })
+                            }),
+                            signal: controller.signal
                         });
+
+                        clearTimeout(timeoutId);
 
                         if (response.status === 403) {
                             throw new Error("API Key ungültig oder gesperrt.");
@@ -2131,8 +2162,11 @@ Text: "${desc}"`;
 
                         if (response.status === 429 || response.status >= 500) {
                             attempt++;
-                            console.warn(`API Busy/Limit (Status ${response.status}). Retrying ${attempt}/3...`);
-                            await new Promise(r => setTimeout(r, 1000 * attempt));
+                            // STABILITY: Exponential backoff with jitter
+                            const baseDelay = Math.pow(2, attempt) * 1000;
+                            const jitter = Math.random() * 500;
+                            console.warn(`API Busy/Limit (Status ${response.status}). Retrying ${attempt}/3 in ${baseDelay}ms...`);
+                            await new Promise(r => setTimeout(r, baseDelay + jitter));
                             continue;
                         }
 
@@ -2173,17 +2207,32 @@ Text: "${desc}"`;
                         }
                     } catch(innerEx) {
                         console.warn("Attempt failed", innerEx);
+                        // STABILITY: Handle timeout errors
+                        if (innerEx.name === 'AbortError') {
+                            throw new Error("Zeitüberschreitung - Server antwortet nicht.");
+                        }
                         if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx;
                         attempt++;
-                        await new Promise(r => setTimeout(r, 1000));
+                        // STABILITY: Exponential backoff with jitter
+                        const baseDelay = Math.pow(2, attempt) * 1000;
+                        const jitter = Math.random() * 500;
+                        await new Promise(r => setTimeout(r, baseDelay + jitter));
                     }
                 }
             } catch(e) {
                 console.error("Final API Failure:", e);
-                alert(e.message);
+                alert(e.message || "API Fehler aufgetreten.");
             }
 
             btn.innerHTML = originalButtonHTML;
+        };
+
+        // STABILITY: Debounced search to prevent excessive re-renders
+        window.debouncedSearch = function() {
+            if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                window.renderReportList();
+            }, 300);
         };
 
         window.renderReportList = function() {
@@ -2256,23 +2305,33 @@ Text: "${desc}"`;
             }).join('');
         };
 
+        // STABILITY: Save queue to prevent race conditions
+        let pendingSave = null;
+        let saveQueue = Promise.resolve();
+
         window.saveReportToFirestore = async function(report) {
             if (!currentUser) return;
-            try {
-                // Public collection for shared access
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), report);
-            } catch(e) {
-                console.error("Save failed", e);
-                if(e.code === 'storage/quota-exceeded') {
-                     alert("Speicher voll.");
-                } else if (e.message && e.message.includes("exceeds the maximum allowed size")) {
-                     alert("Fehler: Der Bericht ist zu groß (max. 1 MB). Das passiert bei zu vielen Bildern. Bitte lösche ein paar Bilder, damit gespeichert werden kann.");
-                } else if(e.code === 'permission-denied') {
-                     alert("Speichern fehlgeschlagen: Keine Berechtigung (Firebase Rules prüfen).");
-                } else {
-                     alert("Fehler beim Speichern: " + e.message);
+
+            // Queue saves to prevent race conditions
+            saveQueue = saveQueue.then(async () => {
+                try {
+                    // Public collection for shared access
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), report);
+                } catch(e) {
+                    console.error("Save failed", e);
+                    if(e.code === 'storage/quota-exceeded') {
+                         alert("Speicher voll.");
+                    } else if (e.message && e.message.includes("exceeds the maximum allowed size")) {
+                         alert("Fehler: Der Bericht ist zu groß (max. 1 MB). Das passiert bei zu vielen Bildern. Bitte lösche ein paar Bilder, damit gespeichert werden kann.");
+                    } else if(e.code === 'permission-denied') {
+                         alert("Speichern fehlgeschlagen: Keine Berechtigung (Firebase Rules prüfen).");
+                    } else {
+                         alert("Fehler beim Speichern: " + e.message);
+                    }
                 }
-            }
+            });
+
+            return saveQueue;
         };
 
         window.deleteReportFromFirestore = async function(id) {
@@ -2304,10 +2363,16 @@ Text: "${desc}"`;
         };
 
         window.setupRealtimeListener = function() {
+            // STABILITY: Cleanup previous listener to prevent memory leaks
+            if (firestoreUnsubscribe) {
+                firestoreUnsubscribe();
+                firestoreUnsubscribe = null;
+            }
+
             const q = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
             let isFirstLoad = true;
 
-            onSnapshot(q, (snapshot) => {
+            firestoreUnsubscribe = onSnapshot(q, (snapshot) => {
                 const newReports = [];
                 snapshot.forEach(doc => newReports.push(doc.data()));
                 allReports = newReports;
@@ -2940,20 +3005,31 @@ Text: "${desc}"`;
         
         window.listen = function(id) {
             if(!('webkitSpeechRecognition' in window)) return alert('Browser nicht unterstützt');
+
+            // STABILITY: Stop any active speech recognition first
+            if (activeSpeechRecognition) {
+                try {
+                    activeSpeechRecognition.abort();
+                } catch(e) { /* ignore */ }
+                activeSpeechRecognition = null;
+            }
+
             const r = new webkitSpeechRecognition();
+            activeSpeechRecognition = r; // Track for cleanup
             r.lang = currentLang === 'de' ? "de-DE" : "en-US";
             const btn = document.querySelector(`button[onclick*="${id}"]`);
             btn.classList.add('listening');
             r.start();
-            r.onresult = e => { 
+            r.onresult = e => {
                 const txt = e.results[0][0].transcript;
                 const field = document.getElementById(id);
-                field.value += " " + txt; 
-                btn.classList.remove('listening'); 
+                field.value += " " + txt;
+                btn.classList.remove('listening');
+                activeSpeechRecognition = null;
                 if(id.startsWith('h_')) window.updateCurrentReportHeader();
             };
-            r.onerror = () => btn.classList.remove('listening');
-            r.onend = () => btn.classList.remove('listening');
+            r.onerror = () => { btn.classList.remove('listening'); activeSpeechRecognition = null; };
+            r.onend = () => { btn.classList.remove('listening'); activeSpeechRecognition = null; };
         };
         
         // --- NEW FILE UPLOAD HANDLER ---
@@ -2985,11 +3061,15 @@ Text: "${desc}"`;
                                 const base64DataUrl = cvs.toDataURL('image/jpeg', 0.8);
 
                                 cvs.toBlob(blob => {
+                                    // STABILITY: Clean up canvas memory
+                                    cvs.width = 0;
+                                    cvs.height = 0;
                                     if (blob) resolve({ blob, base64: base64DataUrl });
                                     else reject(new Error("Canvas to Blob failed"));
                                 }, 'image/jpeg', 0.8);
                             };
                             img.onerror = reject;
+                            img.onload = img.onload; // Keep reference
                             img.src = e.target.result;
                         };
                         reader.onerror = reject;
