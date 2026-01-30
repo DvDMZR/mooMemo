@@ -3069,7 +3069,6 @@ Text: "${desc}"`;
                                 }, 'image/jpeg', 0.8);
                             };
                             img.onerror = reject;
-                            img.onload = img.onload; // Keep reference
                             img.src = e.target.result;
                         };
                         reader.onerror = reject;
