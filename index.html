@@ -1802,6 +1802,15 @@
             else { el.classList.add('offline'); el.classList.remove('online'); txt.textContent = "Offline"; }
         };
 
+        // STABILITY: Auto-reconnect when back online
+        window.addEventListener('online', () => {
+            window.showToast("Verbindung wiederhergestellt");
+            if(currentUser) window.setupRealtimeListener();
+        });
+        window.addEventListener('offline', () => {
+            window.updateSyncStatus(false);
+        });
+
         window.showToast = function(message) {
             const x = document.getElementById("toast"); 
             if(x) {
@@ -2514,15 +2523,27 @@ Text: "${desc}"`;
         };
         
         window.createNewReport = function() {
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Erstelle...';
+
             const readableId = Math.floor(10000 + Math.random() * 90000).toString();
-            const r = { 
-                id: Date.now().toString(), 
-                readable_id: readableId, 
-                created_at: Date.now(), 
-                header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', authors: [], participants: [] }, 
-                points: [] 
+            const r = {
+                id: Date.now().toString(),
+                readable_id: readableId,
+                created_at: Date.now(),
+                header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', authors: [], participants: [] },
+                points: []
             };
-            window.saveReportToFirestore(r).then(() => window.openReport(r.id));
+            window.saveReportToFirestore(r).then(() => {
+                window.openReport(r.id);
+            }).catch(e => {
+                window.showToast("Fehler beim Erstellen");
+            }).finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            });
         };
 
         window.updateCurrentReportHeader = function() {
@@ -2565,12 +2586,23 @@ Text: "${desc}"`;
                 desc: document.getElementById('p_desc').value,
                 assignee: document.getElementById('p_assignee').value,
                 status: document.getElementById('p_status').value,
-                images: tempImages 
+                images: tempImages
              };
              if(idx === -1) points.push(p); else points[idx] = p;
              const r = allReports.find(x => x.id === currentReportId);
-             if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_saved)); }
-             window.closeModal(); window.renderPointsList(); window.renderStatusList();
+             if(r) {
+                r.points = points;
+                // STABILITY: Close modal only after successful save
+                window.saveReportToFirestore(r).then(() => {
+                    window.showToast(translations[currentLang].toast_saved);
+                    window.closeModal();
+                    tempImages = [];
+                    window.renderPointsList();
+                    window.renderStatusList();
+                }).catch(e => {
+                    window.showToast("Fehler beim Speichern");
+                });
+             }
         };
         
         window.askDeleteReport = function(e, id) {
@@ -2682,6 +2714,7 @@ Text: "${desc}"`;
 
         window.removeParticipant = function(i) {
             const r = allReports.find(x => x.id === currentReportId);
+            if(!r || !r.header.participants) return;
             r.header.participants.splice(i, 1);
             window.saveReportToFirestore(r);
             window.renderParticipantsList(r.header.participants);
@@ -2712,6 +2745,7 @@ Text: "${desc}"`;
 
         window.removeAuthor = function(i) {
             const r = allReports.find(x => x.id === currentReportId);
+            if(!r) return;
             if(r.header.authors) {
                 r.header.authors.splice(i, 1);
                 // Sync deprecated author field with first author
@@ -2727,7 +2761,10 @@ Text: "${desc}"`;
             document.getElementById('edit-index').value = index;
             tempImages = [];
             if(index > -1) {
+                // STABILITY: Bounds check
+                if(index >= points.length) { console.error('Invalid point index'); return; }
                 const p = points[index];
+                if(!p) return;
                 document.getElementById('p_ticket').value = p.ticket || "";
                 document.getElementById('p_title').value = p.title || "";
                 document.getElementById('p_desc').value = p.desc || "";
@@ -2990,10 +3027,11 @@ Text: "${desc}"`;
         window.executeDelete = function() {}; // Stub
         
         window.toggleStatus = function(i) {
-            points[i].status = points[i].status==='open' ? 'resolved' : 'open'; 
-            const r = allReports.find(x=>x.id===currentReportId); 
-            if(r) window.saveReportToFirestore(r); 
-            setTimeout(()=>{window.renderStatusList();window.renderPointsList();},10); 
+            if(i < 0 || i >= points.length || !points[i]) return;
+            points[i].status = points[i].status==='open' ? 'resolved' : 'open';
+            const r = allReports.find(x=>x.id===currentReportId);
+            if(r) window.saveReportToFirestore(r);
+            setTimeout(()=>{window.renderStatusList();window.renderPointsList();},10);
         };
         
         window.listen = function(id) {
