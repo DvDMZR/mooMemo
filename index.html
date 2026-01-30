@@ -2819,13 +2819,25 @@ Text: "${desc}"`;
 
         window.executeDeletePoint = function() {
              const idx = parseInt(document.getElementById('edit-index').value);
-             if(idx > -1) {
-                 points.splice(idx, 1);
-                 const r = allReports.find(x => x.id === currentReportId);
-                 if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_deleted)); }
-                 window.closeModal(); window.renderPointsList(); window.renderStatusList();
-             }
-             window.closeDeletePointModal();
+             if(idx < 0 || idx >= points.length) return;
+
+             const r = allReports.find(x => x.id === currentReportId);
+             if(!r) return;
+
+             // Remove point and save
+             points.splice(idx, 1);
+             r.points = points;
+
+             window.saveReportToFirestore(r).then(() => {
+                 window.showToast(translations[currentLang].toast_deleted);
+                 window.closeDeletePointModal();
+                 window.closeModal();
+                 window.renderPointsList();
+                 window.renderStatusList();
+             }).catch(e => {
+                 // Restore point on failure
+                 window.showToast("Fehler beim Löschen");
+             });
         };
 
         window.toggleFullScreen = function() {
