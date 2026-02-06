@@ -1593,6 +1593,15 @@
                 ]
             },
             {
+                ver: "1.5.8",
+                date: "2026-02-06",
+                changes: [
+                    "Fix: Berichte mit vielen Bildern können nun gespeichert werden (1 MB Limit behoben).",
+                    "Bilder-Daten werden nicht mehr im Bericht-Dokument gespeichert, nur noch die URLs.",
+                    "PDF-Export: Bilder werden beim Drucken automatisch als Base64 eingebettet."
+                ]
+            },
+            {
                 ver: "1.5.7",
                 date: "2026-01-29",
                 changes: [
@@ -1903,9 +1912,8 @@
              const filteredPoints = exportFilter === 'open' ? r.points.filter(p => p.status === 'open') : r.points;
 
              const html = filteredPoints.map(p => {
-                 // Use base64 if available (for PDF export), fallback to src URL
                  const safeImages = (p.images||[]).map(img => {
-                     const src = typeof img==='string' ? img : (img.base64 || img.src);
+                     const src = typeof img==='string' ? img : (img.src || img.base64);
                      const isLarge = typeof img==='string' ? false : img.isLarge;
                      return {src, isLarge};
                  });
@@ -1915,7 +1923,7 @@
                  return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
-             const devBuild = "DEV-20260127A";
+             const devBuild = "DEV-20260206A";
              const previewEl = document.getElementById('pdf-preview');
              if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between; align-items:flex-start;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${logoSrc}" style="height:40px; width:126px; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
@@ -2269,8 +2277,14 @@ Text: "${desc}"`;
         window.saveReportToFirestore = async function(report) {
             if (!currentUser) return;
             try {
+                // Strip base64 data from images before saving to Firestore (1 MB doc limit).
+                // Images are already stored in Firebase Storage; only the URL is needed.
+                const stripped = JSON.parse(JSON.stringify(report));
+                (stripped.points || []).forEach(p => {
+                    (p.images || []).forEach(img => { delete img.base64; });
+                });
                 // Public collection for shared access
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), report);
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', stripped.id), stripped);
             } catch(e) {
                 console.error("Save failed", e);
                 if(e.code === 'storage/quota-exceeded') {
@@ -2790,13 +2804,29 @@ Text: "${desc}"`;
         };
         
         // --- PRINT REPORT (Native Browser Print for better quality) ---
-        window.printReport = function() {
+        window.printReport = async function() {
             // Re-render preview fresh
             window.renderPDFPreview();
-            // Small delay to ensure images are loaded, then print
-            setTimeout(() => {
-                window.print();
-            }, 100);
+            // Convert all images to base64 for reliable print rendering
+            const preview = document.getElementById('pdf-preview');
+            if (preview) {
+                const imgs = preview.querySelectorAll('img');
+                await Promise.all(Array.from(imgs).map(async img => {
+                    if (img.src && !img.src.startsWith('data:') && !img.src.endsWith('.svg')) {
+                        try {
+                            const res = await fetch(img.src);
+                            const blob = await res.blob();
+                            const dataUrl = await new Promise(resolve => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            });
+                            img.src = dataUrl;
+                        } catch(e) { /* keep original URL as fallback */ }
+                    }
+                }));
+            }
+            window.print();
         };
 
         // --- SHARE LINK FUNCTIONS ---
