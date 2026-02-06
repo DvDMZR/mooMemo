@@ -1362,7 +1362,7 @@
             <div id="register-form" style="display:none;">
                 <div id="register-error" class="login-error"></div>
                 <input type="text" id="reg-name" placeholder="Vor- und Nachname" autocomplete="name">
-                <input type="email" id="reg-email" placeholder="E-Mail Adresse" autocomplete="email">
+                <input type="email" id="reg-email" placeholder="vorname.nachname@gea.com" autocomplete="email">
                 <input type="password" id="reg-password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="new-password">
                 <input type="password" id="reg-password2" placeholder="Passwort wiederholen" autocomplete="new-password">
                 <input type="text" id="reg-invite" placeholder="Einladungscode">
@@ -2173,6 +2173,7 @@
 
             if (!name) { window.showRegisterError('Bitte Namen eingeben.'); return; }
             if (!email) { window.showRegisterError('Bitte E-Mail eingeben.'); return; }
+            if (!email.toLowerCase().endsWith('@gea.com')) { window.showRegisterError('Nur @gea.com E-Mail Adressen sind erlaubt.'); return; }
             if (pw.length < 6) { window.showRegisterError('Passwort muss mindestens 6 Zeichen haben.'); return; }
             if (pw !== pw2) { window.showRegisterError('Passwörter stimmen nicht überein.'); return; }
 
