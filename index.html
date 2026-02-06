@@ -2273,22 +2273,8 @@
         };
 
         // --- PASSWORD RESET ---
-        window.doPasswordReset = async function() {
-            const email = document.getElementById('login-email').value.trim();
-            if (!email) { window.showLoginError('Bitte zuerst E-Mail Adresse eingeben.'); return; }
-            if (!email.toLowerCase().endsWith('@gea.com')) { window.showLoginError('Nur @gea.com Adressen sind registriert.'); return; }
-            try {
-                await sendPasswordResetEmail(auth, email);
-                alert('Passwort-Reset E-Mail wurde an ' + email + ' gesendet.\n\nBitte prüfe dein Postfach (auch Spam/Junk).\n\nAbsender: noreply@moomemo-a9012.firebaseapp.com');
-            } catch(e) {
-                console.error("Password reset failed:", e);
-                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-email') {
-                    window.showLoginError('Kein Konto mit dieser E-Mail gefunden.');
-                } else {
-                    console.warn("[ERR-A01] Password reset failed:", e.code);
-                    window.showLoginError('Fehler A01 - Admin kontaktieren (David.Mazur@gea.com)');
-                }
-            }
+        window.doPasswordReset = function() {
+            alert('Passwort vergessen?\n\nBitte wende dich an David.Mazur@gea.com.\nDein Konto wird dann zurückgesetzt und du kannst dich neu registrieren.');
         };
 
         // --- PASSWORD CHANGE ---
@@ -2483,19 +2469,25 @@
                     return;
                 }
 
-                container.innerHTML = users.map(u => `
+                container.innerHTML = users.map(u => {
+                    const isSelf = u.uid === currentUser.uid;
+                    const deleteBtn = isSelf ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
+                    return `
                     <div class="user-list-item">
                         <div class="user-info">
                             <div class="name">${window.escapeHtml(u.displayName || '-')}</div>
                             <div class="email">${window.escapeHtml(u.email || '-')}</div>
                         </div>
-                        <span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
-                              onclick="window.toggleUserRole('${u.uid}')"
-                              title="Klicken zum Ändern">
-                            ${u.role === 'admin' ? 'Admin' : 'User'}
-                        </span>
-                    </div>
-                `).join('');
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
+                                  onclick="window.toggleUserRole('${u.uid}')"
+                                  title="Klicken zum Ändern">
+                                ${u.role === 'admin' ? 'Admin' : 'User'}
+                            </span>
+                            ${deleteBtn}
+                        </div>
+                    </div>`;
+                }).join('');
             } catch(e) {
                 console.error("Load user list failed:", e);
                 container.innerHTML = '<div style="color:var(--danger); text-align:center;">Fehler beim Laden</div>';
@@ -2517,6 +2509,20 @@
             } catch(e) {
                 console.error("Toggle role failed:", e);
                 alert('Fehler: ' + e.message);
+            }
+        };
+
+        window.deleteUserProfile = async function(uid) {
+            if (!window.isAdmin()) return;
+            if (uid === currentUser.uid) { alert('Du kannst dich nicht selbst löschen.'); return; }
+            if (!confirm('Benutzer-Profil aus mooMemo entfernen?')) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
+                window.showToast('Benutzer entfernt');
+                await window.loadUserList();
+            } catch(e) {
+                console.warn("[ERR-U01] Delete user profile failed:", e.code);
+                window.showToast('Fehler U01 - Console prüfen');
             }
         };
 
