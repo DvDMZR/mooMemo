@@ -1214,9 +1214,166 @@
             pointer-events: none;
         }
 
+        /* --- LOGIN SCREEN --- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #004080 50%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: pop-in 0.4s ease-out;
+        }
+        .login-card img { height: 36px; margin-bottom: 8px; }
+        .login-card h2 { color: var(--primary); font-size: 1.5rem; margin: 0 0 8px 0; font-weight: 800; }
+        .login-card .login-subtitle { color: var(--text-sub); font-size: 0.85rem; margin-bottom: 24px; }
+        .login-card input { margin-bottom: 12px; }
+        .login-card .btn { margin-top: 8px; }
+        .login-link { color: var(--primary); font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+        .login-link:hover { text-decoration: underline; }
+        .login-divider { margin: 16px 0; color: var(--text-sub); font-size: 0.8rem; }
+        .login-error { color: var(--danger); font-size: 0.85rem; margin-bottom: 10px; display: none; min-height: 0; }
+        .login-error.visible { display: block; }
+
+        /* User badge in header */
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: var(--primary-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .user-badge:hover { background: #d4e3f3; }
+        .user-badge i { font-size: 0.9rem; }
+
+        /* User menu dropdown */
+        .user-menu {
+            position: absolute;
+            top: 55px;
+            right: 10px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 200;
+            display: none;
+            min-width: 220px;
+            border: 1px solid var(--border-color);
+        }
+        .user-menu.open { display: block; animation: pop-in 0.2s ease-out; }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            transition: background 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+        .user-menu-item:hover { background: #f1f5f9; }
+        .user-menu-item i { width: 20px; text-align: center; color: var(--secondary); }
+        .user-menu-item.danger { color: var(--danger); }
+        .user-menu-item.danger i { color: var(--danger); }
+        .user-menu-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 4px;
+        }
+        .user-menu-header .user-name { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+        .user-menu-header .user-email { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+        .user-menu-header .user-role {
+            font-size: 0.65rem; font-weight: 700; color: white;
+            background: var(--primary); padding: 2px 8px; border-radius: 10px;
+            display: inline-block; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .user-menu-header .user-role.admin { background: var(--accent); }
+
+        /* User list in admin area */
+        .user-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid var(--border-color);
+        }
+        .user-list-item .user-info { flex: 1; }
+        .user-list-item .user-info .name { font-weight: 600; font-size: 0.9rem; }
+        .user-list-item .user-info .email { font-size: 0.75rem; color: var(--text-sub); }
+        .user-list-item .role-badge {
+            font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .user-list-item .role-badge.admin { background: var(--accent); color: white; }
+        .user-list-item .role-badge.user { background: #e2e8f0; color: var(--text-sub); }
+
     </style>
 </head>
 <body>
+
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" style="display:none;">
+        <div class="login-card">
+            <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA">
+            <h2>mooMemo</h2>
+            <p class="login-subtitle">Besuchsberichte & Aufgabenverwaltung</p>
+
+            <!-- LOGIN FORM -->
+            <div id="login-form">
+                <div id="login-error" class="login-error"></div>
+                <input type="email" id="login-email" placeholder="E-Mail Adresse" autocomplete="email">
+                <input type="password" id="login-password" placeholder="Passwort" autocomplete="current-password" onkeydown="if(event.key==='Enter') window.doLogin()">
+                <button class="btn btn-primary" onclick="window.doLogin()" id="login-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Anmelden
+                </button>
+                <div class="login-divider">&mdash; oder &mdash;</div>
+                <span class="login-link" onclick="window.showRegisterForm()">Neues Konto erstellen</span>
+                <br><br>
+                <span class="login-link" onclick="window.doPasswordReset()" style="font-size:0.8rem; font-weight:400; color:var(--text-sub);">Passwort vergessen?</span>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="register-form" style="display:none;">
+                <div id="register-error" class="login-error"></div>
+                <input type="text" id="reg-name" placeholder="Vor- und Nachname" autocomplete="name">
+                <input type="email" id="reg-email" placeholder="vorname.nachname@gea.com" autocomplete="email">
+                <input type="password" id="reg-password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="new-password">
+                <input type="password" id="reg-password2" placeholder="Passwort wiederholen" autocomplete="new-password">
+                <input type="text" id="reg-invite" placeholder="Einladungscode">
+                <button class="btn btn-primary" onclick="window.doRegister()" id="register-btn">
+                    <i class="fa-solid fa-user-plus"></i> Registrieren
+                </button>
+                <div class="login-divider"></div>
+                <span class="login-link" onclick="window.showLoginForm()"><i class="fa-solid fa-arrow-left"></i> Zurück zum Login</span>
+            </div>
+        </div>
+    </div>
 
     <!-- SHARED VIEW HEADER (only visible in shared mode) -->
     <div class="shared-header" id="shared-header">
@@ -1253,10 +1410,34 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.6.0)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.0)</span>
         </div>
         <div class="header-controls">
+            <button class="user-badge" id="user-badge" onclick="window.toggleUserMenu()" style="display:none;">
+                <i class="fa-solid fa-user-circle"></i>
+                <span id="user-badge-name">User</span>
+            </button>
             <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
+        </div>
+        <!-- USER DROPDOWN MENU -->
+        <div id="user-menu" class="user-menu">
+            <div class="user-menu-header">
+                <div class="user-name" id="menu-user-name">-</div>
+                <div class="user-email" id="menu-user-email">-</div>
+                <span class="user-role" id="menu-user-role">User</span>
+            </div>
+            <button class="user-menu-item" onclick="window.openPasswordChange()">
+                <i class="fa-solid fa-key"></i> Passwort ändern
+            </button>
+            <button class="user-menu-item" onclick="window.openSettings(); window.toggleUserMenu();">
+                <i class="fa-solid fa-gear"></i> Einstellungen
+            </button>
+            <button class="user-menu-item" id="menu-admin-btn" style="display:none;" onclick="window.askAdminTools(); window.toggleUserMenu();">
+                <i class="fa-solid fa-user-shield"></i> Admin-Bereich
+            </button>
+            <button class="user-menu-item danger" onclick="window.doLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Abmelden
+            </button>
         </div>
     </div>
 
@@ -1274,7 +1455,7 @@
     <div id="dashboard" class="section active">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
             <h2 style="margin-bottom:0;"><i class="fa-solid fa-folder-open"></i> <span data-i18n="dash_title">Berichte (Cloud)</span></h2>
-            <button class="icon-btn" onclick="window.askAdminTools()" style="color:var(--primary);" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
+            <button class="icon-btn" id="admin-tools-btn" onclick="window.askAdminTools()" style="color:var(--primary); display:none;" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
         </div>
         <div class="filter-container">
              <div class="search-container">
@@ -1438,7 +1619,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.6.0</div>
+                        <div class="info-version">mooMemo v1.7.0</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1525,10 +1706,61 @@
                 </p>
             </div>
 
+            <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:20px; border:1px solid #e2e8f0;">
+                <button class="btn btn-primary" onclick="window.openUserManagement()" style="margin-top:0; font-size:0.85rem; width:100%;">
+                    <i class="fa-solid fa-users-gear"></i> Benutzerverwaltung
+                </button>
+                <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;">
+                    Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.
+                </p>
+            </div>
+
             <p style="color:var(--text-sub); margin-top:25px;" data-i18n="data_backup">Datensicherung</p>
             <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
                 <button class="btn btn-secondary" onclick="window.performExport()" style="margin-top:0"><i class="fa-solid fa-download"></i> <span data-i18n="backup_save">Backup speichern</span></button>
                 <button class="btn btn-secondary" onclick="document.getElementById('import-input').click(); window.closeAdminToolsModal();" style="margin-top:0"><i class="fa-solid fa-upload"></i> <span data-i18n="backup_load">Backup importieren</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSWORD CHANGE MODAL -->
+    <div class="modal-overlay" id="password-change-modal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <span class="close-modal" onclick="document.getElementById('password-change-modal').style.display='none'">&times;</span>
+            <div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-key"></i></div>
+            <h3 style="color:var(--text-main)">Passwort ändern</h3>
+            <div id="pw-change-error" class="login-error"></div>
+            <input type="password" id="pw-current" placeholder="Aktuelles Passwort" style="margin-bottom:10px;" autocomplete="current-password">
+            <input type="password" id="pw-new" placeholder="Neues Passwort (mind. 6 Zeichen)" style="margin-bottom:10px;" autocomplete="new-password">
+            <input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" style="margin-bottom:10px;" autocomplete="new-password">
+            <button class="btn btn-primary" onclick="window.doChangePassword()">Passwort ändern</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('password-change-modal').style.display='none'">Abbrechen</button>
+        </div>
+    </div>
+
+    <!-- USER MANAGEMENT MODAL (Admin only) -->
+    <div class="modal-overlay" id="user-mgmt-modal">
+        <div class="modal-content" style="max-width:500px;">
+            <span class="close-modal" onclick="document.getElementById('user-mgmt-modal').style.display='none'">&times;</span>
+            <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-users-gear"></i> Benutzerverwaltung</h3>
+
+            <!-- Invite Code Section -->
+            <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #e2e8f0;">
+                <p style="font-weight:700; margin-top:0; font-size:0.9rem;">Einladungscode</p>
+                <p style="font-size:0.75rem; color:#64748b; margin-top:-5px;">Neue Benutzer benötigen diesen Code zur Registrierung.</p>
+                <div class="input-group-merged">
+                    <input type="text" id="admin-invite-code" placeholder="Einladungscode...">
+                    <button class="btn btn-primary" onclick="window.saveInviteCode()" style="margin:0; border-top-left-radius:0; border-bottom-left-radius:0; width:auto; padding:0 18px;"><i class="fa-solid fa-save"></i></button>
+                </div>
+            </div>
+
+            <!-- User List -->
+            <div style="margin-top:15px;">
+                <p style="font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-users" style="color:var(--primary);"></i> Registrierte Benutzer
+                    <span id="user-count-badge" style="font-size:0.7rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px;">0</span>
+                </p>
+                <div id="user-list-container" style="max-height:300px; overflow-y:auto;"></div>
             </div>
         </div>
     </div>
@@ -1538,8 +1770,8 @@
     <!-- LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
@@ -1554,7 +1786,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.6.0";
+        const APP_VERSION = "1.7.0";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1571,6 +1803,24 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.7.0",
+                date: "2026-02-06",
+                changes: [
+                    "NEU: Benutzer-Authentifizierung mit E-Mail und Passwort.",
+                    "NEU: Login- und Registrierungsbildschirm.",
+                    "NEU: Passwort ändern und zurücksetzen per E-Mail.",
+                    "NEU: Benutzerprofil mit individuellem Namen und Rolle.",
+                    "NEU: Admin-Bereich: Benutzerverwaltung, Einladungscodes, Rollenzuweisung.",
+                    "NEU: Einstellungen (Sprache, KI-Sprache) werden pro Benutzer in der Cloud gespeichert.",
+                    "NEU: Berichte werden dem erstellenden Benutzer zugeordnet (created_by).",
+                    "NEU: Erster registrierter Benutzer wird automatisch Admin.",
+                    "Sicherheit: Kein anonymer Zugriff - alle Daten nur für eingeloggte @gea.com User.",
+                    "Sicherheit: Geteilte Links erfordern jetzt ebenfalls Login (Datenschutz).",
+                    "Sicherheit: Nur @gea.com E-Mail Adressen können sich registrieren.",
+                    "Admin-Bereich ist nun rollenbasiert statt PIN-geschützt."
+                ]
+            },
             {
                 ver: "1.6.0",
                 date: "2026-02-06",
@@ -1705,7 +1955,8 @@
         const storage = getStorage(app); // Init Storage
 
         let currentUser = null;
-        let allReports = []; 
+        let currentUserProfile = null; // User profile from Firestore { displayName, email, role, settings }
+        let allReports = [];
         let currentReportId = null;
         let points = []; 
         let tempImages = []; 
@@ -1839,17 +2090,410 @@
         }
 
         // --- AUTH ---
-        window.initAuth = async function() {
+
+        // Show login overlay (for non-shared-link access)
+        window.showLoginScreen = function() {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            // Hide the main app
+            document.querySelector('.app-logo-header').style.display = 'none';
+            document.getElementById('tab-navigation').style.display = 'none';
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        };
+
+        window.hideLoginScreen = function() {
+            document.getElementById('login-overlay').style.display = 'none';
+            // Restore main app
+            document.querySelector('.app-logo-header').style.display = '';
+            document.querySelectorAll('.section').forEach(s => s.style.display = '');
+            document.getElementById('dashboard').classList.add('active');
+        };
+
+        window.showLoginForm = function() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-error').className = 'login-error';
+            document.getElementById('login-error').textContent = '';
+        };
+
+        window.showRegisterForm = function() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('register-error').className = 'login-error';
+            document.getElementById('register-error').textContent = '';
+        };
+
+        window.showLoginError = function(msg) {
+            const el = document.getElementById('login-error');
+            el.textContent = msg;
+            el.className = 'login-error visible';
+        };
+
+        window.showRegisterError = function(msg) {
+            const el = document.getElementById('register-error');
+            el.textContent = msg;
+            el.className = 'login-error visible';
+        };
+
+        // --- LOGIN ---
+        window.doLogin = async function() {
+            const email = document.getElementById('login-email').value.trim();
+            const pw = document.getElementById('login-password').value;
+            if (!email || !pw) { window.showLoginError('Bitte E-Mail und Passwort eingeben.'); return; }
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Anmelden...';
+
             try {
-                // Prevent loop if already signed in
-                if (!auth.currentUser) {
-                     await signInAnonymously(auth);
+                await signInWithEmailAndPassword(auth, email, pw);
+                // onAuthStateChanged will handle the rest
+            } catch(e) {
+                console.error("Login failed:", e);
+                let msg = 'Anmeldung fehlgeschlagen.';
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+                    msg = 'E-Mail oder Passwort falsch.';
+                } else if (e.code === 'auth/invalid-email') {
+                    msg = 'Ungültige E-Mail Adresse.';
+                } else if (e.code === 'auth/too-many-requests') {
+                    msg = 'Zu viele Versuche. Bitte warte kurz.';
                 }
-            } catch(e) { 
-                console.error("Auth failed", e);
-                if(document.getElementById('sync-text')) document.getElementById('sync-text').textContent = "Auth Fehler";
-                if(document.getElementById('sync-status')) document.getElementById('sync-status').classList.add('offline');
+                window.showLoginError(msg);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Anmelden';
             }
+        };
+
+        // --- REGISTER ---
+        window.doRegister = async function() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pw = document.getElementById('reg-password').value;
+            const pw2 = document.getElementById('reg-password2').value;
+            const inviteCode = document.getElementById('reg-invite').value.trim();
+
+            if (!name) { window.showRegisterError('Bitte Namen eingeben.'); return; }
+            if (!email) { window.showRegisterError('Bitte E-Mail eingeben.'); return; }
+            if (!email.toLowerCase().endsWith('@gea.com')) { window.showRegisterError('Nur @gea.com E-Mail Adressen sind erlaubt.'); return; }
+            if (pw.length < 6) { window.showRegisterError('Passwort muss mindestens 6 Zeichen haben.'); return; }
+            if (pw !== pw2) { window.showRegisterError('Passwörter stimmen nicht überein.'); return; }
+
+            const btn = document.getElementById('register-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrieren...';
+
+            try {
+                // Check if this is the first user (no invite code needed)
+                const isFirstUser = await window.checkFirstUser();
+
+                if (!isFirstUser) {
+                    // Verify invite code
+                    const storedCode = await window.loadInviteCode();
+                    if (!storedCode) {
+                        window.showRegisterError('Registrierung ist aktuell nicht möglich. Bitte Admin kontaktieren.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
+                        return;
+                    }
+                    if (inviteCode !== storedCode) {
+                        window.showRegisterError('Einladungscode ist falsch.');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
+                        return;
+                    }
+                }
+
+                // Create Firebase Auth user
+                const cred = await createUserWithEmailAndPassword(auth, email, pw);
+                await updateProfile(cred.user, { displayName: name });
+
+                // Create user profile in Firestore
+                const role = isFirstUser ? 'admin' : 'user';
+                await window.createUserProfile(cred.user.uid, email, name, role);
+
+                // onAuthStateChanged will handle the rest
+            } catch(e) {
+                console.error("Register failed:", e);
+                let msg = 'Registrierung fehlgeschlagen.';
+                if (e.code === 'auth/email-already-in-use') {
+                    msg = 'Diese E-Mail wird bereits verwendet.';
+                } else if (e.code === 'auth/invalid-email') {
+                    msg = 'Ungültige E-Mail Adresse.';
+                } else if (e.code === 'auth/weak-password') {
+                    msg = 'Passwort ist zu schwach.';
+                }
+                window.showRegisterError(msg);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
+            }
+        };
+
+        // --- LOGOUT ---
+        window.doLogout = async function() {
+            window.toggleUserMenu();
+            try {
+                currentUserProfile = null;
+                currentUser = null;
+                currentReportId = null;
+                points = [];
+                allReports = [];
+                await signOut(auth);
+                // onAuthStateChanged will show login screen
+            } catch(e) {
+                console.error("Logout failed:", e);
+            }
+        };
+
+        // --- PASSWORD RESET ---
+        window.doPasswordReset = async function() {
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) { window.showLoginError('Bitte zuerst E-Mail Adresse eingeben.'); return; }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert('Passwort-Reset E-Mail wurde gesendet. Bitte prüfe dein Postfach.');
+            } catch(e) {
+                console.error("Password reset failed:", e);
+                if (e.code === 'auth/user-not-found') {
+                    window.showLoginError('Kein Konto mit dieser E-Mail gefunden.');
+                } else {
+                    window.showLoginError('Fehler beim Senden der E-Mail.');
+                }
+            }
+        };
+
+        // --- PASSWORD CHANGE ---
+        window.openPasswordChange = function() {
+            window.toggleUserMenu();
+            document.getElementById('pw-current').value = '';
+            document.getElementById('pw-new').value = '';
+            document.getElementById('pw-new2').value = '';
+            document.getElementById('pw-change-error').className = 'login-error';
+            document.getElementById('pw-change-error').textContent = '';
+            document.getElementById('password-change-modal').style.display = 'flex';
+        };
+
+        window.doChangePassword = async function() {
+            const currentPw = document.getElementById('pw-current').value;
+            const newPw = document.getElementById('pw-new').value;
+            const newPw2 = document.getElementById('pw-new2').value;
+            const errEl = document.getElementById('pw-change-error');
+
+            if (!currentPw) { errEl.textContent = 'Aktuelles Passwort eingeben.'; errEl.className = 'login-error visible'; return; }
+            if (newPw.length < 6) { errEl.textContent = 'Neues Passwort muss mind. 6 Zeichen haben.'; errEl.className = 'login-error visible'; return; }
+            if (newPw !== newPw2) { errEl.textContent = 'Neue Passwörter stimmen nicht überein.'; errEl.className = 'login-error visible'; return; }
+
+            try {
+                // Re-authenticate first
+                const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPw);
+                await reauthenticateWithCredential(auth.currentUser, credential);
+                // Update password
+                await fbUpdatePassword(auth.currentUser, newPw);
+                document.getElementById('password-change-modal').style.display = 'none';
+                window.showToast('Passwort erfolgreich geändert!');
+            } catch(e) {
+                console.error("Password change failed:", e);
+                if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+                    errEl.textContent = 'Aktuelles Passwort ist falsch.';
+                } else {
+                    errEl.textContent = 'Fehler: ' + e.message;
+                }
+                errEl.className = 'login-error visible';
+            }
+        };
+
+        // --- USER PROFILE MANAGEMENT ---
+        window.createUserProfile = async function(uid, email, displayName, role) {
+            const profile = {
+                uid: uid,
+                email: email,
+                displayName: displayName,
+                role: role || 'user',
+                settings: {
+                    lang: 'de',
+                    aiLang: 'de'
+                },
+                created_at: Date.now()
+            };
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), profile);
+            return profile;
+        };
+
+        window.loadUserProfile = async function(uid) {
+            try {
+                const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                }
+                return null;
+            } catch(e) {
+                console.error("Load profile failed:", e);
+                return null;
+            }
+        };
+
+        window.saveUserSettings = async function(settings) {
+            if (!currentUser || !currentUserProfile) return;
+            try {
+                currentUserProfile.settings = settings;
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid), currentUserProfile);
+            } catch(e) {
+                console.error("Save settings failed:", e);
+            }
+        };
+
+        window.checkFirstUser = async function() {
+            try {
+                const usersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
+                return usersSnap.empty;
+            } catch(e) {
+                console.warn("Could not check users collection:", e);
+                return false;
+            }
+        };
+
+        window.isAdmin = function() {
+            return currentUserProfile && currentUserProfile.role === 'admin';
+        };
+
+        // --- USER UI UPDATE ---
+        window.updateUserUI = function() {
+            const badge = document.getElementById('user-badge');
+            const menuName = document.getElementById('menu-user-name');
+            const menuEmail = document.getElementById('menu-user-email');
+            const menuRole = document.getElementById('menu-user-role');
+            const badgeName = document.getElementById('user-badge-name');
+
+            if (currentUserProfile) {
+                const firstName = (currentUserProfile.displayName || 'User').split(' ')[0];
+                badgeName.textContent = firstName;
+                badge.style.display = 'flex';
+
+                menuName.textContent = currentUserProfile.displayName || '-';
+                menuEmail.textContent = currentUserProfile.email || '-';
+                menuRole.textContent = currentUserProfile.role === 'admin' ? 'Admin' : 'Benutzer';
+                menuRole.className = 'user-role' + (currentUserProfile.role === 'admin' ? ' admin' : '');
+
+                // Show/hide admin tools buttons
+                const adminBtn = document.getElementById('admin-tools-btn');
+                if (adminBtn) adminBtn.style.display = currentUserProfile.role === 'admin' ? '' : 'none';
+                const menuAdminBtn = document.getElementById('menu-admin-btn');
+                if (menuAdminBtn) menuAdminBtn.style.display = currentUserProfile.role === 'admin' ? '' : 'none';
+            } else {
+                badge.style.display = 'none';
+            }
+        };
+
+        window.toggleUserMenu = function() {
+            const menu = document.getElementById('user-menu');
+            menu.classList.toggle('open');
+        };
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('user-menu');
+            const badge = document.getElementById('user-badge');
+            if (menu && !menu.contains(e.target) && !badge.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+
+        // --- INVITE CODE MANAGEMENT ---
+        window.loadInviteCode = async function() {
+            try {
+                const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'auth'));
+                if (docSnap.exists()) {
+                    return docSnap.data().invite_code || '';
+                }
+                return '';
+            } catch(e) {
+                console.warn("Could not load invite code:", e);
+                return '';
+            }
+        };
+
+        window.saveInviteCode = async function() {
+            const code = document.getElementById('admin-invite-code').value.trim();
+            if (!code) { alert('Bitte Einladungscode eingeben.'); return; }
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'auth'), { invite_code: code }, { merge: true });
+                window.showToast('Einladungscode gespeichert!');
+            } catch(e) {
+                console.error("Save invite code failed:", e);
+                alert('Fehler: ' + e.message);
+            }
+        };
+
+        // --- USER MANAGEMENT (Admin) ---
+        window.openUserManagement = async function() {
+            window.closeAdminToolsModal();
+            document.getElementById('user-mgmt-modal').style.display = 'flex';
+
+            // Load current invite code
+            const code = await window.loadInviteCode();
+            document.getElementById('admin-invite-code').value = code;
+
+            // Load user list
+            await window.loadUserList();
+        };
+
+        window.loadUserList = async function() {
+            const container = document.getElementById('user-list-container');
+            container.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fas fa-spinner fa-spin"></i> Lade...</div>';
+
+            try {
+                const usersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
+                const users = [];
+                usersSnap.forEach(d => users.push(d.data()));
+                users.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+
+                document.getElementById('user-count-badge').textContent = users.length;
+
+                if (users.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Keine Benutzer</div>';
+                    return;
+                }
+
+                container.innerHTML = users.map(u => `
+                    <div class="user-list-item">
+                        <div class="user-info">
+                            <div class="name">${window.escapeHtml(u.displayName || '-')}</div>
+                            <div class="email">${window.escapeHtml(u.email || '-')}</div>
+                        </div>
+                        <span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
+                              onclick="window.toggleUserRole('${u.uid}')"
+                              title="Klicken zum Ändern">
+                            ${u.role === 'admin' ? 'Admin' : 'User'}
+                        </span>
+                    </div>
+                `).join('');
+            } catch(e) {
+                console.error("Load user list failed:", e);
+                container.innerHTML = '<div style="color:var(--danger); text-align:center;">Fehler beim Laden</div>';
+            }
+        };
+
+        window.toggleUserRole = async function(uid) {
+            if (!window.isAdmin()) { alert('Nur Admins können Rollen ändern.'); return; }
+            if (uid === currentUser.uid) { alert('Du kannst deine eigene Rolle nicht ändern.'); return; }
+
+            try {
+                const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
+                if (!docSnap.exists()) return;
+                const user = docSnap.data();
+                const newRole = user.role === 'admin' ? 'user' : 'admin';
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { role: newRole }, { merge: true });
+                window.showToast(`Rolle geändert zu: ${newRole === 'admin' ? 'Admin' : 'User'}`);
+                await window.loadUserList();
+            } catch(e) {
+                console.error("Toggle role failed:", e);
+                alert('Fehler: ' + e.message);
+            }
+        };
+
+        window.initAuth = async function() {
+            // Always require login - no anonymous access
+            window.showLoginScreen();
         };
 
         // --- MAIN LOGIC FUNCTIONS ---
@@ -1947,7 +2591,7 @@
                  return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
-             const devBuild = "DEV-20260206A";
+             const devBuild = "DEV-20260206B";
              const previewEl = document.getElementById('pdf-preview');
              if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between; align-items:flex-start;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${logoSrc}" style="height:40px; width:126px; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
@@ -2420,7 +3064,13 @@ Text: "${desc}"`;
         
         window.setLanguage = function(lang) {
             currentLang = lang;
-            localStorage.setItem('mooMemo_lang', lang); // PERSISTENCE
+            localStorage.setItem('mooMemo_lang', lang); // PERSISTENCE (local)
+            // Save to user profile in Firestore
+            if (currentUserProfile) {
+                const s = currentUserProfile.settings || {};
+                s.lang = lang;
+                window.saveUserSettings(s);
+            }
             const t = translations[lang];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -2444,7 +3094,13 @@ Text: "${desc}"`;
         
         window.setAiTargetLang = function(lang) {
             aiTargetLang = lang;
-            localStorage.setItem('mooMemo_ai_lang', lang); // PERSISTENCE
+            localStorage.setItem('mooMemo_ai_lang', lang); // PERSISTENCE (local)
+            // Save to user profile in Firestore
+            if (currentUserProfile) {
+                const s = currentUserProfile.settings || {};
+                s.aiLang = lang;
+                window.saveUserSettings(s);
+            }
             const container = document.getElementById('ai-lang-container');
             const buttons = container.getElementsByClassName('lang-btn');
             for(let btn of buttons) {
@@ -2509,12 +3165,14 @@ Text: "${desc}"`;
         
         window.createNewReport = function() {
             const readableId = Math.floor(10000 + Math.random() * 90000).toString();
-            const r = { 
-                id: Date.now().toString(), 
-                readable_id: readableId, 
-                created_at: Date.now(), 
-                header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', authors: [], participants: [] }, 
-                points: [] 
+            const r = {
+                id: Date.now().toString(),
+                readable_id: readableId,
+                created_at: Date.now(),
+                created_by: currentUser ? currentUser.uid : null,
+                created_by_name: currentUserProfile ? currentUserProfile.displayName : '',
+                header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', authors: [], participants: [] },
+                points: []
             };
             window.saveReportToFirestore(r).then(() => window.openReport(r.id));
         };
@@ -2569,11 +3227,18 @@ Text: "${desc}"`;
         
         window.askDeleteReport = function(e, id) {
             if(e) e.stopPropagation();
-            window.configurePinModal(translations[currentLang].delete_report_title, translations[currentLang].delete_report_msg, 'var(--danger)', 'fa-triangle-exclamation', () => window.deleteReportFromFirestore(id));
+            const t = translations[currentLang];
+            if (confirm(t.delete_report_msg)) {
+                window.deleteReportFromFirestore(id);
+            }
         };
         
         window.askAdminTools = function() {
-             window.configurePinModal(translations[currentLang].admin_title, translations[currentLang].admin_desc, 'var(--primary)', 'fa-user-shield', () => document.getElementById('admin-tools-modal').style.display = 'flex');
+            if (window.isAdmin()) {
+                document.getElementById('admin-tools-modal').style.display = 'flex';
+            } else {
+                alert('Nur Admins haben Zugriff auf diesen Bereich.');
+            }
         };
 
         window.exportSingleReport = function(e, id) {
@@ -2604,8 +3269,20 @@ Text: "${desc}"`;
         };
 
         window.verifyPin = function() {
+            // Admin role check replaces PIN for admin tools
+            if (pendingPinAction && pendingPinAction._isAdminAction) {
+                if (window.isAdmin()) {
+                    pendingPinAction();
+                    window.closePinModal();
+                } else {
+                    alert("Nur Admins haben Zugriff auf diese Funktion.");
+                    window.closePinModal();
+                }
+                return;
+            }
+            // For delete confirmations, accept any confirmation
             const pin = document.getElementById('auth-pin').value;
-            if (pin === '0000') {
+            if (pin === '0000' || window.isAdmin()) {
                 if (pendingPinAction) pendingPinAction();
                 window.closePinModal();
             } else {
@@ -3166,20 +3843,61 @@ Text: "${desc}"`;
         window.parseUrlParams();
 
         // Only run after everything is defined
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 window.updateSyncStatus(true);
-                // NEW: FETCH GLOBAL CONFIG & PERSISTENT SETTINGS
 
-                // Load Settings
-                const savedLang = localStorage.getItem('mooMemo_lang');
-                if(savedLang) window.setLanguage(savedLang);
+                // Reject anonymous users - require real login
+                if (user.isAnonymous) {
+                    await signOut(auth);
+                    return;
+                }
 
-                const savedAiLang = localStorage.getItem('mooMemo_ai_lang');
-                if(savedAiLang) window.setAiTargetLang(savedAiLang);
+                // Load user profile
+                let profile = await window.loadUserProfile(user.uid);
 
-                // Check Version for Changelog (skip if viewing shared link)
+                // If profile doesn't exist (e.g. created via another method), create one
+                if (!profile && user.email) {
+                    const isFirst = await window.checkFirstUser();
+                    profile = await window.createUserProfile(
+                        user.uid,
+                        user.email,
+                        user.displayName || user.email.split('@')[0],
+                        isFirst ? 'admin' : 'user'
+                    );
+                }
+
+                currentUserProfile = profile;
+
+                // Hide login screen, show app
+                window.hideLoginScreen();
+
+                // Update user UI
+                window.updateUserUI();
+
+                // Load user settings from profile (with localStorage fallback)
+                if (profile && profile.settings) {
+                    if (profile.settings.lang) {
+                        window.setLanguage(profile.settings.lang);
+                    } else {
+                        const savedLang = localStorage.getItem('mooMemo_lang');
+                        if (savedLang) window.setLanguage(savedLang);
+                    }
+                    if (profile.settings.aiLang) {
+                        window.setAiTargetLang(profile.settings.aiLang);
+                    } else {
+                        const savedAiLang = localStorage.getItem('mooMemo_ai_lang');
+                        if (savedAiLang) window.setAiTargetLang(savedAiLang);
+                    }
+                } else {
+                    const savedLang = localStorage.getItem('mooMemo_lang');
+                    if (savedLang) window.setLanguage(savedLang);
+                    const savedAiLang = localStorage.getItem('mooMemo_ai_lang');
+                    if (savedAiLang) window.setAiTargetLang(savedAiLang);
+                }
+
+                // Check Version for Changelog
                 if (!sharedReportId) {
                     window.checkVersion();
                 }
@@ -3192,6 +3910,8 @@ Text: "${desc}"`;
                 // Initialize mobile back button handler
                 window.initBackButtonHandler();
             } else {
+                currentUser = null;
+                currentUserProfile = null;
                 window.updateSyncStatus(false);
                 window.initAuth();
             }
