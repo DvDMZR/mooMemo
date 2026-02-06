@@ -1326,6 +1326,23 @@
         .user-list-item .user-info { flex: 1; }
         .user-list-item .user-info .name { font-weight: 600; font-size: 0.9rem; }
         .user-list-item .user-info .email { font-size: 0.75rem; color: var(--text-sub); }
+        /* Report context header */
+        .report-context {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin: 10px 15px 5px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .report-context .rc-main { flex: 1; min-width: 0; }
+        .report-context .rc-customer { font-weight: 700; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .report-context .rc-meta { font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+        .report-context .rc-id { font-size: 0.7rem; opacity: 0.7; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 8px; white-space: nowrap; }
+
         .user-list-item .role-badge {
             font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
             cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
@@ -1487,6 +1504,9 @@
         <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()" style="width:auto; padding: 8px 16px; font-size: 0.85rem; margin-top:0;"><i class="fa-solid fa-file-import"></i> <span data-i18n="btn_import">Bericht importieren / Update</span></button>
         <input type="file" id="import-input" style="display:none" accept=".json" onchange="window.importBackup(this)">
     </div>
+
+    <!-- REPORT CONTEXT HEADER (shown in all tabs when a report is open) -->
+    <div id="report-context-header" style="display:none;"></div>
 
     <!-- HEADER DATA -->
     <div id="header" class="section">
@@ -1807,34 +1827,21 @@
                 ver: "1.7.0",
                 date: "2026-02-06",
                 changes: [
-                    "NEU: Benutzer-Authentifizierung mit E-Mail und Passwort.",
-                    "NEU: Login- und Registrierungsbildschirm.",
-                    "NEU: Passwort ändern und zurücksetzen per E-Mail.",
-                    "NEU: Benutzerprofil mit individuellem Namen und Rolle.",
-                    "NEU: Admin-Bereich: Benutzerverwaltung, Einladungscodes, Rollenzuweisung.",
-                    "NEU: Einstellungen (Sprache, KI-Sprache) werden pro Benutzer in der Cloud gespeichert.",
-                    "NEU: Berichte werden dem erstellenden Benutzer zugeordnet (created_by).",
-                    "NEU: Erster registrierter Benutzer wird automatisch Admin.",
-                    "Sicherheit: Kein anonymer Zugriff - alle Daten nur für eingeloggte @gea.com User.",
-                    "Sicherheit: Geteilte Links erfordern jetzt ebenfalls Login (Datenschutz).",
-                    "Sicherheit: Nur @gea.com E-Mail Adressen können sich registrieren.",
-                    "Admin-Bereich ist nun rollenbasiert statt PIN-geschützt."
+                    "NEU: Login mit E-Mail & Passwort - nur @gea.com Adressen.",
+                    "NEU: Benutzerverwaltung für Admins (Einladungscodes, Rollen).",
+                    "NEU: Passwort ändern im Benutzermenü.",
+                    "NEU: Einstellungen werden pro Benutzer gespeichert.",
+                    "NEU: Bericht-Info Header in Punkten, Status und Export.",
+                    "Alle Daten nur noch für eingeloggte Benutzer sichtbar."
                 ]
             },
             {
                 ver: "1.6.0",
                 date: "2026-02-06",
                 changes: [
-                    "Fix: Berichte mit vielen Bildern können nun gespeichert werden (1 MB Limit behoben).",
-                    "Bilder-Daten werden nicht mehr im Bericht-Dokument gespeichert, nur noch die URLs.",
-                    "PDF-Export: Bilder werden beim Drucken automatisch als Base64 eingebettet.",
-                    "Performance: Year-Filter wird jetzt in einem DOM-Update gerendert statt pro Jahr.",
-                    "Performance: Sortierung nach offenen Punkten vorberechnet statt pro Vergleich.",
-                    "Performance: Bilder werden parallel verarbeitet und hochgeladen statt sequenziell.",
-                    "Sicherheit: HTML-Escaping für alle Benutzereingaben (XSS-Schutz).",
-                    "UX: Toast-Nachrichten werden als Queue nacheinander angezeigt.",
-                    "Code: Zentraler getCurrentReport()-Helper ersetzt 15 duplizierte Lookups.",
-                    "Code: Toter Code entfernt (executeDelete Stub, closeDeleteModal)."
+                    "Fix: Berichte mit vielen Bildern können nun gespeichert werden.",
+                    "Bilder werden in Firebase Storage gespeichert statt im Bericht.",
+                    "Performance-Verbesserungen bei Filtern und Bildverarbeitung."
                 ]
             },
             {
@@ -2265,6 +2272,7 @@
                 currentReportId = null;
                 points = [];
                 allReports = [];
+                localStorage.removeItem('mooMemo_lastReport');
                 await signOut(auth);
                 // onAuthStateChanged will show login screen
             } catch(e) {
@@ -2532,7 +2540,34 @@
         };
 
         // --- MAIN LOGIC FUNCTIONS ---
-        
+
+        window.renderReportContext = function() {
+            const el = document.getElementById('report-context-header');
+            if (!el) return;
+            const r = window.getCurrentReport();
+            if (!r || !currentReportId) {
+                el.style.display = 'none';
+                return;
+            }
+            const h = r.header;
+            const customer = h.customer || 'Neuer Bericht';
+            const authors = (h.authors && h.authors.length) ? h.authors.join(', ') : (h.author || '');
+            const formatDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d; };
+            const dateStr = h.date_from ? formatDate(h.date_from) : '';
+            const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
+            const openCount = (r.points || []).filter(p => p.status === 'open').length;
+            const meta = [authors, dateStr, h.type || 'AMS'].filter(Boolean).join(' · ');
+
+            el.innerHTML = `<div class="report-context">
+                <div class="rc-main">
+                    <div class="rc-customer">${window.escapeHtml(customer)}</div>
+                    <div class="rc-meta">${window.escapeHtml(meta)}${openCount > 0 ? ` · <strong>${openCount} offen</strong>` : ''}</div>
+                </div>
+                <span class="rc-id">${displayId}</span>
+            </div>`;
+            el.style.display = 'block';
+        };
+
         window.renderParticipantsList = function(l) { 
             const el = document.getElementById('participants-list');
             if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Teilnehmer</span>' : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join('');
@@ -3152,15 +3187,19 @@ Text: "${desc}"`;
         window.goToDashboard = function() {
             currentReportId = null;
             points = [];
-            
+
             // Clear memory
             localStorage.removeItem('mooMemo_lastReport');
-            
+
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.getElementById('dashboard').classList.add('active');
             document.getElementById('tab-navigation').style.display = 'none';
             document.getElementById('nav-back-btn').style.display = 'none';
             document.getElementById('header-logo').style.display = 'inline-block';
+
+            // Hide report context header
+            const ctx = document.getElementById('report-context-header');
+            if (ctx) ctx.style.display = 'none';
 
             window.renderReportList();
         };
@@ -3238,6 +3277,7 @@ Text: "${desc}"`;
             const map = {'header':0, 'points':1, 'status':2, 'export':3};
             document.querySelectorAll('.nav-item')[map[id]].classList.add('active');
             document.getElementById('fab-btn').style.display = (id==='points') ? 'flex' : 'none';
+            window.renderReportContext();
             if(id==='points') window.renderPointsList();
             if(id==='status') window.renderStatusList();
             if(id==='export') {
