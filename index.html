@@ -1577,7 +1577,14 @@
                 changes: [
                     "Fix: Berichte mit vielen Bildern können nun gespeichert werden (1 MB Limit behoben).",
                     "Bilder-Daten werden nicht mehr im Bericht-Dokument gespeichert, nur noch die URLs.",
-                    "PDF-Export: Bilder werden beim Drucken automatisch als Base64 eingebettet."
+                    "PDF-Export: Bilder werden beim Drucken automatisch als Base64 eingebettet.",
+                    "Performance: Year-Filter wird jetzt in einem DOM-Update gerendert statt pro Jahr.",
+                    "Performance: Sortierung nach offenen Punkten vorberechnet statt pro Vergleich.",
+                    "Performance: Bilder werden parallel verarbeitet und hochgeladen statt sequenziell.",
+                    "Sicherheit: HTML-Escaping für alle Benutzereingaben (XSS-Schutz).",
+                    "UX: Toast-Nachrichten werden als Queue nacheinander angezeigt.",
+                    "Code: Zentraler getCurrentReport()-Helper ersetzt 15 duplizierte Lookups.",
+                    "Code: Toter Code entfernt (executeDelete Stub, closeDeleteModal)."
                 ]
             },
             {
