@@ -2184,31 +2184,27 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrieren...';
 
             try {
-                // Check if this is the first user (no invite code needed)
+                // Step 1: Create Firebase Auth user FIRST (no Firestore access needed)
+                const cred = await createUserWithEmailAndPassword(auth, email, pw);
+                await updateProfile(cred.user, { displayName: name });
+
+                // Step 2: Now authenticated - check if this is the first user
                 const isFirstUser = await window.checkFirstUser();
 
                 if (!isFirstUser) {
-                    // Verify invite code
+                    // Verify invite code (now we have Firestore access)
                     const storedCode = await window.loadInviteCode();
-                    if (!storedCode) {
-                        window.showRegisterError('Registrierung ist aktuell nicht möglich. Bitte Admin kontaktieren.');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
-                        return;
-                    }
-                    if (inviteCode !== storedCode) {
-                        window.showRegisterError('Einladungscode ist falsch.');
+                    if (!storedCode || inviteCode !== storedCode) {
+                        // Wrong code - delete the just-created auth account
+                        await cred.user.delete();
+                        window.showRegisterError(storedCode ? 'Einladungscode ist falsch.' : 'Registrierung ist aktuell nicht möglich. Bitte Admin kontaktieren.');
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
                         return;
                     }
                 }
 
-                // Create Firebase Auth user
-                const cred = await createUserWithEmailAndPassword(auth, email, pw);
-                await updateProfile(cred.user, { displayName: name });
-
-                // Create user profile in Firestore
+                // Step 3: Create user profile in Firestore
                 const role = isFirstUser ? 'admin' : 'user';
                 await window.createUserProfile(cred.user.uid, email, name, role);
 
