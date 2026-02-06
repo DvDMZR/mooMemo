@@ -1233,7 +1233,15 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
             animation: pop-in 0.4s ease-out;
+            position: relative;
         }
+        .login-lang-toggle { position: absolute; top: 12px; right: 12px; display: flex; gap: 2px; }
+        .login-lang-btn {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-sub);
+            font-size: 0.7rem; font-weight: 600; padding: 3px 8px; cursor: pointer; border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .login-lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
         .login-card img { height: 36px; margin-bottom: 8px; }
         .login-card h2 { color: var(--primary); font-size: 1.5rem; margin: 0 0 8px 0; font-weight: 800; }
         .login-card .login-subtitle { color: var(--text-sub); font-size: 0.85rem; margin-bottom: 24px; }
@@ -1340,9 +1348,13 @@
     <!-- LOGIN OVERLAY -->
     <div id="login-overlay" style="display:none;">
         <div class="login-card">
+            <div class="login-lang-toggle">
+                <button class="login-lang-btn active" data-loginlang="de" onclick="window.setLoginLang('de')">DE</button>
+                <button class="login-lang-btn" data-loginlang="en" onclick="window.setLoginLang('en')">EN</button>
+            </div>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA">
             <h2>mooMemo</h2>
-            <p class="login-subtitle">Besuchsberichte & Aufgabenverwaltung</p>
+            <p class="login-subtitle" id="login-subtitle">Besuchsberichte & Aufgabenverwaltung</p>
 
             <!-- LOGIN FORM -->
             <div id="login-form">
@@ -1350,12 +1362,12 @@
                 <input type="email" id="login-email" placeholder="E-Mail Adresse" autocomplete="email">
                 <input type="password" id="login-password" placeholder="Passwort" autocomplete="current-password" onkeydown="if(event.key==='Enter') window.doLogin()">
                 <button class="btn btn-primary" onclick="window.doLogin()" id="login-btn">
-                    <i class="fa-solid fa-right-to-bracket"></i> Anmelden
+                    <i class="fa-solid fa-right-to-bracket"></i> <span id="login-btn-text">Anmelden</span>
                 </button>
-                <div class="login-divider">&mdash; oder &mdash;</div>
-                <span class="login-link" onclick="window.showRegisterForm()">Neues Konto erstellen</span>
+                <div class="login-divider" id="login-divider">&mdash; oder &mdash;</div>
+                <span class="login-link" onclick="window.showRegisterForm()" id="login-create-link">Neues Konto erstellen</span>
                 <br><br>
-                <span class="login-link" onclick="window.doPasswordReset()" style="font-size:0.8rem; font-weight:400; color:var(--text-sub);">Passwort vergessen?</span>
+                <span class="login-link" onclick="window.doPasswordReset()" style="font-size:0.8rem; font-weight:400; color:var(--text-sub);" id="login-forgot-link">Passwort vergessen?</span>
             </div>
 
             <!-- REGISTER FORM -->
@@ -1367,10 +1379,10 @@
                 <input type="password" id="reg-password2" placeholder="Passwort wiederholen" autocomplete="new-password">
                 <input type="text" id="reg-invite" placeholder="Einladungscode">
                 <button class="btn btn-primary" onclick="window.doRegister()" id="register-btn">
-                    <i class="fa-solid fa-user-plus"></i> Registrieren
+                    <i class="fa-solid fa-user-plus"></i> <span id="register-btn-text">Registrieren</span>
                 </button>
                 <div class="login-divider"></div>
-                <span class="login-link" onclick="window.showLoginForm()"><i class="fa-solid fa-arrow-left"></i> Zurück zum Login</span>
+                <span class="login-link" onclick="window.showLoginForm()" id="register-back-link"><i class="fa-solid fa-arrow-left"></i> Zurück zum Login</span>
             </div>
         </div>
     </div>
@@ -1410,7 +1422,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.0)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.1)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1623,7 +1635,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.7.0</div>
+                        <div class="info-version">mooMemo v1.7.1</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1790,7 +1802,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.7.0";
+        const APP_VERSION = "1.7.1";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1807,6 +1819,13 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.7.1",
+                date: "2026-02-06",
+                changes: [
+                    "NEU: Sprachwahl (DE/EN) auf dem Login-Bildschirm."
+                ]
+            },
             {
                 ver: "1.7.0",
                 date: "2026-02-06",
@@ -2093,6 +2112,8 @@
             document.querySelector('.app-logo-header').style.display = 'none';
             document.getElementById('tab-navigation').style.display = 'none';
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            // Apply saved login language
+            window.setLoginLang(loginLang);
         };
 
         window.hideLoginScreen = function() {
@@ -2129,53 +2150,159 @@
             el.className = 'login-error visible';
         };
 
+        // --- LOGIN SCREEN LANGUAGE ---
+        let loginLang = localStorage.getItem('mooMemo_lang') || 'de';
+
+        const loginTranslations = {
+            de: {
+                subtitle: 'Besuchsberichte & Aufgabenverwaltung',
+                email_placeholder: 'E-Mail Adresse',
+                password_placeholder: 'Passwort',
+                login_btn: 'Anmelden',
+                login_loading: 'Anmelden...',
+                divider: '\u2014 oder \u2014',
+                create_account: 'Neues Konto erstellen',
+                forgot_pw: 'Passwort vergessen?',
+                name_placeholder: 'Vor- und Nachname',
+                reg_email_placeholder: 'vorname.nachname@gea.com',
+                reg_pw_placeholder: 'Passwort (mind. 6 Zeichen)',
+                reg_pw2_placeholder: 'Passwort wiederholen',
+                invite_placeholder: 'Einladungscode',
+                register_btn: 'Registrieren',
+                register_loading: 'Registrieren...',
+                back_login: 'Zurück zum Login',
+                err_email_pw: 'Bitte E-Mail und Passwort eingeben.',
+                err_login_fail: 'Anmeldung fehlgeschlagen.',
+                err_wrong_cred: 'E-Mail oder Passwort falsch.',
+                err_invalid_email: 'Ungültige E-Mail Adresse.',
+                err_too_many: 'Zu viele Versuche. Bitte warte kurz.',
+                err_name: 'Bitte Namen eingeben.',
+                err_fullname: 'Bitte Vor- UND Nachname eingeben (z.B. Max Mustermann).',
+                err_email: 'Bitte E-Mail eingeben.',
+                err_gea_only: 'Nur @gea.com E-Mail Adressen sind erlaubt.',
+                err_pw_short: 'Passwort muss mindestens 6 Zeichen haben.',
+                err_pw_match: 'Passwörter stimmen nicht überein.',
+                err_invite_required: 'Einladungscode erforderlich. Bitte bei David.Mazur@gea.com anfordern.',
+                err_invite_wrong: 'Einladungscode ist falsch. Bitte bei David.Mazur@gea.com anfordern.',
+                err_reg_unavailable: 'Registrierung ist aktuell nicht möglich. Bitte David.Mazur@gea.com kontaktieren.',
+                err_reg_fail: 'Registrierung fehlgeschlagen.',
+                err_email_used: 'Diese E-Mail wird bereits verwendet.',
+                err_pw_weak: 'Passwort ist zu schwach.',
+                pw_reset_msg: 'Passwort vergessen?\n\nBitte wende dich an David.Mazur@gea.com.\nDein Konto wird dann zurückgesetzt und du kannst dich neu registrieren.'
+            },
+            en: {
+                subtitle: 'Visit Reports & Task Management',
+                email_placeholder: 'Email Address',
+                password_placeholder: 'Password',
+                login_btn: 'Sign In',
+                login_loading: 'Signing in...',
+                divider: '\u2014 or \u2014',
+                create_account: 'Create New Account',
+                forgot_pw: 'Forgot password?',
+                name_placeholder: 'First and Last Name',
+                reg_email_placeholder: 'firstname.lastname@gea.com',
+                reg_pw_placeholder: 'Password (min. 6 characters)',
+                reg_pw2_placeholder: 'Repeat Password',
+                invite_placeholder: 'Invite Code',
+                register_btn: 'Register',
+                register_loading: 'Registering...',
+                back_login: 'Back to Login',
+                err_email_pw: 'Please enter email and password.',
+                err_login_fail: 'Login failed.',
+                err_wrong_cred: 'Email or password incorrect.',
+                err_invalid_email: 'Invalid email address.',
+                err_too_many: 'Too many attempts. Please wait a moment.',
+                err_name: 'Please enter your name.',
+                err_fullname: 'Please enter first AND last name (e.g. John Smith).',
+                err_email: 'Please enter an email.',
+                err_gea_only: 'Only @gea.com email addresses are allowed.',
+                err_pw_short: 'Password must be at least 6 characters.',
+                err_pw_match: 'Passwords do not match.',
+                err_invite_required: 'Invite code required. Please request from David.Mazur@gea.com.',
+                err_invite_wrong: 'Invite code is incorrect. Please request from David.Mazur@gea.com.',
+                err_reg_unavailable: 'Registration is currently not possible. Please contact David.Mazur@gea.com.',
+                err_reg_fail: 'Registration failed.',
+                err_email_used: 'This email is already in use.',
+                err_pw_weak: 'Password is too weak.',
+                pw_reset_msg: 'Forgot your password?\n\nPlease contact David.Mazur@gea.com.\nYour account will be reset and you can re-register.'
+            }
+        };
+
+        window.setLoginLang = function(lang) {
+            loginLang = lang;
+            localStorage.setItem('mooMemo_lang', lang);
+            const t = loginTranslations[lang];
+            // Update toggle buttons
+            document.querySelectorAll('.login-lang-btn').forEach(b => b.classList.remove('active'));
+            const active = document.querySelector(`.login-lang-btn[data-loginlang="${lang}"]`);
+            if (active) active.classList.add('active');
+            // Update texts
+            document.getElementById('login-subtitle').textContent = t.subtitle;
+            document.getElementById('login-email').placeholder = t.email_placeholder;
+            document.getElementById('login-password').placeholder = t.password_placeholder;
+            document.getElementById('login-btn-text').textContent = t.login_btn;
+            document.getElementById('login-divider').innerHTML = t.divider;
+            document.getElementById('login-create-link').textContent = t.create_account;
+            document.getElementById('login-forgot-link').textContent = t.forgot_pw;
+            document.getElementById('reg-name').placeholder = t.name_placeholder;
+            document.getElementById('reg-email').placeholder = t.reg_email_placeholder;
+            document.getElementById('reg-password').placeholder = t.reg_pw_placeholder;
+            document.getElementById('reg-password2').placeholder = t.reg_pw2_placeholder;
+            document.getElementById('reg-invite').placeholder = t.invite_placeholder;
+            document.getElementById('register-btn-text').textContent = t.register_btn;
+            const backLink = document.getElementById('register-back-link');
+            backLink.innerHTML = '<i class="fa-solid fa-arrow-left"></i> ' + t.back_login;
+        };
+
         // --- LOGIN ---
         window.doLogin = async function() {
+            const lt = loginTranslations[loginLang];
             const email = document.getElementById('login-email').value.trim();
             const pw = document.getElementById('login-password').value;
-            if (!email || !pw) { window.showLoginError('Bitte E-Mail und Passwort eingeben.'); return; }
+            if (!email || !pw) { window.showLoginError(lt.err_email_pw); return; }
 
             const btn = document.getElementById('login-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Anmelden...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + lt.login_loading;
 
             try {
                 await signInWithEmailAndPassword(auth, email, pw);
                 // onAuthStateChanged will handle the rest
             } catch(e) {
                 console.error("Login failed:", e);
-                let msg = 'Anmeldung fehlgeschlagen.';
+                let msg = lt.err_login_fail;
                 if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-                    msg = 'E-Mail oder Passwort falsch.';
+                    msg = lt.err_wrong_cred;
                 } else if (e.code === 'auth/invalid-email') {
-                    msg = 'Ungültige E-Mail Adresse.';
+                    msg = lt.err_invalid_email;
                 } else if (e.code === 'auth/too-many-requests') {
-                    msg = 'Zu viele Versuche. Bitte warte kurz.';
+                    msg = lt.err_too_many;
                 }
                 window.showLoginError(msg);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Anmelden';
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ' + lt.login_btn;
             }
         };
 
         // --- REGISTER ---
         window.doRegister = async function() {
+            const lt = loginTranslations[loginLang];
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const pw = document.getElementById('reg-password').value;
             const pw2 = document.getElementById('reg-password2').value;
             const inviteCode = document.getElementById('reg-invite').value.trim();
 
-            if (!name) { window.showRegisterError('Bitte Namen eingeben.'); return; }
-            if (name.split(/\s+/).length < 2) { window.showRegisterError('Bitte Vor- UND Nachname eingeben (z.B. Max Mustermann).'); return; }
-            if (!email) { window.showRegisterError('Bitte E-Mail eingeben.'); return; }
-            if (!email.toLowerCase().endsWith('@gea.com')) { window.showRegisterError('Nur @gea.com E-Mail Adressen sind erlaubt.'); return; }
-            if (pw.length < 6) { window.showRegisterError('Passwort muss mindestens 6 Zeichen haben.'); return; }
-            if (pw !== pw2) { window.showRegisterError('Passwörter stimmen nicht überein.'); return; }
+            if (!name) { window.showRegisterError(lt.err_name); return; }
+            if (name.split(/\s+/).length < 2) { window.showRegisterError(lt.err_fullname); return; }
+            if (!email) { window.showRegisterError(lt.err_email); return; }
+            if (!email.toLowerCase().endsWith('@gea.com')) { window.showRegisterError(lt.err_gea_only); return; }
+            if (pw.length < 6) { window.showRegisterError(lt.err_pw_short); return; }
+            if (pw !== pw2) { window.showRegisterError(lt.err_pw_match); return; }
 
             const btn = document.getElementById('register-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrieren...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + lt.register_loading;
 
             try {
                 // Block onAuthStateChanged from running during registration
@@ -2195,18 +2322,18 @@
                         // No invite code entered
                         isRegistering = false;
                         await cred.user.delete();
-                        window.showRegisterError('Einladungscode erforderlich. Bitte bei David.Mazur@gea.com anfordern.');
+                        window.showRegisterError(lt.err_invite_required);
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
+                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> ' + lt.register_btn;
                         return;
                     }
                     if (!storedCode || inviteCode !== storedCode) {
                         // Wrong code - delete the just-created auth account
                         isRegistering = false;
                         await cred.user.delete();
-                        window.showRegisterError(storedCode ? 'Einladungscode ist falsch. Bitte bei David.Mazur@gea.com anfordern.' : 'Registrierung ist aktuell nicht möglich. Bitte David.Mazur@gea.com kontaktieren.');
+                        window.showRegisterError(storedCode ? lt.err_invite_wrong : lt.err_reg_unavailable);
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
+                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> ' + lt.register_btn;
                         return;
                     }
                 }
@@ -2223,8 +2350,9 @@
                 window.hideLoginScreen();
                 window.updateUserUI();
                 window.updateSyncStatus(true);
+                // Apply login language as app language for new user
+                window.setLanguage(loginLang);
                 if (currentUserProfile && currentUserProfile.settings) {
-                    if (currentUserProfile.settings.lang) window.setLanguage(currentUserProfile.settings.lang);
                     if (currentUserProfile.settings.aiLang) window.setAiTargetLang(currentUserProfile.settings.aiLang);
                 }
                 window.checkVersion();
@@ -2233,17 +2361,17 @@
             } catch(e) {
                 isRegistering = false;
                 console.error("Register failed:", e);
-                let msg = 'Registrierung fehlgeschlagen.';
+                let msg = lt.err_reg_fail;
                 if (e.code === 'auth/email-already-in-use') {
-                    msg = 'Diese E-Mail wird bereits verwendet.';
+                    msg = lt.err_email_used;
                 } else if (e.code === 'auth/invalid-email') {
-                    msg = 'Ungültige E-Mail Adresse.';
+                    msg = lt.err_invalid_email;
                 } else if (e.code === 'auth/weak-password') {
-                    msg = 'Passwort ist zu schwach.';
+                    msg = lt.err_pw_weak;
                 }
                 window.showRegisterError(msg);
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrieren';
+                btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> ' + lt.register_btn;
             }
         };
 
@@ -2266,7 +2394,8 @@
 
         // --- PASSWORD RESET ---
         window.doPasswordReset = function() {
-            alert('Passwort vergessen?\n\nBitte wende dich an David.Mazur@gea.com.\nDein Konto wird dann zurückgesetzt und du kannst dich neu registrieren.');
+            const lt = loginTranslations[loginLang];
+            alert(lt.pw_reset_msg);
         };
 
         // --- PASSWORD CHANGE ---
