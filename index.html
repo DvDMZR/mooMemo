@@ -1732,6 +1732,15 @@
         };
 
         // --- HELPER FUNCTIONS ---
+        window.escapeHtml = function(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        };
+
+        window.getCurrentReport = function() {
+            return allReports.find(r => r.id === currentReportId);
+        };
+
         window.getAgeInMonths = function(dateStr) {
             if (!dateStr) return 0;
             const start = new Date(dateStr);
@@ -1807,14 +1816,20 @@
             else { el.classList.add('offline'); el.classList.remove('online'); txt.textContent = "Offline"; }
         };
 
+        const toastQueue = [];
+        let toastActive = false;
         window.showToast = function(message) {
-            const x = document.getElementById("toast"); 
-            if(x) {
-                x.className = "show"; 
-                x.textContent = message; 
-                setTimeout(() => x.className = x.className.replace("show", ""), 3000);
-            }
+            toastQueue.push(message);
+            if (!toastActive) processToastQueue();
         };
+        function processToastQueue() {
+            const x = document.getElementById("toast");
+            if (!x || toastQueue.length === 0) { toastActive = false; return; }
+            toastActive = true;
+            x.textContent = toastQueue.shift();
+            x.className = "show";
+            setTimeout(() => { x.className = x.className.replace("show", ""); setTimeout(processToastQueue, 350); }, 2500);
+        }
 
         // --- AUTH ---
         window.initAuth = async function() {
@@ -1834,12 +1849,12 @@
         
         window.renderParticipantsList = function(l) { 
             const el = document.getElementById('participants-list');
-            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Teilnehmer</span>' : l.map((p,i)=>`<div class="tag-item">${p} <span class="tag-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join(''); 
+            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Teilnehmer</span>' : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join('');
         };
 
-        window.renderAuthorsList = function(l) { 
+        window.renderAuthorsList = function(l) {
             const el = document.getElementById('authors-list');
-            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Verfasser</span>' : l.map((p,i)=>`<div class="tag-item">${p} <span class="tag-remove" onclick="window.removeAuthor(${i})">&times;</span></div>`).join(''); 
+            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Verfasser</span>' : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeAuthor(${i})">&times;</span></div>`).join(''); 
         };
 
         window.renderModalImages = function() { 
@@ -1852,7 +1867,7 @@
             if(!container) return;
             const t = translations[currentLang];
             if(points.length===0) { container.innerHTML=`<div style="text-align:center; padding:40px; color:#9ca3af;">${t.no_points}</div>`; return; }
-            const r = allReports.find(x=>x.id===currentReportId);
+            const r = window.getCurrentReport();
             const rDate = r ? r.header.date_from : new Date();
             
             container.innerHTML = points.map((p,i) => {
@@ -1866,13 +1881,13 @@
                     <div class="point-content-wrapper">
                         <div class="point-header-row">
                             <div class="point-title">
-                                ${p.ticket ? `<span class="ticket-link"><i class="fa-solid fa-ticket"></i> CRM ${p.ticket}</span>` : ''}
-                                ${p.title}
+                                ${p.ticket ? `<span class="ticket-link"><i class="fa-solid fa-ticket"></i> CRM ${window.escapeHtml(p.ticket)}</span>` : ''}
+                                ${window.escapeHtml(p.title)}
                             </div>
                             <div>${badge}</div>
                         </div>
-                        <div class="point-desc">${(p.desc||'').substring(0,80)}...</div>
-                        <div class="point-meta-row"><span><i class="fa-solid fa-user"></i> ${p.assignee||t.no_assignee}</span>${p.images&&p.images.length?`<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>`:''}</div>
+                        <div class="point-desc">${window.escapeHtml((p.desc||'').substring(0,80))}...</div>
+                        <div class="point-meta-row"><span><i class="fa-solid fa-user"></i> ${window.escapeHtml(p.assignee)||t.no_assignee}</span>${p.images&&p.images.length?`<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>`:''}</div>
                     </div>
                     <div class="point-sort-column">${moveUp}${moveDown}</div>
                 </div>`;
@@ -1891,8 +1906,8 @@
                 const btnBg = p.status==='open' ? 'var(--danger-bg)' : 'var(--success-bg)';
                 const btnColor = p.status==='open' ? '#991b1b' : '#065f46';
                 const imgCount = p.images&&p.images.length>0 ? `<span style="margin-left:8px; opacity:0.8;"><i class="fa-solid fa-image"></i> ${p.images.length}</span>` : '';
-                const ticket = p.ticket ? `<span style="font-size:0.75rem; background:#eff6ff; color:#1d4ed8; padding:1px 6px; border-radius:4px; margin-right:6px; border:1px solid #bfdbfe; vertical-align:middle; display:inline-block;"><i class="fa-solid fa-ticket"></i> CRM ${p.ticket}</span>` : '';
-                const item = `<div class="status-item-anim" style="background:white; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${p.status==='open'?'var(--danger)':'var(--success)'}; cursor:pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" onclick="window.openModal(${i})"><div style="flex:1"><div style="margin-bottom:2px;">${ticket}<strong style="vertical-align:middle;">${p.title}</strong></div><div style="font-size:0.8rem; color:gray; margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.7rem;"></i> ${p.assignee||t.no_assignee} ${imgCount}</div></div><button class="btn" style="width:auto; margin:0; margin-left:10px; font-size:0.75rem; padding:6px 12px; background:${btnBg}; color:${btnColor}; font-weight:700; border-radius:8px;" onclick="event.stopPropagation(); window.toggleStatus(${i})">${btnText}</button></div>`;
+                const ticket = p.ticket ? `<span style="font-size:0.75rem; background:#eff6ff; color:#1d4ed8; padding:1px 6px; border-radius:4px; margin-right:6px; border:1px solid #bfdbfe; vertical-align:middle; display:inline-block;"><i class="fa-solid fa-ticket"></i> CRM ${window.escapeHtml(p.ticket)}</span>` : '';
+                const item = `<div class="status-item-anim" style="background:white; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${p.status==='open'?'var(--danger)':'var(--success)'}; cursor:pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" onclick="window.openModal(${i})"><div style="flex:1"><div style="margin-bottom:2px;">${ticket}<strong style="vertical-align:middle;">${window.escapeHtml(p.title)}</strong></div><div style="font-size:0.8rem; color:gray; margin-top:2px;"><i class="fa-solid fa-user" style="font-size:0.7rem;"></i> ${window.escapeHtml(p.assignee)||t.no_assignee} ${imgCount}</div></div><button class="btn" style="width:auto; margin:0; margin-left:10px; font-size:0.75rem; padding:6px 12px; background:${btnBg}; color:${btnColor}; font-weight:700; border-radius:8px;" onclick="event.stopPropagation(); window.toggleStatus(${i})">${btnText}</button></div>`;
                 if(p.status==='open') { cOpen++; htmlOpen+=item; } else { cRes++; htmlResolved+=item; }
             });
             listOpen.innerHTML=htmlOpen||`<div style="text-align:center; color:#9ca3af; font-style:italic;">${t.no_open_points}</div>`;
@@ -1930,7 +1945,7 @@
              if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between; align-items:flex-start;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${logoSrc}" style="height:40px; width:126px; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
         
-        window.renderPDFPreview = () => window.renderPDFPreviewWithData(allReports.find(x=>x.id===currentReportId));
+        window.renderPDFPreview = () => window.renderPDFPreviewWithData(window.getCurrentReport());
 
         window.setExportFilter = function(filter) {
             exportFilter = filter;
@@ -1948,7 +1963,7 @@
             const sidebar = document.getElementById('related-reports-sidebar');
             if (!container) return;
 
-            const currentReport = allReports.find(r => r.id === currentReportId);
+            const currentReport = window.getCurrentReport();
             if (!currentReport || !currentReport.header.customer) {
                 if (sidebar) sidebar.style.display = 'none';
                 return;
@@ -2210,8 +2225,7 @@ Text: "${desc}"`;
             const yearSelect = document.getElementById('year-filter');
             const uniqueYears = [...new Set(allReports.map(r => r.header.date_from ? r.header.date_from.substring(0,4) : ''))].filter(y => y).sort().reverse();
             const currentVal = yearSelect.value;
-            yearSelect.innerHTML = `<option value="all">${t.filter_all_years}</option>`;
-            uniqueYears.forEach(y => yearSelect.innerHTML += `<option value="${y}">${y}</option>`);
+            yearSelect.innerHTML = `<option value="all">${t.filter_all_years}</option>` + uniqueYears.map(y => `<option value="${y}">${y}</option>`).join('');
             if(uniqueYears.includes(filterYear)) yearSelect.value = filterYear; else if(filterYear !== 'all') yearSelect.value = 'all'; else yearSelect.value = currentVal;
             
             const searchInput = document.getElementById('search-input');
@@ -2241,20 +2255,25 @@ Text: "${desc}"`;
                 return matchType && matchYear && matchSearch;
             });
 
-            filteredReports.sort((a, b) => {
-                if(sortMethod==='date_asc') return new Date(a.header.date_from)-new Date(b.header.date_from);
-                if(sortMethod==='author') {
-                    const aAuthor = (a.header.authors && a.header.authors.length) ? a.header.authors[0] : (a.header.author || '');
-                    const bAuthor = (b.header.authors && b.header.authors.length) ? b.header.authors[0] : (b.header.author || '');
-                    return aAuthor.localeCompare(bAuthor);
-                }
-                if(sortMethod==='open_points') return ((b.points||[]).filter(p=>p.status==='open').length)-((a.points||[]).filter(p=>p.status==='open').length);
-                return new Date(b.header.date_from)-new Date(a.header.date_from);
-            });
+            if(sortMethod==='open_points') {
+                const openCountMap = new Map();
+                filteredReports.forEach(r => openCountMap.set(r.id, (r.points||[]).filter(p=>p.status==='open').length));
+                filteredReports.sort((a, b) => openCountMap.get(b.id) - openCountMap.get(a.id));
+            } else {
+                filteredReports.sort((a, b) => {
+                    if(sortMethod==='date_asc') return new Date(a.header.date_from)-new Date(b.header.date_from);
+                    if(sortMethod==='author') {
+                        const aAuthor = (a.header.authors && a.header.authors.length) ? a.header.authors[0] : (a.header.author || '');
+                        const bAuthor = (b.header.authors && b.header.authors.length) ? b.header.authors[0] : (b.header.author || '');
+                        return aAuthor.localeCompare(bAuthor);
+                    }
+                    return new Date(b.header.date_from)-new Date(a.header.date_from);
+                });
+            }
 
             list.innerHTML = filteredReports.map(r => {
-                let title = r.header.customer || "Neuer Bericht";
-                if(r.header.date_from) { const d = new Date(r.header.date_from); if(!isNaN(d)) { const [w,y] = window.getWeekNumber(d); title = `KW ${w} ${y} - ${r.header.customer}`; } }
+                let title = window.escapeHtml(r.header.customer) || "Neuer Bericht";
+                if(r.header.date_from) { const d = new Date(r.header.date_from); if(!isNaN(d)) { const [w,y] = window.getWeekNumber(d); title = `KW ${w} ${y} - ${window.escapeHtml(r.header.customer)}`; } }
                 const openCount = (r.points||[]).filter(p=>p.status==='open').length;
                 const total = (r.points||[]).length;
                 const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
@@ -2271,7 +2290,7 @@ Text: "${desc}"`;
                 }
                 const pointsTxt = total > 0 ? `${total} ${t.tab_points}` : t.no_points;
                 // Use authors array, fallback to deprecated author field
-                const authorsDisplay = (r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-');
+                const authorsDisplay = window.escapeHtml((r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-'));
                 return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button><button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button></div></div>`;
             }).join('');
         };
@@ -2363,7 +2382,7 @@ Text: "${desc}"`;
                 }
 
                 if (currentReportId) {
-                    const r = allReports.find(x => x.id === currentReportId);
+                    const r = window.getCurrentReport();
                     if (r) {
                         points = r.points;
                         if(document.getElementById('points').classList.contains('active')) window.renderPointsList();
@@ -2497,7 +2516,7 @@ Text: "${desc}"`;
             if(!currentReportId) return;
             if (headerUpdateTimeout) clearTimeout(headerUpdateTimeout);
             headerUpdateTimeout = setTimeout(() => {
-                const report = allReports.find(r => r.id === currentReportId);
+                const report = window.getCurrentReport();
                 if(report) {
                     report.header.type = document.getElementById('h_type').value;
                     report.header.customer = document.getElementById('h_customer').value;
@@ -2536,7 +2555,7 @@ Text: "${desc}"`;
                 images: tempImages 
              };
              if(idx === -1) points.push(p); else points[idx] = p;
-             const r = allReports.find(x => x.id === currentReportId);
+             const r = window.getCurrentReport();
              if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_saved)); }
              window.closeModal(); window.renderPointsList(); window.renderStatusList();
         };
@@ -2576,8 +2595,6 @@ Text: "${desc}"`;
             document.getElementById('pin-auth-modal').style.display = 'none';
             pendingPinAction = null;
         };
-
-        window.closeDeleteModal = window.closePinModal;
 
         window.verifyPin = function() {
             const pin = document.getElementById('auth-pin').value;
@@ -2634,7 +2651,7 @@ Text: "${desc}"`;
             const input = document.getElementById('new_participant');
             const name = input.value.trim();
             if(!name || !currentReportId) return;
-            const r = allReports.find(x => x.id === currentReportId);
+            const r = window.getCurrentReport();
             if(!r.header.participants) r.header.participants = [];
             
             // Prevent duplicates
@@ -2649,7 +2666,7 @@ Text: "${desc}"`;
         };
 
         window.removeParticipant = function(i) {
-            const r = allReports.find(x => x.id === currentReportId);
+            const r = window.getCurrentReport();
             r.header.participants.splice(i, 1);
             window.saveReportToFirestore(r);
             window.renderParticipantsList(r.header.participants);
@@ -2659,7 +2676,7 @@ Text: "${desc}"`;
             const input = document.getElementById('new_author');
             const name = input.value.trim();
             if(!name || !currentReportId) return;
-            const r = allReports.find(x => x.id === currentReportId);
+            const r = window.getCurrentReport();
 
             // Migration check
             if(!r.header.authors) r.header.authors = [];
@@ -2679,7 +2696,7 @@ Text: "${desc}"`;
         };
 
         window.removeAuthor = function(i) {
-            const r = allReports.find(x => x.id === currentReportId);
+            const r = window.getCurrentReport();
             if(r.header.authors) {
                 r.header.authors.splice(i, 1);
                 // Sync deprecated author field with first author
@@ -2752,7 +2769,7 @@ Text: "${desc}"`;
              const idx = parseInt(document.getElementById('edit-index').value);
              if(idx > -1) {
                  points.splice(idx, 1);
-                 const r = allReports.find(x => x.id === currentReportId);
+                 const r = window.getCurrentReport();
                  if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_deleted)); }
                  window.closeModal(); window.renderPointsList(); window.renderStatusList();
              }
@@ -2773,7 +2790,7 @@ Text: "${desc}"`;
                 const item = points[draggedItemIndex];
                 points.splice(draggedItemIndex, 1);
                 points.splice(newIndex, 0, item);
-                const r = allReports.find(x => x.id === currentReportId);
+                const r = window.getCurrentReport();
                 if(r) { r.points = points; window.saveReportToFirestore(r); }
                 window.renderPointsList();
             }
@@ -2785,7 +2802,7 @@ Text: "${desc}"`;
                 const item = points[index];
                 points.splice(index, 1);
                 points.splice(newIndex, 0, item);
-                const r = allReports.find(x => x.id === currentReportId);
+                const r = window.getCurrentReport();
                 if(r) { r.points = points; window.saveReportToFirestore(r); }
                 window.renderPointsList();
             }
@@ -2971,11 +2988,9 @@ Text: "${desc}"`;
             window.switchTab('status');
         };
         
-        window.executeDelete = function() {}; // Stub
-        
         window.toggleStatus = function(i) {
             points[i].status = points[i].status==='open' ? 'resolved' : 'open'; 
-            const r = allReports.find(x=>x.id===currentReportId); 
+            const r = window.getCurrentReport(); 
             if(r) window.saveReportToFirestore(r); 
             setTimeout(()=>{window.renderStatusList();window.renderPointsList();},10); 
         };
@@ -3000,63 +3015,61 @@ Text: "${desc}"`;
         
         // --- NEW FILE UPLOAD HANDLER ---
         
+        function resizeImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const cvs = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if(w > 2048) { h *= 2048/w; w = 2048; }
+                        cvs.width = w; cvs.height = h;
+                        const ctx = cvs.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const base64DataUrl = cvs.toDataURL('image/jpeg', 0.8);
+                        cvs.toBlob(blob => {
+                            if (blob) resolve({ blob, base64: base64DataUrl });
+                            else reject(new Error("Canvas to Blob failed"));
+                        }, 'image/jpeg', 0.8);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         window.processFiles = async function(files) {
             if(!files || !files.length) return;
 
             document.getElementById('img-spinner').style.display = 'inline-block';
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+            // Resize all images in parallel
+            const resizeResults = await Promise.allSettled(Array.from(files).map(f => resizeImage(f)));
 
-                // 1. Resize/Compress using Canvas - return both blob and base64
-                try {
-                    const { blob: processedBlob, base64 } = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = e => {
-                            const img = new Image();
-                            img.onload = () => {
-                                const cvs = document.createElement('canvas');
-                                let w = img.width, h = img.height;
-                                // 2K Resolution
-                                if(w > 2048) { h *= 2048/w; w = 2048; }
-                                cvs.width = w; cvs.height = h;
-                                const ctx = cvs.getContext('2d');
-                                ctx.drawImage(img, 0, 0, w, h);
-
-                                // Get base64 data URL for PDF export
-                                const base64DataUrl = cvs.toDataURL('image/jpeg', 0.8);
-
-                                cvs.toBlob(blob => {
-                                    if (blob) resolve({ blob, base64: base64DataUrl });
-                                    else reject(new Error("Canvas to Blob failed"));
-                                }, 'image/jpeg', 0.8);
-                            };
-                            img.onerror = reject;
-                            img.src = e.target.result;
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                    });
-
-                    // 2. Upload to Firebase Storage
-                    const reportId = currentReportId || 'temp_uploads';
+            // Upload all successfully resized images in parallel
+            const reportId = currentReportId || 'temp_uploads';
+            const uploadPromises = resizeResults
+                .filter(r => r.status === 'fulfilled')
+                .map(async (r) => {
+                    const { blob: processedBlob, base64 } = r.value;
                     const path = `images/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
                     const storageRef = ref(storage, path);
-
                     await uploadBytes(storageRef, processedBlob);
                     const downloadURL = await getDownloadURL(storageRef);
+                    return { src: downloadURL, base64, isLarge: false };
+                });
 
-                    // 3. Add to local state with both URL and base64 for PDF
-                    tempImages.push({
-                        src: downloadURL,
-                        base64: base64,
-                        isLarge: false
-                    });
-                } catch (error) {
-                    console.error("Upload failed", error);
-                    alert("Upload fehlgeschlagen: " + error.message);
-                }
-            }
+            const uploadResults = await Promise.allSettled(uploadPromises);
+            uploadResults.forEach(r => {
+                if (r.status === 'fulfilled') tempImages.push(r.value);
+                else console.error("Upload failed", r.reason);
+            });
+
+            const failCount = resizeResults.filter(r => r.status === 'rejected').length + uploadResults.filter(r => r.status === 'rejected').length;
+            if (failCount > 0) alert(`${failCount} Bild(er) konnten nicht hochgeladen werden.`);
 
             document.getElementById('img-spinner').style.display = 'none';
             window.renderModalImages();
