@@ -1770,7 +1770,7 @@
     <!-- LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
@@ -1815,7 +1815,9 @@
                     "NEU: Einstellungen (Sprache, KI-Sprache) werden pro Benutzer in der Cloud gespeichert.",
                     "NEU: Berichte werden dem erstellenden Benutzer zugeordnet (created_by).",
                     "NEU: Erster registrierter Benutzer wird automatisch Admin.",
-                    "Sicherheit: Kein anonymer Zugriff mehr auf die App (nur geteilte Links).",
+                    "Sicherheit: Kein anonymer Zugriff - alle Daten nur für eingeloggte @gea.com User.",
+                    "Sicherheit: Geteilte Links erfordern jetzt ebenfalls Login (Datenschutz).",
+                    "Sicherheit: Nur @gea.com E-Mail Adressen können sich registrieren.",
                     "Admin-Bereich ist nun rollenbasiert statt PIN-geschützt."
                 ]
             },
@@ -2490,18 +2492,7 @@
         };
 
         window.initAuth = async function() {
-            // For shared links, use anonymous auth
-            if (sharedReportId) {
-                try {
-                    if (!auth.currentUser) {
-                        await signInAnonymously(auth);
-                    }
-                } catch(e) {
-                    console.error("Anonymous auth failed", e);
-                }
-                return;
-            }
-            // For normal access, show login screen
+            // Always require login - no anonymous access
             window.showLoginScreen();
         };
 
@@ -3857,15 +3848,13 @@ Text: "${desc}"`;
                 currentUser = user;
                 window.updateSyncStatus(true);
 
-                // SHARED LINK MODE: Skip profile loading, just setup listener
-                if (sharedReportId && user.isAnonymous) {
-                    window.fetchGlobalConfig().then(() => {
-                        window.setupRealtimeListener();
-                    });
+                // Reject anonymous users - require real login
+                if (user.isAnonymous) {
+                    await signOut(auth);
                     return;
                 }
 
-                // NORMAL MODE: Load user profile
+                // Load user profile
                 let profile = await window.loadUserProfile(user.uid);
 
                 // If profile doesn't exist (e.g. created via another method), create one
