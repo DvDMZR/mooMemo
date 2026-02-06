@@ -1942,6 +1942,8 @@
         console.log("mooMemo Version:", APP_VERSION);
         // --- KONFIGURATION ENDE ---
 
+        let isRegistering = false; // Flag to prevent onAuthStateChanged race condition during registration
+
         let firebaseConfig;
         let appId;
         
@@ -2184,11 +2186,14 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrieren...';
 
             try {
+                // Block onAuthStateChanged from running during registration
+                isRegistering = true;
+
                 // Step 1: Create Firebase Auth user FIRST (no Firestore access needed)
                 const cred = await createUserWithEmailAndPassword(auth, email, pw);
                 await updateProfile(cred.user, { displayName: name });
 
-                // Step 2: Now authenticated - check if this is the first user
+                // Step 2: Now authenticated - check if this is the first user profile
                 const isFirstUser = await window.checkFirstUser();
 
                 if (!isFirstUser) {
@@ -2196,6 +2201,7 @@
                     const storedCode = await window.loadInviteCode();
                     if (!storedCode || inviteCode !== storedCode) {
                         // Wrong code - delete the just-created auth account
+                        isRegistering = false;
                         await cred.user.delete();
                         window.showRegisterError(storedCode ? 'Einladungscode ist falsch.' : 'Registrierung ist aktuell nicht möglich. Bitte Admin kontaktieren.');
                         btn.disabled = false;
@@ -2208,8 +2214,23 @@
                 const role = isFirstUser ? 'admin' : 'user';
                 await window.createUserProfile(cred.user.uid, email, name, role);
 
-                // onAuthStateChanged will handle the rest
+                // Step 4: Done - let onAuthStateChanged take over
+                isRegistering = false;
+                // Manually trigger the post-login setup
+                currentUser = cred.user;
+                currentUserProfile = await window.loadUserProfile(cred.user.uid);
+                window.hideLoginScreen();
+                window.updateUserUI();
+                window.updateSyncStatus(true);
+                if (currentUserProfile && currentUserProfile.settings) {
+                    if (currentUserProfile.settings.lang) window.setLanguage(currentUserProfile.settings.lang);
+                    if (currentUserProfile.settings.aiLang) window.setAiTargetLang(currentUserProfile.settings.aiLang);
+                }
+                window.checkVersion();
+                window.fetchGlobalConfig().then(() => window.setupRealtimeListener());
+                window.initBackButtonHandler();
             } catch(e) {
+                isRegistering = false;
                 console.error("Register failed:", e);
                 let msg = 'Registrierung fehlgeschlagen.';
                 if (e.code === 'auth/email-already-in-use') {
@@ -3840,6 +3861,9 @@ Text: "${desc}"`;
 
         // Only run after everything is defined
         onAuthStateChanged(auth, async (user) => {
+            // Skip if registration is in progress (doRegister handles everything)
+            if (isRegistering) return;
+
             if (user) {
                 currentUser = user;
                 window.updateSyncStatus(true);
