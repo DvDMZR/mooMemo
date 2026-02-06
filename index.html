@@ -1326,23 +1326,6 @@
         .user-list-item .user-info { flex: 1; }
         .user-list-item .user-info .name { font-weight: 600; font-size: 0.9rem; }
         .user-list-item .user-info .email { font-size: 0.75rem; color: var(--text-sub); }
-        /* Report context header */
-        .report-context {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 14px 18px;
-            border-radius: 14px;
-            margin: 10px 15px 5px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-        .report-context .rc-main { flex: 1; min-width: 0; }
-        .report-context .rc-customer { font-weight: 700; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .report-context .rc-meta { font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
-        .report-context .rc-id { font-size: 0.7rem; opacity: 0.7; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 8px; white-space: nowrap; }
-
         .user-list-item .role-badge {
             font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
             cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
@@ -1428,6 +1411,10 @@
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
             <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.0)</span>
+            <div id="header-report-info" style="display:none; line-height:1.2;">
+                <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
+                <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
+            </div>
         </div>
         <div class="header-controls">
             <button class="user-badge" id="user-badge" onclick="window.toggleUserMenu()" style="display:none;">
@@ -1504,9 +1491,6 @@
         <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()" style="width:auto; padding: 8px 16px; font-size: 0.85rem; margin-top:0;"><i class="fa-solid fa-file-import"></i> <span data-i18n="btn_import">Bericht importieren / Update</span></button>
         <input type="file" id="import-input" style="display:none" accept=".json" onchange="window.importBackup(this)">
     </div>
-
-    <!-- REPORT CONTEXT HEADER (shown in all tabs when a report is open) -->
-    <div id="report-context-header" style="display:none;"></div>
 
     <!-- HEADER DATA -->
     <div id="header" class="section">
@@ -2542,11 +2526,15 @@
         // --- MAIN LOGIC FUNCTIONS ---
 
         window.renderReportContext = function() {
-            const el = document.getElementById('report-context-header');
-            if (!el) return;
+            const infoEl = document.getElementById('header-report-info');
+            const titleEl = document.getElementById('app-title');
+            const logoEl = document.getElementById('header-logo');
+            if (!infoEl) return;
+
             const r = window.getCurrentReport();
             if (!r || !currentReportId) {
-                el.style.display = 'none';
+                infoEl.style.display = 'none';
+                titleEl.style.display = '';
                 return;
             }
             const h = r.header;
@@ -2554,18 +2542,16 @@
             const authors = (h.authors && h.authors.length) ? h.authors.join(', ') : (h.author || '');
             const formatDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d; };
             const dateStr = h.date_from ? formatDate(h.date_from) : '';
-            const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
+            const displayId = r.readable_id ? `#${r.readable_id}` : '';
             const openCount = (r.points || []).filter(p => p.status === 'open').length;
-            const meta = [authors, dateStr, h.type || 'AMS'].filter(Boolean).join(' · ');
+            const meta = [displayId, authors, dateStr, h.type || 'AMS'].filter(Boolean).join(' · ') + (openCount > 0 ? ` · ${openCount} offen` : '');
 
-            el.innerHTML = `<div class="report-context">
-                <div class="rc-main">
-                    <div class="rc-customer">${window.escapeHtml(customer)}</div>
-                    <div class="rc-meta">${window.escapeHtml(meta)}${openCount > 0 ? ` · <strong>${openCount} offen</strong>` : ''}</div>
-                </div>
-                <span class="rc-id">${displayId}</span>
-            </div>`;
-            el.style.display = 'block';
+            document.getElementById('hri-customer').textContent = customer;
+            document.getElementById('hri-meta').textContent = meta;
+
+            titleEl.style.display = 'none';
+            logoEl.style.display = 'none';
+            infoEl.style.display = '';
         };
 
         window.renderParticipantsList = function(l) { 
@@ -3197,9 +3183,10 @@ Text: "${desc}"`;
             document.getElementById('nav-back-btn').style.display = 'none';
             document.getElementById('header-logo').style.display = 'inline-block';
 
-            // Hide report context header
-            const ctx = document.getElementById('report-context-header');
-            if (ctx) ctx.style.display = 'none';
+            // Reset header to show app title
+            const infoEl = document.getElementById('header-report-info');
+            if (infoEl) infoEl.style.display = 'none';
+            document.getElementById('app-title').style.display = '';
 
             window.renderReportList();
         };
