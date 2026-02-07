@@ -1375,7 +1375,7 @@
                 <div id="register-error" class="login-error"></div>
                 <input type="text" id="reg-name" placeholder="Vor- und Nachname" autocomplete="name">
                 <input type="email" id="reg-email" placeholder="vorname.nachname@gea.com" autocomplete="email">
-                <input type="password" id="reg-password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="new-password">
+                <input type="password" id="reg-password" placeholder="Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)" autocomplete="new-password">
                 <input type="password" id="reg-password2" placeholder="Passwort wiederholen" autocomplete="new-password">
                 <input type="text" id="reg-invite" placeholder="Einladungscode">
                 <button class="btn btn-primary" onclick="window.doRegister()" id="register-btn">
@@ -1747,7 +1747,7 @@
             <h3 style="color:var(--text-main)">Passwort ändern</h3>
             <div id="pw-change-error" class="login-error"></div>
             <input type="password" id="pw-current" placeholder="Aktuelles Passwort" style="margin-bottom:10px;" autocomplete="current-password">
-            <input type="password" id="pw-new" placeholder="Neues Passwort (mind. 6 Zeichen)" style="margin-bottom:10px;" autocomplete="new-password">
+            <input type="password" id="pw-new" placeholder="Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)" style="margin-bottom:10px;" autocomplete="new-password">
             <input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" style="margin-bottom:10px;" autocomplete="new-password">
             <button class="btn btn-primary" onclick="window.doChangePassword()">Passwort ändern</button>
             <button class="btn btn-secondary" onclick="document.getElementById('password-change-modal').style.display='none'">Abbrechen</button>
@@ -1787,7 +1787,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
@@ -2180,7 +2180,7 @@
                 err_fullname: 'Bitte Vor- UND Nachname eingeben (z.B. Max Mustermann).',
                 err_email: 'Bitte E-Mail eingeben.',
                 err_gea_only: 'Nur @gea.com E-Mail Adressen sind erlaubt.',
-                err_pw_short: 'Passwort muss mindestens 6 Zeichen haben.',
+                err_pw_short: 'Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.',
                 err_pw_match: 'Passwörter stimmen nicht überein.',
                 err_invite_required: 'Einladungscode erforderlich. Bitte bei David.Mazur@gea.com anfordern.',
                 err_invite_wrong: 'Einladungscode ist falsch. Bitte bei David.Mazur@gea.com anfordern.',
@@ -2216,7 +2216,7 @@
                 err_fullname: 'Please enter first AND last name (e.g. John Smith).',
                 err_email: 'Please enter an email.',
                 err_gea_only: 'Only @gea.com email addresses are allowed.',
-                err_pw_short: 'Password must be at least 6 characters.',
+                err_pw_short: 'Password must be at least 8 characters with 1 uppercase letter, 1 number, and 1 special character.',
                 err_pw_match: 'Passwords do not match.',
                 err_invite_required: 'Invite code required. Please request from David.Mazur@gea.com.',
                 err_invite_wrong: 'Invite code is incorrect. Please request from David.Mazur@gea.com.',
@@ -2297,7 +2297,7 @@
             if (name.split(/\s+/).length < 2) { window.showRegisterError(lt.err_fullname); return; }
             if (!email) { window.showRegisterError(lt.err_email); return; }
             if (!email.toLowerCase().endsWith('@gea.com')) { window.showRegisterError(lt.err_gea_only); return; }
-            if (pw.length < 6) { window.showRegisterError(lt.err_pw_short); return; }
+            if (pw.length < 8 || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) { window.showRegisterError(lt.err_pw_short); return; }
             if (pw !== pw2) { window.showRegisterError(lt.err_pw_match); return; }
 
             const btn = document.getElementById('register-btn');
@@ -2416,7 +2416,7 @@
             const errEl = document.getElementById('pw-change-error');
 
             if (!currentPw) { errEl.textContent = 'Aktuelles Passwort eingeben.'; errEl.className = 'login-error visible'; return; }
-            if (newPw.length < 6) { errEl.textContent = 'Neues Passwort muss mind. 6 Zeichen haben.'; errEl.className = 'login-error visible'; return; }
+            if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[0-9]/.test(newPw) || !/[^A-Za-z0-9]/.test(newPw)) { errEl.textContent = 'Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.'; errEl.className = 'login-error visible'; return; }
             if (newPw !== newPw2) { errEl.textContent = 'Neue Passwörter stimmen nicht überein.'; errEl.className = 'login-error visible'; return; }
 
             try {
@@ -2593,11 +2593,18 @@
                 container.innerHTML = users.map(u => {
                     const isSelf = u.uid === currentUser.uid;
                     const deleteBtn = isSelf ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
+                    const createdStr = u.created_at ? new Date(u.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
+                    const lastLoginStr = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Noch nie';
                     return `
-                    <div class="user-list-item">
-                        <div class="user-info">
+                    <div class="user-list-item" style="flex-wrap:wrap;">
+                        <div class="user-info" style="flex:1; min-width:150px;">
                             <div class="name">${window.escapeHtml(u.displayName || '-')}</div>
                             <div class="email">${window.escapeHtml(u.email || '-')}</div>
+                            <div style="font-size:0.7rem; color:var(--text-sub); margin-top:2px;">
+                                <i class="fa-solid fa-calendar-plus" style="width:14px;"></i> Registriert: ${createdStr}
+                                &nbsp;|&nbsp;
+                                <i class="fa-solid fa-right-to-bracket" style="width:14px;"></i> Letzter Login: ${lastLoginStr}
+                            </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px;">
                             <span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
@@ -4066,6 +4073,11 @@ Text: "${desc}"`;
                 }
 
                 currentUserProfile = profile;
+
+                // Update lastLogin timestamp
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), { lastLogin: Date.now() });
+                } catch(e) { console.error("lastLogin update failed:", e); }
 
                 // Hide login screen, show app
                 window.hideLoginScreen();
