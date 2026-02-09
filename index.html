@@ -1678,7 +1678,13 @@
             <br>
             <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
-            
+            <label data-i18n="lbl_solution">Lösung</label><div class="input-group"><textarea id="p_solution" rows="3" placeholder="Lösung hier eingeben..." data-i18n-placeholder="solution_placeholder"></textarea><button class="mic-btn" onclick="window.listen('p_solution')"><i class="fa-solid fa-microphone"></i></button></div>
+            <button id="btn-improve-solution" class="ai-btn" onclick="window.improveSolution()" title="Lösung mit KI überarbeiten" style="margin-top:5px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+            <div id="solution-date-display" style="font-size:0.7rem; color:var(--text-sub); margin-top:4px; margin-bottom:8px; display:none;"><i class="fa-solid fa-clock"></i> <span id="solution-date-text"></span></div>
+            <br>
+
             <label><span data-i18n="lbl_images">Bilder hinzufügen</span> <div class="spinner" id="img-spinner"></div></label>
             
             <!-- DROP ZONE -->
@@ -1994,10 +2000,10 @@
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?"
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung"
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?"
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution"
             }
         };
 
@@ -2449,7 +2455,8 @@
                     lang: 'de',
                     aiLang: 'de'
                 },
-                created_at: Date.now()
+                created_at: Date.now(),
+                lastLogin: Date.now()
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), profile);
             return profile;
@@ -2730,6 +2737,7 @@
                             <div>${badge}</div>
                         </div>
                         <div class="point-desc">${window.escapeHtml((p.desc||'').substring(0,80))}...</div>
+                        ${p.solution && p.solution.trim() ? `<div style="font-size:0.75rem; color:#1d4ed8; margin-top:2px;"><i class="fa-solid fa-lightbulb"></i> ${t.lbl_solution}: ${window.escapeHtml(p.solution.substring(0,60))}${p.solution.length>60?'...':''}</div>` : ''}
                         <div class="point-meta-row"><span><i class="fa-solid fa-user"></i> ${window.escapeHtml(p.assignee)||t.no_assignee}</span>${p.images&&p.images.length?`<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>`:''}</div>
                     </div>
                     <div class="point-sort-column">${moveUp}${moveDown}</div>
@@ -2780,7 +2788,12 @@
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
                  const badgeStyle = p.status==='open' ? 'background:#fef2f2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#065f46; border:1px solid #bbf7d0;';
                  const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
-                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 let solutionHtml = '';
+                 if (p.solution && p.solution.trim()) {
+                     const solDateStr = p.solutionDate ? ` <span style="font-size:0.75rem; color:#666;">(${t.solution_last_edited}: ${new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })})</span>` : '';
+                     solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0;">${window.escapeHtml(p.solution)}</p></div>`;
+                 }
+                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}${solutionHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
              const devBuild = "DEV-20260206B";
@@ -3063,6 +3076,82 @@ Text: "${desc}"`;
             btn.innerHTML = originalButtonHTML;
         };
 
+        window.improveSolution = async function() {
+            const solutionField = document.getElementById('p_solution');
+            const solution = solutionField.value.trim();
+
+            if (solution.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+
+            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
+            if(!apiKey) {
+                alert("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-improve-solution');
+            const originalButtonHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
+            const context = "GEA FarmTechnologies Melktechnik/Fütterungstechnik";
+
+            const userPrompt = `Du bist ein technischer Redakteur für ${context}. Korrigiere Rechtschreibung und Grammatik im folgenden Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+
+Antworte NUR mit dem korrigierten Text (keine anderen Texte, kein JSON, keine Erklärungen).
+
+Sprache: ${targetLang}
+
+Text: "${solution}"`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            let attempt = 0;
+            let success = false;
+
+            try {
+                while(attempt < 3 && !success) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: userPrompt }] }],
+                                generationConfig: { temperature: 0.1 }
+                            })
+                        });
+
+                        if (response.status === 403) {
+                            throw new Error("API Key ungültig oder gesperrt.");
+                        }
+                        if (response.status === 429 || response.status >= 500) {
+                            attempt++;
+                            await new Promise(r => setTimeout(r, 1000 * attempt));
+                            continue;
+                        }
+                        if(!response.ok) {
+                            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                            solutionField.value = result.candidates[0].content.parts[0].text.trim();
+                            window.showToast("Rechtschreibung korrigiert!");
+                            success = true;
+                        }
+                    } catch(innerEx) {
+                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx;
+                        attempt++;
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+            } catch(e) {
+                console.error("Final API Failure:", e);
+                alert(e.message);
+            }
+
+            btn.innerHTML = originalButtonHTML;
+        };
+
         window.renderReportList = function() {
             const t = translations[currentLang];
             const yearSelect = document.getElementById('year-filter');
@@ -3091,7 +3180,7 @@ Text: "${desc}"`;
                     const allAuthors = (rAuthor + ' ' + rAuthors).trim();
 
                     let inPoints = false;
-                    if(r.points) inPoints = r.points.some(p => (p.title && p.title.toLowerCase().includes(searchQuery)) || (p.desc && p.desc.toLowerCase().includes(searchQuery)));
+                    if(r.points) inPoints = r.points.some(p => (p.title && p.title.toLowerCase().includes(searchQuery)) || (p.desc && p.desc.toLowerCase().includes(searchQuery)) || (p.solution && p.solution.toLowerCase().includes(searchQuery)));
                     // Search in ID, customer, authors, and points
                     matchSearch = rId.includes(searchQuery) || rCustomer.includes(searchQuery) || allAuthors.includes(searchQuery) || inPoints;
                 }
@@ -3278,6 +3367,10 @@ Text: "${desc}"`;
                 }
             });
             document.getElementById('search-input').placeholder = t.search_placeholder;
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if(t[key]) el.placeholder = t[key];
+            });
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.querySelector(`.lang-btn[data-lang="${lang}"]`);
             if(activeBtn) activeBtn.classList.add('active');
@@ -3412,13 +3505,22 @@ Text: "${desc}"`;
 
         window.savePoint = function() {
              const idx = parseInt(document.getElementById('edit-index').value);
+             const newSolution = document.getElementById('p_solution').value;
+             const oldPoint = idx > -1 ? points[idx] : null;
+             let solutionDate = oldPoint ? oldPoint.solutionDate || null : null;
+             if (newSolution.trim() && newSolution !== (oldPoint ? oldPoint.solution || '' : '')) {
+                 solutionDate = Date.now();
+             }
+             if (!newSolution.trim()) { solutionDate = null; }
              const p = {
                 ticket: document.getElementById('p_ticket').value,
                 title: document.getElementById('p_title').value,
                 desc: document.getElementById('p_desc').value,
                 assignee: document.getElementById('p_assignee').value,
                 status: document.getElementById('p_status').value,
-                images: tempImages 
+                solution: newSolution,
+                solutionDate: solutionDate,
+                images: tempImages
              };
              if(idx === -1) points.push(p); else points[idx] = p;
              const r = window.getCurrentReport();
@@ -3596,6 +3698,8 @@ Text: "${desc}"`;
         window.openModal = function(index = -1) {
             document.getElementById('edit-index').value = index;
             tempImages = [];
+            const solutionDateEl = document.getElementById('solution-date-display');
+            const solutionDateText = document.getElementById('solution-date-text');
             if(index > -1) {
                 const p = points[index];
                 document.getElementById('p_ticket').value = p.ticket || "";
@@ -3603,7 +3707,15 @@ Text: "${desc}"`;
                 document.getElementById('p_desc').value = p.desc || "";
                 document.getElementById('p_assignee').value = p.assignee || "";
                 document.getElementById('p_status').value = p.status || "open";
-                
+                document.getElementById('p_solution').value = p.solution || "";
+                if (p.solutionDate) {
+                    const t = translations[currentLang];
+                    solutionDateText.textContent = t.solution_last_edited + ': ' + new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    solutionDateEl.style.display = 'block';
+                } else {
+                    solutionDateEl.style.display = 'none';
+                }
+
                 tempImages = (p.images || []).map(img => {
                     if (typeof img === 'string') {
                         return { src: img, isLarge: false };
@@ -3616,6 +3728,8 @@ Text: "${desc}"`;
                 document.getElementById('p_desc').value = "";
                 document.getElementById('p_assignee').value = "";
                 document.getElementById('p_status').value = "open";
+                document.getElementById('p_solution').value = "";
+                solutionDateEl.style.display = 'none';
             }
             window.renderModalImages();
             document.getElementById('modal').style.display = 'flex';
