@@ -2987,28 +2987,29 @@
             let userPrompt;
             if (!title) {
                 // Keine Überschrift vorhanden: Kurze Überschrift generieren + Text korrigieren
-                userPrompt = `Du bist ein technischer Redakteur für ${context}. Führe folgende Aufgaben aus:
+                userPrompt = `Du bist ein technischer Redakteur für ${context}.
+WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}. Überschrift und Text MÜSSEN auf ${targetLang} sein.
 
-1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter) basierend auf dem Text. Die Überschrift soll prägnant den Kerninhalt erfassen.
+Führe folgende Aufgaben aus:
+1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter, auf ${targetLang}) basierend auf dem Text. Die Überschrift soll prägnant den Kerninhalt erfassen.
 2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
 
 Antworte NUR im folgenden JSON-Format (keine anderen Texte):
-{"headline": "Kurze Überschrift hier", "text": "Korrigierter Text hier"}
-
-Sprache: ${targetLang}
+{"headline": "Kurze Überschrift auf ${targetLang}", "text": "Korrigierter Text hier"}
 
 Text: "${desc}"`;
             } else {
                 // Überschrift vorhanden: Nur Rechtschreibprüfung für Titel + Text korrigieren
-                userPrompt = `Du bist ein technischer Redakteur für ${context}. Führe folgende Aufgaben aus:
+                userPrompt = `Du bist ein technischer Redakteur für ${context}.
+WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}. Überschrift und Text MÜSSEN auf ${targetLang} sein.
 
-1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Ändere nichts anderes, bleibe möglichst nah am Original.
+Führe folgende Aufgaben aus:
+1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Ändere nichts anderes, bleibe möglichst nah am Original. Die Überschrift MUSS auf ${targetLang} bleiben.
 2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
 
 Antworte NUR im folgenden JSON-Format (keine anderen Texte):
-{"headline": "Korrigierte Überschrift hier", "text": "Korrigierter Text hier"}
+{"headline": "Korrigierte Überschrift auf ${targetLang}", "text": "Korrigierter Text hier"}
 
-Sprache: ${targetLang}
 
 Überschrift: "${title}"
 Text: "${desc}"`;
