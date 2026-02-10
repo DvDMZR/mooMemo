@@ -1422,7 +1422,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.1)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.2)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1635,7 +1635,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.7.1</div>
+                        <div class="info-version">mooMemo v1.7.2</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1805,7 +1805,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.7.1";
+        const APP_VERSION = "1.7.2";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1823,32 +1823,27 @@
         // CHANGELOG DEFINITION
         const CHANGELOG = [
             {
-                ver: "1.7.1",
+                ver: "1.7.2",
                 date: "2026-02-10",
                 changes: [
-                    "NEU: Sprachwahl (DE/EN) auf dem Login-Bildschirm.",
-                    "NEU: Lösungsfeld für Punkte - nachträglich Lösungen eintragen.",
-                    "NEU: KI-Autokorrektur für Lösungstexte (Zauberstab).",
-                    "NEU: 'Zuletzt bearbeitet' Datum bei Lösungen.",
-                    "NEU: Lösung wird im PDF-Export angezeigt (blaue Box).",
-                    "NEU: Zauberstab zeigt Zielsprache an (→ DE / → EN).",
-                    "NEU: Bericht duplizieren - Kunde, Teilnehmer & Verfasser übernehmen.",
-                    "Sicherheit: Backup/Import/Löschen nur noch für Admins.",
-                    "Fix: Letzter Login wird jetzt korrekt angezeigt.",
-                    "Fix: Zauberstab-Überschrift bleibt in gewählter Sprache.",
-                    "Fix: Verwaiste Bilder werden beim Löschen aus dem Storage entfernt.",
-                    "Fix: Firestore Listener Memory-Leak behoben."
+                    "Lösungsfeld für Punkte - nachträglich Lösungen eintragen.",
+                    "KI-Autokorrektur für Lösungstexte (Zauberstab).",
+                    "Lösung wird im PDF-Export angezeigt.",
+                    "Zauberstab zeigt Zielsprache an (→ DE / → EN).",
+                    "Backup/Import/Löschen nur noch für Admins.",
+                    "Letzter Login wird jetzt korrekt angezeigt.",
+                    "Verwaiste Bilder werden beim Löschen aus dem Storage entfernt."
                 ]
             },
             {
                 ver: "1.7.0",
                 date: "2026-02-06",
                 changes: [
-                    "NEU: Login mit E-Mail & Passwort - nur @gea.com Adressen.",
-                    "NEU: Benutzerverwaltung für Admins (Einladungscodes, Rollen).",
-                    "NEU: Passwort ändern im Benutzermenü.",
-                    "NEU: Einstellungen werden pro Benutzer gespeichert.",
-                    "NEU: Bericht-Info Header in Punkten, Status und Export.",
+                    "Login mit E-Mail & Passwort - nur @gea.com Adressen.",
+                    "Benutzerverwaltung für Admins (Einladungscodes, Rollen).",
+                    "Passwort ändern im Benutzermenü.",
+                    "Einstellungen werden pro Benutzer gespeichert.",
+                    "Bericht-Info Header in Punkten, Status und Export.",
                     "Alle Daten nur noch für eingeloggte Benutzer sichtbar."
                 ]
             },
@@ -1856,7 +1851,7 @@
                 ver: "1.6.0",
                 date: "2026-02-06",
                 changes: [
-                    "Fix: Berichte mit vielen Bildern können nun gespeichert werden.",
+                    "Berichte mit vielen Bildern können nun gespeichert werden.",
                     "Bilder werden in Firebase Storage gespeichert statt im Bericht.",
                     "Performance-Verbesserungen bei Filtern und Bildverarbeitung."
                 ]
@@ -1865,32 +1860,26 @@
                 ver: "1.5.9",
                 date: "2026-02-04",
                 changes: [
-                    "NEU: Suche findet jetzt automatisch Berichte nach Verfasser (kein 'von:' mehr nötig).",
-                    "NEU: Mobil - Bestätigungsdialog beim Verlassen der App via Zurück-Button.",
-                    "Verbesserte Unterstützung für mehrere Verfasser in der Suche."
+                    "Suche findet automatisch Berichte nach Verfasser.",
+                    "Mobil - Bestätigungsdialog beim Verlassen der App via Zurück-Button."
                 ]
             },
             {
                 ver: "1.5.8",
                 date: "2026-01-29",
                 changes: [
-                    "GEA-Farbsystem",
-                    "Micro-Interactions: Hover, Press & Focus-Effekte.",
+                    "GEA-Farbsystem & Micro-Interactions.",
                     "Card-Design mit Animationen.",
-                    "Navigation mit animiertem Unterstrich.",
-                    "Custom Scrollbar & verbesserte Accessibility.",
-                    "NEU: Sidebar zeigt Berichte des selben Kunden (Nur Desktop).",
-                    "Roter Indikator bei offenen Punkten.",
-                    "Fix: Verfasser-Änderungen in Übersicht sichtbar."
+                    "Sidebar zeigt Berichte des selben Kunden (Desktop).",
+                    "Roter Indikator bei offenen Punkten."
                 ]
             },
             {
                 ver: "1.5.7",
                 date: "2026-01-29",
                 changes: [
-                    "NEU: Zauberstab generiert automatisch kurze Überschrift wenn keine vorhanden.",
-                    "Zauberstab: Bei vorhandener Überschrift nur Rechtschreibprüfung.",
-                    "Punkte-Tab: Neues 'OFFEN' Badge statt 'Neu' für offene Punkte.",
+                    "Zauberstab generiert automatisch kurze Überschrift wenn keine vorhanden.",
+                    "Punkte-Tab: 'OFFEN' Badge statt 'Neu' für offene Punkte.",
                     "Export: Farbige Badge-Styles wie in der App (rot/grün)."
                 ]
             },
@@ -1898,9 +1887,8 @@
                 ver: "1.5.6",
                 date: "2026-01-28",
                 changes: [
-                    "NEU: Berichte per Link teilen - Empfänger können den Export direkt öffnen.",
-                    "Verbesserter PDF-Export: Native Browser-Druckfunktion für bessere Qualität.",
-                    "GEA-Logo wird als SVG eingebunden für scharfe Darstellung.",
+                    "Berichte per Link teilen.",
+                    "Verbesserter PDF-Export mit nativer Browser-Druckfunktion.",
                     "Export-Filter: Nur offene Punkte anzeigen."
                 ]
             },
@@ -1908,8 +1896,7 @@
                 ver: "1.5.4",
                 date: "2026-01-27",
                 changes: [
-                    "Bilder-Lightbox: Thumbnails in Punkten können per Klick vergrößert angezeigt werden.",
-                    "Bilder-Lightbox: Bilder im Export/PDF-Vorschau können per Klick als Popup vergrößert werden.",
+                    "Bilder-Lightbox: Thumbnails per Klick vergrößern.",
                     "PDF-Export als BETA gekennzeichnet."
                 ]
             },
@@ -1917,27 +1904,25 @@
                 ver: "1.5.3",
                 date: "2026-01-26",
                 changes: [
-                    "Fix: Bilder werden nun im PDF-Export korrekt angezeigt.",
-                    "Fix: Logo im PDF-Header wird nun korrekt dargestellt.",
-                    "Bilder werden beim Upload als Base64 gespeichert für zuverlässigen PDF-Export."
+                    "Bilder werden nun im PDF-Export korrekt angezeigt.",
+                    "Logo im PDF-Header wird korrekt dargestellt."
                 ]
             },
             {
                 ver: "1.5.2",
                 date: "2026-01-25",
                 changes: [
-                    "Fix: Zeichenkodierung korrigiert (Umlaute werden nun korrekt dargestellt).",
+                    "Zeichenkodierung korrigiert (Umlaute).",
                     "Code-Optimierungen und Bereinigung."
                 ]
             },
-             {
+            {
                 ver: "1.5.1",
                 date: "2026-01-23",
                 changes: [
-                    "Funktion: Mehrere Verfasser pro Bericht optimiert.",
+                    "Mehrere Verfasser pro Bericht.",
                     "Autofill für Namen (Verfasser, Teilnehmer, Verantwortlich).",
-                    "Optimierung der PDF-Ausgabe.",
-                    "UI-Textanpassungen (Verantwortlich statt Adressat)."
+                    "Optimierung der PDF-Ausgabe."
                 ]
             },
             {
@@ -1945,10 +1930,7 @@
                 date: "2026-01-23",
                 changes: [
                     "Bilder Upload per Drag & Drop am PC.",
-                    "Mobile: Auswahl zwischen Kamera und Galerie gefixt.",
-                    "Neuer Info-Bereich: Changelog & Impressum.",
-                    "Copyright & Kontaktinformationen aktualisiert.",
-                    "Kleinere Anpassungen & Fehlerbehebungen."
+                    "Info-Bereich: Changelog & Impressum."
                 ]
             },
             {
@@ -1957,8 +1939,7 @@
                 changes: [
                     "Cloud-Speicher für API Keys.",
                     "Settings bleiben nach Neustart erhalten.",
-                    "Verbesserte Bildqualität & Zoom.",
-                    "Logo-Update (GEA)."
+                    "Verbesserte Bildqualität & Zoom."
                 ]
             }
         ];
