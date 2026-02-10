@@ -1833,7 +1833,6 @@
                     "NEU: Lösung wird im PDF-Export angezeigt (blaue Box).",
                     "NEU: Zauberstab zeigt Zielsprache an (→ DE / → EN).",
                     "NEU: Bericht duplizieren - Kunde, Teilnehmer & Verfasser übernehmen.",
-                    "NEU: Share-Links mit Ablaufdatum (7 Tage) für mehr Sicherheit.",
                     "Sicherheit: Backup/Import/Löschen nur noch für Admins.",
                     "Fix: Letzter Login wird jetzt korrekt angezeigt.",
                     "Fix: Zauberstab-Überschrift bleibt in gewählter Sprache.",
@@ -2000,7 +1999,6 @@
         // SHARE LINK PARAMETERS
         let isReadOnly = false;
         let sharedReportId = null;
-        let sharedShareToken = null;
         let sharedTab = null;
         let exportFilter = 'all'; // 'all' | 'open'
 
@@ -3240,7 +3238,7 @@ Text: "${text}"`);
                 window.renderReportList();
 
                 // SHARED LINK MODE: Apply on first load if URL has share token or report parameter
-                if (isFirstLoad && (sharedShareToken || sharedReportId)) {
+                if (isFirstLoad && sharedReportId) {
                     isFirstLoad = false;
                     window.applySharedLinkMode();
                     return; // Skip normal auto-restore logic
@@ -3802,36 +3800,15 @@ Text: "${text}"`);
         };
 
         // --- SHARE LINK FUNCTIONS ---
-        window.generateShareToken = function() {
-            return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, c => {
-                const r = Math.random() * 16 | 0;
-                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-            });
-        };
-
-        window.copyShareLink = async function(tab) {
+        window.copyShareLink = function(tab) {
             if (!currentReportId) return;
-            const btn = document.getElementById('share-link-btn');
-            if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            const baseUrl = window.location.origin + window.location.pathname;
+            const link = `${baseUrl}?report=${currentReportId}`;
 
-            try {
-                // Generate token and store in Firestore with 7-day expiry
-                const token = window.generateShareToken();
-                const expiry = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'shared_links', token), {
-                    reportId: currentReportId,
-                    expiry: expiry,
-                    created_at: Date.now(),
-                    created_by: currentUser ? currentUser.uid : null
-                });
-
-                const baseUrl = window.location.origin + window.location.pathname;
-                const link = `${baseUrl}?share=${token}`;
-
-                await navigator.clipboard.writeText(link).catch(() => {});
+            navigator.clipboard.writeText(link).then(() => {
                 window.showToast(translations[currentLang].toast_copied);
                 window.open(link, '_blank');
-
+                const btn = document.getElementById('share-link-btn');
                 if (btn) {
                     btn.classList.add('copied');
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopiert!';
@@ -3840,11 +3817,10 @@ Text: "${text}"`);
                         btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].share_title}`;
                     }, 2000);
                 }
-            } catch(e) {
-                console.error("Share link creation failed:", e);
-                window.showToast("Fehler beim Erstellen des Links");
-                if (btn) btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].share_title}`;
-            }
+            }).catch(() => {
+                window.open(link, '_blank');
+                window.showToast(translations[currentLang].toast_copied);
+            });
         };
 
         window.updateShareLink = function() {
@@ -3854,45 +3830,17 @@ Text: "${text}"`);
         // --- URL PARAMETER PARSING ---
         window.parseUrlParams = function() {
             const params = new URLSearchParams(window.location.search);
-            // Support new token-based share links
-            const shareToken = params.get('share');
-            // Legacy: direct report ID (still supported for old links)
             const reportId = params.get('report');
             const tab = params.get('tab');
 
-            if (shareToken) {
-                sharedShareToken = shareToken;
-                sharedTab = tab || 'export';
-                isReadOnly = true;
-            } else if (reportId) {
+            if (reportId) {
                 sharedReportId = reportId;
                 sharedTab = tab || 'export';
                 isReadOnly = true;
             }
         };
 
-        window.applySharedLinkMode = async function() {
-            // Token-based share link: validate token first
-            if (sharedShareToken) {
-                try {
-                    const tokenDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'shared_links', sharedShareToken));
-                    if (!tokenDoc.exists()) {
-                        document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;"><i class="fa-solid fa-link-slash" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i><h2 style="color:#1f2937;">Link ungültig</h2><p style="color:#64748b;">Dieser Link existiert nicht.</p><a href="?" style="color:var(--primary); font-weight:600; margin-top:15px;">Zur App</a></div>`;
-                        return;
-                    }
-                    const tokenData = tokenDoc.data();
-                    if (tokenData.expiry && tokenData.expiry < Date.now()) {
-                        document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;"><i class="fa-solid fa-clock" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i><h2 style="color:#1f2937;">Link abgelaufen</h2><p style="color:#64748b;">Dieser Link ist nicht mehr gültig. Bitte fordere einen neuen Link an.</p><a href="?" style="color:var(--primary); font-weight:600; margin-top:15px;">Zur App</a></div>`;
-                        return;
-                    }
-                    sharedReportId = tokenData.reportId;
-                } catch(e) {
-                    console.error("Share token validation failed:", e);
-                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;"><i class="fa-solid fa-triangle-exclamation" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i><h2 style="color:#1f2937;">Fehler</h2><p style="color:#64748b;">Link konnte nicht überprüft werden.</p><a href="?" style="color:var(--primary); font-weight:600; margin-top:15px;">Zur App</a></div>`;
-                    return;
-                }
-            }
-
+        window.applySharedLinkMode = function() {
             if (!sharedReportId) return;
 
             // Find the report
@@ -4217,7 +4165,7 @@ Text: "${text}"`);
                 }
 
                 // Check Version for Changelog
-                if (!sharedReportId && !sharedShareToken) {
+                if (!sharedReportId) {
                     window.checkVersion();
                 }
 
