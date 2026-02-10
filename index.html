@@ -2611,7 +2611,8 @@
                     const isSelf = u.uid === currentUser.uid;
                     const deleteBtn = isSelf ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
                     const createdStr = u.created_at ? new Date(u.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
-                    const lastLoginStr = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Noch nie';
+                    const lastLoginTs = u.lastLogin || u.created_at;
+                    const lastLoginStr = lastLoginTs ? new Date(lastLoginTs).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
                     return `
                     <div class="user-list-item" style="flex-wrap:wrap;">
                         <div class="user-info" style="flex:1; min-width:150px;">
@@ -4132,9 +4133,9 @@ Text: "${text}"`);
 
                 currentUserProfile = profile;
 
-                // Update lastLogin timestamp
+                // Update lastLogin timestamp (setDoc+merge is more robust than updateDoc)
                 try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), { lastLogin: Date.now() });
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), { lastLogin: Date.now() }, { merge: true });
                 } catch(e) { console.error("lastLogin update failed:", e); }
 
                 // Hide login screen, show app
