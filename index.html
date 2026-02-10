@@ -1422,7 +1422,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.1)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.1)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1635,7 +1635,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.8.1</div>
+                        <div class="info-version">mooMemo v1.7.1</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1805,7 +1805,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8.1";
+        const APP_VERSION = "1.7.1";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1823,30 +1823,18 @@
         // CHANGELOG DEFINITION
         const CHANGELOG = [
             {
-                ver: "1.8.1",
+                ver: "1.7.1",
                 date: "2026-02-10",
                 changes: [
-                    "Sicherheit: Backup Export/Import und Berichte löschen nur noch für Admins.",
-                    "PIN-System (0000) komplett entfernt - Admin-Rolle steuert Zugriff.",
-                    "Lösch-Button in der Berichtsliste nur für Admins sichtbar."
-                ]
-            },
-            {
-                ver: "1.8.0",
-                date: "2026-02-09",
-                changes: [
+                    "NEU: Sprachwahl (DE/EN) auf dem Login-Bildschirm.",
                     "NEU: Lösungsfeld für Punkte - nachträglich Lösungen eintragen.",
                     "NEU: KI-Autokorrektur für Lösungstexte (Zauberstab).",
                     "NEU: 'Zuletzt bearbeitet' Datum bei Lösungen.",
                     "NEU: Lösung wird im PDF-Export angezeigt (blaue Box).",
-                    "Fix: Letzter Login wird jetzt korrekt ab Registrierung angezeigt."
-                ]
-            },
-            {
-                ver: "1.7.1",
-                date: "2026-02-06",
-                changes: [
-                    "NEU: Sprachwahl (DE/EN) auf dem Login-Bildschirm."
+                    "NEU: Zauberstab zeigt Zielsprache an (→ DE / → EN).",
+                    "Sicherheit: Backup/Import/Löschen nur noch für Admins.",
+                    "Fix: Letzter Login wird jetzt korrekt angezeigt.",
+                    "Fix: Zauberstab-Überschrift bleibt in gewählter Sprache."
                 ]
             },
             {
