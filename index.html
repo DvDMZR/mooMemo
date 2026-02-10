@@ -1422,7 +1422,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.1)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.2)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1443,16 +1443,16 @@
                 <span class="user-role" id="menu-user-role">User</span>
             </div>
             <button class="user-menu-item" onclick="window.openPasswordChange()">
-                <i class="fa-solid fa-key"></i> Passwort ändern
+                <i class="fa-solid fa-key"></i> <span data-i18n="menu_change_pw">Passwort ändern</span>
             </button>
             <button class="user-menu-item" onclick="window.openSettings(); window.toggleUserMenu();">
-                <i class="fa-solid fa-gear"></i> Einstellungen
+                <i class="fa-solid fa-gear"></i> <span data-i18n="menu_settings">Einstellungen</span>
             </button>
             <button class="user-menu-item" id="menu-admin-btn" style="display:none;" onclick="window.askAdminTools(); window.toggleUserMenu();">
-                <i class="fa-solid fa-user-shield"></i> Admin-Bereich
+                <i class="fa-solid fa-user-shield"></i> <span data-i18n="menu_admin">Admin-Bereich</span>
             </button>
             <button class="user-menu-item danger" onclick="window.doLogout()">
-                <i class="fa-solid fa-right-from-bracket"></i> Abmelden
+                <i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="menu_logout">Abmelden</span>
             </button>
         </div>
     </div>
@@ -1511,21 +1511,21 @@
             <label data-i18n="lbl_area">Bereich</label>
             <select id="h_type" onchange="window.updateCurrentReportHeader()" style="margin-bottom: 20px;"><option value="AMS">AMS</option><option value="CMS">CMS</option><option value="AS">AS</option></select>
             <label data-i18n="lbl_customer">Kunde / Projekt</label>
-            <div class="input-group"><input type="text" id="h_customer" placeholder="z.B. Müller GmbH" oninput="window.updateCurrentReportHeader()"><button class="mic-btn" onclick="window.listen('h_customer')"><i class="fa-solid fa-microphone"></i></button></div>
+            <div class="input-group"><input type="text" id="h_customer" placeholder="z.B. Müller GmbH" data-i18n-placeholder="ph_customer" oninput="window.updateCurrentReportHeader()"><button class="mic-btn" onclick="window.listen('h_customer')"><i class="fa-solid fa-microphone"></i></button></div>
             <br><label data-i18n="lbl_date">Datum (von - bis)</label>
             <div style="display:flex; gap:15px;"><input type="date" id="h_date_from" onchange="window.updateCurrentReportHeader()"><input type="date" id="h_date_to" onchange="window.updateCurrentReportHeader()"></div>
             
             <br><label data-i18n="lbl_author">Verfasser</label>
             <div id="authors-list" class="tag-list"></div>
             <div class="input-group-merged">
-                <input type="text" id="new_author" placeholder="Name wählen..." oninput="window.handleInputAutofill(this, 'list-names', window.addAuthor)" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addAuthor();}">
+                <input type="text" id="new_author" placeholder="Name wählen..." data-i18n-placeholder="ph_name" oninput="window.handleInputAutofill(this, 'list-names', window.addAuthor)" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addAuthor();}">
                 <button class="btn btn-primary" onclick="window.addAuthor()"><i class="fa-solid fa-plus"></i></button>
             </div>
             
             <br><hr style="border:0; border-top:1px solid #eee; margin:25px 0;"><label data-i18n="lbl_participants">Teilnehmer</label>
             <div id="participants-list" class="tag-list"></div>
             <div class="input-group-merged">
-                <input type="text" id="new_participant" placeholder="Name wählen..." oninput="window.handleInputAutofill(this, 'list-names', window.addParticipant)" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addParticipant();}">
+                <input type="text" id="new_participant" placeholder="Name wählen..." data-i18n-placeholder="ph_name" oninput="window.handleInputAutofill(this, 'list-names', window.addParticipant)" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addParticipant();}">
                 <button class="btn btn-primary" onclick="window.addParticipant()"><i class="fa-solid fa-plus"></i></button>
             </div>
         </div>
@@ -1577,12 +1577,12 @@
 
         <!-- EXPORT FILTER BUTTONS -->
         <div class="export-filter-bar" id="export-filter-bar">
-            <span class="export-filter-label">Anzeigen:</span>
+            <span class="export-filter-label" data-i18n="export_show">Anzeigen:</span>
             <button class="export-filter-btn active" id="filter-all-btn" onclick="window.setExportFilter('all')">
-                Alle
+                <span data-i18n="filter_all_export">Alle</span>
             </button>
             <button class="export-filter-btn" id="filter-open-btn" onclick="window.setExportFilter('open')">
-                Nur Offene
+                <span data-i18n="filter_open_only">Nur Offene</span>
             </button>
         </div>
 
@@ -1596,7 +1596,7 @@
             <div id="related-reports-sidebar" class="related-reports-sidebar">
                 <div class="related-reports-title">
                     <i class="fa-solid fa-folder-tree"></i>
-                    <span>Weitere Berichte</span>
+                    <span data-i18n="related_reports">Weitere Berichte</span>
                 </div>
                 <div id="related-reports-list" class="related-reports-list"></div>
             </div>
@@ -1615,27 +1615,27 @@
                 <button class="lang-btn" data-lang="en" onclick="window.setLanguage('en')">EN</button>
             </div>
             
-            <p style="font-weight:600; margin-bottom:5px; margin-top:15px;">KI Zielsprache (Textverbesserung)</p>
+            <p style="font-weight:600; margin-bottom:5px; margin-top:15px;" data-i18n="settings_ai_lang">KI Zielsprache (Textverbesserung)</p>
             <div class="lang-toggle-container" id="ai-lang-container">
-                <button class="lang-btn active" onclick="window.setAiTargetLang('de')">Deutsch</button>
-                <button class="lang-btn" onclick="window.setAiTargetLang('en')">English</button>
+                <button class="lang-btn active" data-ailang="de" onclick="window.setAiTargetLang('de')">Deutsch</button>
+                <button class="lang-btn" data-ailang="en" onclick="window.setAiTargetLang('en')">English</button>
             </div>
             
             <!-- CHANGELOG BUTTON MOVED HERE -->
             <button class="btn btn-secondary changelog-btn" onclick="window.openChangelog()" style="margin-top: 20px; width: 100%;">
-                <i class="fa-solid fa-list-ul"></i> Was ist neu? (Changelog)
+                <i class="fa-solid fa-list-ul"></i> <span data-i18n="btn_changelog">Was ist neu? (Changelog)</span>
             </button>
 
             <!-- APP INFO & LEGAL SECTION -->
             <div class="settings-section">
                 <button class="info-toggle-btn" onclick="window.toggleInfoSection()">
-                    <span><i class="fa-solid fa-circle-info" style="color:var(--primary); margin-right:5px;"></i> App-Info & Rechtliches</span>
+                    <span><i class="fa-solid fa-circle-info" style="color:var(--primary); margin-right:5px;"></i> <span data-i18n="app_info_legal">App-Info & Rechtliches</span></span>
                     <i class="fa-solid fa-chevron-down" id="info-chevron"></i>
                 </button>
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.7.1</div>
+                        <div class="info-version">mooMemo v1.7.2</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1660,25 +1660,31 @@
     <div class="modal-overlay" id="changelog-modal">
         <div class="modal-content" style="max-width:500px;">
             <span class="close-modal" onclick="document.getElementById('changelog-modal').style.display='none'">&times;</span>
-            <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-rocket"></i> Was ist neu?</h3>
+            <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-rocket"></i> <span data-i18n="whats_new">Was ist neu?</span></h3>
             <div id="changelog-container" class="changelog-list"></div>
-            <button class="btn btn-primary" onclick="document.getElementById('changelog-modal').style.display='none'">Verstanden</button>
+            <button class="btn btn-primary" onclick="document.getElementById('changelog-modal').style.display='none'" data-i18n="btn_understood">Verstanden</button>
         </div>
     </div>
     
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="window.closeModal()">&times;</span><h3 id="modal-title" data-i18n="modal_new_point">Neuer Punkt</h3><input type="hidden" id="edit-index" value="-1">
-            <label data-i18n="lbl_ticket">Ticketnummer</label><div class="input-group"><input type="text" id="p_ticket" placeholder="z.B. 123456"><button class="mic-btn" onclick="window.listen('p_ticket')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_ticket">Ticketnummer</label><div class="input-group"><input type="text" id="p_ticket" placeholder="z.B. 123456" data-i18n-placeholder="ph_ticket"><button class="mic-btn" onclick="window.listen('p_ticket')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_title">Titel / Thema</label><div class="input-group"><input type="text" id="p_title" placeholder="..."><button class="mic-btn" onclick="window.listen('p_title')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_desc">Beschreibung</label><div class="input-group"><textarea id="p_desc" rows="4" placeholder="..."></textarea><button class="mic-btn" onclick="window.listen('p_desc')"><i class="fa-solid fa-microphone"></i></button></div>
-            <button id="btn-improve-text" class="ai-btn" onclick="window.improveDescription()" title="Text mit KI überarbeiten" style="margin-top:5px;">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <button id="btn-improve-text" class="ai-btn" onclick="window.improveDescription()" style="margin-top:5px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="ai-lang-hint-desc" style="font-size:0.7rem;"></span>
             </button>
             <br>
-            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." data-i18n-placeholder="ph_name" autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
-            
+            <label data-i18n="lbl_solution">Lösung</label><div class="input-group"><textarea id="p_solution" rows="3" placeholder="Lösung hier eingeben..." data-i18n-placeholder="solution_placeholder"></textarea><button class="mic-btn" onclick="window.listen('p_solution')"><i class="fa-solid fa-microphone"></i></button></div>
+            <button id="btn-improve-solution" class="ai-btn" onclick="window.improveSolution()" style="margin-top:5px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="ai-lang-hint-sol" style="font-size:0.7rem;"></span>
+            </button>
+            <div id="solution-date-display" style="font-size:0.7rem; color:var(--text-sub); margin-top:4px; margin-bottom:8px; display:none;"><i class="fa-solid fa-clock"></i> <span id="solution-date-text"></span></div>
+            <br>
+
             <label><span data-i18n="lbl_images">Bilder hinzufügen</span> <div class="spinner" id="img-spinner"></div></label>
             
             <!-- DROP ZONE -->
@@ -1687,7 +1693,7 @@
                  ondragleave="this.classList.remove('dragover');" 
                  ondrop="event.preventDefault(); this.classList.remove('dragover'); window.processFiles(event.dataTransfer.files);">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                <span>Bilder hier ablegen oder klicken</span>
+                <span data-i18n="drop_zone_text">Bilder hier ablegen oder klicken</span>
                 <input type="file" id="p_images" multiple accept="image/*" style="display:none" onchange="window.handleImageUpload()">
             </div>
 
@@ -1697,9 +1703,6 @@
         </div>
     </div>
     
-    <div class="modal-overlay" id="pin-auth-modal">
-        <div class="modal-content" style="max-width:400px; text-align:center;"><div style="font-size:3rem; margin-bottom:10px;" id="pin-icon"><i class="fa-solid fa-lock"></i></div><h3 style="color:var(--text-main)" id="pin-title" data-i18n="admin_title">Admin Zugriff</h3><p style="color:var(--text-sub)" id="pin-desc" data-i18n="admin_desc">Bitte Admin-PIN eingeben.</p><div style="margin: 20px 0;"><label style="text-align:left; font-size:0.8rem; margin-bottom:5px;">Admin PIN</label><input type="password" id="auth-pin" placeholder="PIN" style="text-align:center; letter-spacing: 5px; font-size: 1.2rem; font-weight:bold;"></div><div style="display:flex; gap:10px; justify-content:center; margin-top:25px;"><button class="btn btn-secondary" onclick="window.closePinModal()" style="margin-top:0"><span data-i18n="btn_cancel">Abbrechen</span></button><button class="btn" id="pin-confirm-btn" style="color:white; margin-top:0" onclick="window.verifyPin()"><span data-i18n="btn_confirm">Bestätigen</span></button></div></div>
-    </div>
     
     <div class="modal-overlay" id="delete-point-confirm-modal">
         <div class="modal-content" style="max-width:400px; text-align:center;"><div style="font-size:3rem; color:var(--danger); margin-bottom:10px;"><i class="fa-solid fa-trash-can"></i></div><h3 style="color:var(--text-main)" data-i18n="confirm_del_title">Punkt löschen?</h3><p style="color:var(--text-sub)" data-i18n="confirm_del_msg">Möchtest du diesen Punkt unwiderruflich entfernen?</p><div style="display:flex; gap:10px; justify-content:center; margin-top:25px;"><button class="btn btn-secondary" onclick="window.closeDeletePointModal()" style="margin-top:0"><span data-i18n="btn_cancel">Abbrechen</span></button><button class="btn" style="background:var(--danger); color:white; margin-top:0" onclick="window.executeDeletePoint()"><span data-i18n="btn_delete_confirm">Ja, Löschen</span></button></div></div>
@@ -1712,21 +1715,21 @@
             <h3 style="color:var(--text-main)" data-i18n="admin_area">Admin Bereich</h3>
             
             <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:20px; border:1px solid #e2e8f0;">
-                <p style="font-weight:700; margin-top:0; font-size:0.9rem;">Globaler API Key (Cloud)</p>
-                <input type="password" id="admin-api-key-input" placeholder="Hier Key eingeben..." style="text-align:center; margin-bottom:10px; width:100%; box-sizing:border-box; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                <p style="font-weight:700; margin-top:0; font-size:0.9rem;" data-i18n="admin_api_key">Globaler API Key (Cloud)</p>
+                <input type="password" id="admin-api-key-input" placeholder="Hier Key eingeben..." data-i18n-placeholder="ph_api_key" style="text-align:center; margin-bottom:10px; width:100%; box-sizing:border-box; padding:10px; border-radius:8px; border:1px solid #ccc;">
                 <button class="btn btn-primary" onclick="window.saveGlobalApiKey()" style="margin-top:0; font-size:0.85rem; width:100%;">
-                    In Cloud speichern
+                    <span data-i18n="admin_save_cloud">In Cloud speichern</span>
                 </button>
-                <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;">
+                <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;" data-i18n="admin_key_desc">
                     Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.
                 </p>
             </div>
 
             <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:20px; border:1px solid #e2e8f0;">
                 <button class="btn btn-primary" onclick="window.openUserManagement()" style="margin-top:0; font-size:0.85rem; width:100%;">
-                    <i class="fa-solid fa-users-gear"></i> Benutzerverwaltung
+                    <i class="fa-solid fa-users-gear"></i> <span data-i18n="user_mgmt">Benutzerverwaltung</span>
                 </button>
-                <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;">
+                <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;" data-i18n="user_mgmt_desc">
                     Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.
                 </p>
             </div>
@@ -1744,13 +1747,13 @@
         <div class="modal-content" style="max-width:400px; text-align:center;">
             <span class="close-modal" onclick="document.getElementById('password-change-modal').style.display='none'">&times;</span>
             <div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-key"></i></div>
-            <h3 style="color:var(--text-main)">Passwort ändern</h3>
+            <h3 style="color:var(--text-main)" data-i18n="pw_change_title">Passwort ändern</h3>
             <div id="pw-change-error" class="login-error"></div>
-            <input type="password" id="pw-current" placeholder="Aktuelles Passwort" style="margin-bottom:10px;" autocomplete="current-password">
-            <input type="password" id="pw-new" placeholder="Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)" style="margin-bottom:10px;" autocomplete="new-password">
-            <input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" style="margin-bottom:10px;" autocomplete="new-password">
-            <button class="btn btn-primary" onclick="window.doChangePassword()">Passwort ändern</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('password-change-modal').style.display='none'">Abbrechen</button>
+            <input type="password" id="pw-current" placeholder="Aktuelles Passwort" data-i18n-placeholder="ph_current_pw" style="margin-bottom:10px;" autocomplete="current-password">
+            <input type="password" id="pw-new" placeholder="Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)" data-i18n-placeholder="ph_new_pw" style="margin-bottom:10px;" autocomplete="new-password">
+            <input type="password" id="pw-new2" placeholder="Neues Passwort wiederholen" data-i18n-placeholder="ph_new_pw2" style="margin-bottom:10px;" autocomplete="new-password">
+            <button class="btn btn-primary" onclick="window.doChangePassword()" data-i18n="pw_change_title">Passwort ändern</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('password-change-modal').style.display='none'" data-i18n="btn_cancel">Abbrechen</button>
         </div>
     </div>
 
@@ -1758,14 +1761,14 @@
     <div class="modal-overlay" id="user-mgmt-modal">
         <div class="modal-content" style="max-width:500px;">
             <span class="close-modal" onclick="document.getElementById('user-mgmt-modal').style.display='none'">&times;</span>
-            <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-users-gear"></i> Benutzerverwaltung</h3>
+            <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-users-gear"></i> <span data-i18n="user_mgmt">Benutzerverwaltung</span></h3>
 
             <!-- Invite Code Section -->
             <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #e2e8f0;">
-                <p style="font-weight:700; margin-top:0; font-size:0.9rem;">Einladungscode</p>
-                <p style="font-size:0.75rem; color:#64748b; margin-top:-5px;">Neue Benutzer benötigen diesen Code zur Registrierung.</p>
+                <p style="font-weight:700; margin-top:0; font-size:0.9rem;" data-i18n="invite_code">Einladungscode</p>
+                <p style="font-size:0.75rem; color:#64748b; margin-top:-5px;" data-i18n="invite_code_desc">Neue Benutzer benötigen diesen Code zur Registrierung.</p>
                 <div class="input-group-merged">
-                    <input type="text" id="admin-invite-code" placeholder="Einladungscode...">
+                    <input type="text" id="admin-invite-code" placeholder="Einladungscode..." data-i18n-placeholder="ph_invite_code">
                     <button class="btn btn-primary" onclick="window.saveInviteCode()" style="margin:0; border-top-left-radius:0; border-bottom-left-radius:0; width:auto; padding:0 18px;"><i class="fa-solid fa-save"></i></button>
                 </div>
             </div>
@@ -1773,7 +1776,7 @@
             <!-- User List -->
             <div style="margin-top:15px;">
                 <p style="font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
-                    <i class="fa-solid fa-users" style="color:var(--primary);"></i> Registrierte Benutzer
+                    <i class="fa-solid fa-users" style="color:var(--primary);"></i> <span data-i18n="registered_users">Registrierte Benutzer</span>
                     <span id="user-count-badge" style="font-size:0.7rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px;">0</span>
                 </p>
                 <div id="user-list-container" style="max-height:300px; overflow-y:auto;"></div>
@@ -1789,7 +1792,7 @@
         import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- KONFIGURATION START ---
         const myFirebaseConfig = {
@@ -1802,7 +1805,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.7.1";
+        const APP_VERSION = "1.7.2";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1820,21 +1823,27 @@
         // CHANGELOG DEFINITION
         const CHANGELOG = [
             {
-                ver: "1.7.1",
-                date: "2026-02-06",
+                ver: "1.7.2",
+                date: "2026-02-10",
                 changes: [
-                    "NEU: Sprachwahl (DE/EN) auf dem Login-Bildschirm."
+                    "Lösungsfeld für Punkte - nachträglich Lösungen eintragen.",
+                    "KI-Autokorrektur für Lösungstexte (Zauberstab).",
+                    "Lösung wird im PDF-Export angezeigt.",
+                    "Zauberstab zeigt Zielsprache an (→ DE / → EN).",
+                    "Backup/Import/Löschen nur noch für Admins.",
+                    "Letzter Login wird jetzt korrekt angezeigt.",
+                    "Verwaiste Bilder werden beim Löschen aus dem Storage entfernt."
                 ]
             },
             {
                 ver: "1.7.0",
                 date: "2026-02-06",
                 changes: [
-                    "NEU: Login mit E-Mail & Passwort - nur @gea.com Adressen.",
-                    "NEU: Benutzerverwaltung für Admins (Einladungscodes, Rollen).",
-                    "NEU: Passwort ändern im Benutzermenü.",
-                    "NEU: Einstellungen werden pro Benutzer gespeichert.",
-                    "NEU: Bericht-Info Header in Punkten, Status und Export.",
+                    "Login mit E-Mail & Passwort - nur @gea.com Adressen.",
+                    "Benutzerverwaltung für Admins (Einladungscodes, Rollen).",
+                    "Passwort ändern im Benutzermenü.",
+                    "Einstellungen werden pro Benutzer gespeichert.",
+                    "Bericht-Info Header in Punkten, Status und Export.",
                     "Alle Daten nur noch für eingeloggte Benutzer sichtbar."
                 ]
             },
@@ -1842,7 +1851,7 @@
                 ver: "1.6.0",
                 date: "2026-02-06",
                 changes: [
-                    "Fix: Berichte mit vielen Bildern können nun gespeichert werden.",
+                    "Berichte mit vielen Bildern können nun gespeichert werden.",
                     "Bilder werden in Firebase Storage gespeichert statt im Bericht.",
                     "Performance-Verbesserungen bei Filtern und Bildverarbeitung."
                 ]
@@ -1851,32 +1860,26 @@
                 ver: "1.5.9",
                 date: "2026-02-04",
                 changes: [
-                    "NEU: Suche findet jetzt automatisch Berichte nach Verfasser (kein 'von:' mehr nötig).",
-                    "NEU: Mobil - Bestätigungsdialog beim Verlassen der App via Zurück-Button.",
-                    "Verbesserte Unterstützung für mehrere Verfasser in der Suche."
+                    "Suche findet automatisch Berichte nach Verfasser.",
+                    "Mobil - Bestätigungsdialog beim Verlassen der App via Zurück-Button."
                 ]
             },
             {
                 ver: "1.5.8",
                 date: "2026-01-29",
                 changes: [
-                    "GEA-Farbsystem",
-                    "Micro-Interactions: Hover, Press & Focus-Effekte.",
+                    "GEA-Farbsystem & Micro-Interactions.",
                     "Card-Design mit Animationen.",
-                    "Navigation mit animiertem Unterstrich.",
-                    "Custom Scrollbar & verbesserte Accessibility.",
-                    "NEU: Sidebar zeigt Berichte des selben Kunden (Nur Desktop).",
-                    "Roter Indikator bei offenen Punkten.",
-                    "Fix: Verfasser-Änderungen in Übersicht sichtbar."
+                    "Sidebar zeigt Berichte des selben Kunden (Desktop).",
+                    "Roter Indikator bei offenen Punkten."
                 ]
             },
             {
                 ver: "1.5.7",
                 date: "2026-01-29",
                 changes: [
-                    "NEU: Zauberstab generiert automatisch kurze Überschrift wenn keine vorhanden.",
-                    "Zauberstab: Bei vorhandener Überschrift nur Rechtschreibprüfung.",
-                    "Punkte-Tab: Neues 'OFFEN' Badge statt 'Neu' für offene Punkte.",
+                    "Zauberstab generiert automatisch kurze Überschrift wenn keine vorhanden.",
+                    "Punkte-Tab: 'OFFEN' Badge statt 'Neu' für offene Punkte.",
                     "Export: Farbige Badge-Styles wie in der App (rot/grün)."
                 ]
             },
@@ -1884,9 +1887,8 @@
                 ver: "1.5.6",
                 date: "2026-01-28",
                 changes: [
-                    "NEU: Berichte per Link teilen - Empfänger können den Export direkt öffnen.",
-                    "Verbesserter PDF-Export: Native Browser-Druckfunktion für bessere Qualität.",
-                    "GEA-Logo wird als SVG eingebunden für scharfe Darstellung.",
+                    "Berichte per Link teilen.",
+                    "Verbesserter PDF-Export mit nativer Browser-Druckfunktion.",
                     "Export-Filter: Nur offene Punkte anzeigen."
                 ]
             },
@@ -1894,8 +1896,7 @@
                 ver: "1.5.4",
                 date: "2026-01-27",
                 changes: [
-                    "Bilder-Lightbox: Thumbnails in Punkten können per Klick vergrößert angezeigt werden.",
-                    "Bilder-Lightbox: Bilder im Export/PDF-Vorschau können per Klick als Popup vergrößert werden.",
+                    "Bilder-Lightbox: Thumbnails per Klick vergrößern.",
                     "PDF-Export als BETA gekennzeichnet."
                 ]
             },
@@ -1903,27 +1904,25 @@
                 ver: "1.5.3",
                 date: "2026-01-26",
                 changes: [
-                    "Fix: Bilder werden nun im PDF-Export korrekt angezeigt.",
-                    "Fix: Logo im PDF-Header wird nun korrekt dargestellt.",
-                    "Bilder werden beim Upload als Base64 gespeichert für zuverlässigen PDF-Export."
+                    "Bilder werden nun im PDF-Export korrekt angezeigt.",
+                    "Logo im PDF-Header wird korrekt dargestellt."
                 ]
             },
             {
                 ver: "1.5.2",
                 date: "2026-01-25",
                 changes: [
-                    "Fix: Zeichenkodierung korrigiert (Umlaute werden nun korrekt dargestellt).",
+                    "Zeichenkodierung korrigiert (Umlaute).",
                     "Code-Optimierungen und Bereinigung."
                 ]
             },
-             {
+            {
                 ver: "1.5.1",
                 date: "2026-01-23",
                 changes: [
-                    "Funktion: Mehrere Verfasser pro Bericht optimiert.",
+                    "Mehrere Verfasser pro Bericht.",
                     "Autofill für Namen (Verfasser, Teilnehmer, Verantwortlich).",
-                    "Optimierung der PDF-Ausgabe.",
-                    "UI-Textanpassungen (Verantwortlich statt Adressat)."
+                    "Optimierung der PDF-Ausgabe."
                 ]
             },
             {
@@ -1931,10 +1930,7 @@
                 date: "2026-01-23",
                 changes: [
                     "Bilder Upload per Drag & Drop am PC.",
-                    "Mobile: Auswahl zwischen Kamera und Galerie gefixt.",
-                    "Neuer Info-Bereich: Changelog & Impressum.",
-                    "Copyright & Kontaktinformationen aktualisiert.",
-                    "Kleinere Anpassungen & Fehlerbehebungen."
+                    "Info-Bereich: Changelog & Impressum."
                 ]
             },
             {
@@ -1943,8 +1939,7 @@
                 changes: [
                     "Cloud-Speicher für API Keys.",
                     "Settings bleiben nach Neustart erhalten.",
-                    "Verbesserte Bildqualität & Zoom.",
-                    "Logo-Update (GEA)."
+                    "Verbesserte Bildqualität & Zoom."
                 ]
             }
         ];
@@ -1972,7 +1967,6 @@
         let currentReportId = null;
         let points = []; 
         let tempImages = []; 
-        let pendingPinAction = null; 
         let headerUpdateTimeout = null; 
         const LOGO_SRC = "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgODUgMjciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTcxLjc2MSAwLjczMTM0Nkg2NS4zMzY5TDYxLjA1NDIgOS4yOTg4M0w2NS44MTkzIDkuMjk5ODNMNjguNTY2MSAzLjgxMjFMNzkuODU3NCAyNi40MzM4SDg0LjYyMjVMNzEuNzYxIDAuNzMxMzQ2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik02OS42MiAxMS40NDM2TDEzLjk0NDggMTEuNDQxNkwxMS44MDM0IDE1LjcyNTNIMjAuMzY4OVYyMi4xNTA5SDEyLjc3N0M4LjA4Mjc4IDIyLjE1MDkgNC4yNjM2OCAxOC4zMjQ2IDQuMjYzNjggMTMuNTg2NUM0LjI2MzY4IDguODQ4NDEgOC4wODI3OCA1LjAxNDg5IDEyLjc3NyA1LjAxNDg5SDIyLjUwMjJWMC43MjkwNzNMMTIuNzc3IDAuNzI5MDc0QzUuNzMxNzMgMC43MjkwNzQgMCA2LjQ5Njk0IDAgMTMuNTg2NUMwIDIwLjY3NjEgNS43MzE3MyAyNi40MzQ3IDEyLjc3NyAyNi40MzQ3SDI0LjY1MTZWMTUuNzI1M0gzMS4wNzU2VjI2LjQzNDdINDguMjA2NEw1MC4zNDc4IDIyLjE1MDlIMzUuMzU4M1YxNS43MjUzSDU3LjgxNTdMNTIuNDg5MSAyNi40MzQ3SDU3LjI1MTlMNjIuNjA2IDE1LjcyNTNINzEuNzYxM0w2OS42MiAxMS40NDM2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik0zNS4zNTg0IDUuMDEzOTZMNTAuMzQ3NiA1LjAxNTA0VjAuNzMxMjkyTDMxLjA3MzIgMC43MjgxNDJMMzEuMDczNiA5LjI5OTc3SDM1LjM1ODRWNS4wMTM5NloiIGZpbGw9IiMwMzAzQjgiLz48L3N2Zz4K";
         let LOGO_PNG = null; // Will be set at runtime by converting SVG to PNG
@@ -1990,14 +1984,15 @@
         let exportFilter = 'all'; // 'all' | 'open'
 
         // DYNAMIC API KEY
-        let globalGeminiKey = ""; 
+        let globalGeminiKey = "";
+        let unsubscribeReportsListener = null;
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?"
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Globaler API Key (Cloud)", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Letzter Login:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode..."
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?"
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Global API Key (Cloud)", admin_save_cloud: "Save to Cloud", admin_key_desc: "This key is stored centrally. All employees use it automatically.", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Login:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code..."
             }
         };
 
@@ -2082,8 +2077,9 @@
             const el = document.getElementById('sync-status');
             const txt = document.getElementById('sync-text');
             if(!el) return;
-            if(isOnline) { el.classList.add('online'); el.classList.remove('offline'); txt.textContent = "Cloud Verbunden"; }
-            else { el.classList.add('offline'); el.classList.remove('online'); txt.textContent = "Offline"; }
+            const t = translations[currentLang];
+            if(isOnline) { el.classList.add('online'); el.classList.remove('offline'); txt.textContent = t.sync_online; }
+            else { el.classList.add('offline'); el.classList.remove('online'); txt.textContent = t.sync_offline; }
         };
 
         const toastQueue = [];
@@ -2379,6 +2375,8 @@
         window.doLogout = async function() {
             window.toggleUserMenu();
             try {
+                // Clean up Firestore listener
+                if (unsubscribeReportsListener) { unsubscribeReportsListener(); unsubscribeReportsListener = null; }
                 currentUserProfile = null;
                 currentUser = null;
                 currentReportId = null;
@@ -2415,9 +2413,10 @@
             const newPw2 = document.getElementById('pw-new2').value;
             const errEl = document.getElementById('pw-change-error');
 
-            if (!currentPw) { errEl.textContent = 'Aktuelles Passwort eingeben.'; errEl.className = 'login-error visible'; return; }
-            if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[0-9]/.test(newPw) || !/[^A-Za-z0-9]/.test(newPw)) { errEl.textContent = 'Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.'; errEl.className = 'login-error visible'; return; }
-            if (newPw !== newPw2) { errEl.textContent = 'Neue Passwörter stimmen nicht überein.'; errEl.className = 'login-error visible'; return; }
+            const t = translations[currentLang];
+            if (!currentPw) { errEl.textContent = t.err_pw_current; errEl.className = 'login-error visible'; return; }
+            if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[0-9]/.test(newPw) || !/[^A-Za-z0-9]/.test(newPw)) { errEl.textContent = t.err_pw_requirements; errEl.className = 'login-error visible'; return; }
+            if (newPw !== newPw2) { errEl.textContent = t.err_pw_mismatch; errEl.className = 'login-error visible'; return; }
 
             try {
                 // Re-authenticate first
@@ -2426,13 +2425,13 @@
                 // Update password
                 await fbUpdatePassword(auth.currentUser, newPw);
                 document.getElementById('password-change-modal').style.display = 'none';
-                window.showToast('Passwort erfolgreich geändert!');
+                window.showToast(t.toast_pw_changed);
             } catch(e) {
                 console.error("Password change failed:", e);
                 if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-                    errEl.textContent = 'Aktuelles Passwort ist falsch.';
+                    errEl.textContent = t.err_pw_wrong;
                 } else {
-                    errEl.textContent = 'Fehler: ' + e.message;
+                    errEl.textContent = t.err_generic + ': ' + e.message;
                 }
                 errEl.className = 'login-error visible';
             }
@@ -2449,7 +2448,8 @@
                     lang: 'de',
                     aiLang: 'de'
                 },
-                created_at: Date.now()
+                created_at: Date.now(),
+                lastLogin: Date.now()
             };
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), profile);
             return profile;
@@ -2507,7 +2507,7 @@
 
                 menuName.textContent = currentUserProfile.displayName || '-';
                 menuEmail.textContent = currentUserProfile.email || '-';
-                menuRole.textContent = currentUserProfile.role === 'admin' ? 'Admin' : 'Benutzer';
+                menuRole.textContent = currentUserProfile.role === 'admin' ? translations[currentLang].role_admin : translations[currentLang].role_user;
                 menuRole.className = 'user-role' + (currentUserProfile.role === 'admin' ? ' admin' : '');
 
                 // Show/hide admin tools buttons
@@ -2550,13 +2550,14 @@
 
         window.saveInviteCode = async function() {
             const code = document.getElementById('admin-invite-code').value.trim();
-            if (!code) { alert('Bitte Einladungscode eingeben.'); return; }
+            const t = translations[currentLang];
+            if (!code) { alert(t.err_invite_empty); return; }
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'auth'), { invite_code: code }, { merge: true });
-                window.showToast('Einladungscode gespeichert!');
+                window.showToast(t.toast_invite_saved);
             } catch(e) {
                 console.error("Save invite code failed:", e);
-                alert('Fehler: ' + e.message);
+                alert(t.err_generic + ': ' + e.message);
             }
         };
 
@@ -2575,7 +2576,8 @@
 
         window.loadUserList = async function() {
             const container = document.getElementById('user-list-container');
-            container.innerHTML = '<div style="text-align:center; padding:10px;"><i class="fas fa-spinner fa-spin"></i> Lade...</div>';
+            const t = translations[currentLang];
+            container.innerHTML = `<div style="text-align:center; padding:10px;"><i class="fas fa-spinner fa-spin"></i> ${t.loading_short}</div>`;
 
             try {
                 const usersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
@@ -2586,7 +2588,7 @@
                 document.getElementById('user-count-badge').textContent = users.length;
 
                 if (users.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Keine Benutzer</div>';
+                    container.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:20px;">${t.no_users}</div>`;
                     return;
                 }
 
@@ -2594,23 +2596,24 @@
                     const isSelf = u.uid === currentUser.uid;
                     const deleteBtn = isSelf ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
                     const createdStr = u.created_at ? new Date(u.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
-                    const lastLoginStr = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Noch nie';
+                    const lastLoginTs = u.lastLogin || u.created_at;
+                    const lastLoginStr = lastLoginTs ? new Date(lastLoginTs).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
                     return `
                     <div class="user-list-item" style="flex-wrap:wrap;">
                         <div class="user-info" style="flex:1; min-width:150px;">
                             <div class="name">${window.escapeHtml(u.displayName || '-')}</div>
                             <div class="email">${window.escapeHtml(u.email || '-')}</div>
                             <div style="font-size:0.7rem; color:var(--text-sub); margin-top:2px;">
-                                <i class="fa-solid fa-calendar-plus" style="width:14px;"></i> Registriert: ${createdStr}
+                                <i class="fa-solid fa-calendar-plus" style="width:14px;"></i> ${t.lbl_registered} ${createdStr}
                                 &nbsp;|&nbsp;
-                                <i class="fa-solid fa-right-to-bracket" style="width:14px;"></i> Letzter Login: ${lastLoginStr}
+                                <i class="fa-solid fa-right-to-bracket" style="width:14px;"></i> ${t.lbl_last_login} ${lastLoginStr}
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px;">
                             <span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
                                   onclick="window.toggleUserRole('${u.uid}')"
                                   title="Klicken zum Ändern">
-                                ${u.role === 'admin' ? 'Admin' : 'User'}
+                                ${u.role === 'admin' ? t.role_admin : t.role_user}
                             </span>
                             ${deleteBtn}
                         </div>
@@ -2618,13 +2621,14 @@
                 }).join('');
             } catch(e) {
                 console.error("Load user list failed:", e);
-                container.innerHTML = '<div style="color:var(--danger); text-align:center;">Fehler beim Laden</div>';
+                container.innerHTML = `<div style="color:var(--danger); text-align:center;">${t.err_loading}</div>`;
             }
         };
 
         window.toggleUserRole = async function(uid) {
-            if (!window.isAdmin()) { alert('Nur Admins können Rollen ändern.'); return; }
-            if (uid === currentUser.uid) { alert('Du kannst deine eigene Rolle nicht ändern.'); return; }
+            const t = translations[currentLang];
+            if (!window.isAdmin()) { alert(t.err_admin_only_roles); return; }
+            if (uid === currentUser.uid) { alert(t.err_own_role); return; }
 
             try {
                 const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
@@ -2632,21 +2636,22 @@
                 const user = docSnap.data();
                 const newRole = user.role === 'admin' ? 'user' : 'admin';
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { role: newRole }, { merge: true });
-                window.showToast(`Rolle geändert zu: ${newRole === 'admin' ? 'Admin' : 'User'}`);
+                window.showToast(`${t.toast_role_changed} ${newRole === 'admin' ? t.role_admin : t.role_user}`);
                 await window.loadUserList();
             } catch(e) {
                 console.error("Toggle role failed:", e);
-                alert('Fehler: ' + e.message);
+                alert(t.err_generic + ': ' + e.message);
             }
         };
 
         window.deleteUserProfile = async function(uid) {
+            const t = translations[currentLang];
             if (!window.isAdmin()) return;
-            if (uid === currentUser.uid) { alert('Du kannst dich nicht selbst löschen.'); return; }
-            if (!confirm('Benutzer-Profil aus mooMemo entfernen?')) return;
+            if (uid === currentUser.uid) { alert(t.err_self_delete); return; }
+            if (!confirm(t.confirm_delete_user)) return;
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
-                window.showToast('Benutzer entfernt');
+                window.showToast(t.toast_user_removed);
                 await window.loadUserList();
             } catch(e) {
                 console.warn("[ERR-U01] Delete user profile failed:", e.code);
@@ -2674,13 +2679,13 @@
                 return;
             }
             const h = r.header;
-            const customer = h.customer || 'Neuer Bericht';
+            const customer = h.customer || translations[currentLang].new_report;
             const authors = (h.authors && h.authors.length) ? h.authors.join(', ') : (h.author || '');
             const formatDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d; };
             const dateStr = h.date_from ? formatDate(h.date_from) : '';
             const displayId = r.readable_id ? `#${r.readable_id}` : '';
             const openCount = (r.points || []).filter(p => p.status === 'open').length;
-            const meta = [displayId, authors, dateStr, h.type || 'AMS'].filter(Boolean).join(' · ') + (openCount > 0 ? ` · ${openCount} offen` : '');
+            const meta = [displayId, authors, dateStr, h.type || 'AMS'].filter(Boolean).join(' · ') + (openCount > 0 ? ` · ${openCount} ${translations[currentLang].open_suffix}` : '');
 
             document.getElementById('hri-customer').textContent = customer;
             document.getElementById('hri-meta').textContent = meta;
@@ -2692,17 +2697,17 @@
 
         window.renderParticipantsList = function(l) { 
             const el = document.getElementById('participants-list');
-            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Teilnehmer</span>' : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join('');
+            if(el) el.innerHTML = l.length===0 ? `<span style="color:#aaa;">${translations[currentLang].no_participants}</span>` : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeParticipant(${i})">&times;</span></div>`).join('');
         };
 
         window.renderAuthorsList = function(l) {
             const el = document.getElementById('authors-list');
-            if(el) el.innerHTML = l.length===0 ? '<span style="color:#aaa;">Keine Verfasser</span>' : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeAuthor(${i})">&times;</span></div>`).join(''); 
+            if(el) el.innerHTML = l.length===0 ? `<span style="color:#aaa;">${translations[currentLang].no_authors}</span>` : l.map((p,i)=>`<div class="tag-item">${window.escapeHtml(p)} <span class="tag-remove" onclick="window.removeAuthor(${i})">&times;</span></div>`).join(''); 
         };
 
         window.renderModalImages = function() { 
             const el = document.getElementById('modal-img-preview');
-            if(el) el.innerHTML = tempImages.map((img,i)=>`<div class="img-thumb-container ${img.isLarge?'is-large':''}"><img src="${img.src}" class="img-thumb" onclick="window.openLightbox(this.src)"><div class="img-btn-remove" onclick="window.removeTempImage(${i})">&times;</div><div class="img-btn-size ${img.isLarge?'active-large':''}" onclick="window.toggleImageSize(${i})"><i class="fa-solid ${img.isLarge?'fa-compress':'fa-expand'}"></i> <span>${img.isLarge?'GROSS':'NORMAL'}</span></div></div>`).join(''); 
+            if(el) el.innerHTML = tempImages.map((img,i)=>`<div class="img-thumb-container ${img.isLarge?'is-large':''}"><img src="${img.src}" class="img-thumb" onclick="window.openLightbox(this.src)"><div class="img-btn-remove" onclick="window.removeTempImage(${i})">&times;</div><div class="img-btn-size ${img.isLarge?'active-large':''}" onclick="window.toggleImageSize(${i})"><i class="fa-solid ${img.isLarge?'fa-compress':'fa-expand'}"></i> <span>${img.isLarge?translations[currentLang].img_large:translations[currentLang].img_normal}</span></div></div>`).join(''); 
         };
 
         window.renderPointsList = function() {
@@ -2730,6 +2735,7 @@
                             <div>${badge}</div>
                         </div>
                         <div class="point-desc">${window.escapeHtml((p.desc||'').substring(0,80))}...</div>
+                        ${p.solution && p.solution.trim() ? `<div style="font-size:0.75rem; color:#1d4ed8; margin-top:2px;"><i class="fa-solid fa-lightbulb"></i> ${t.lbl_solution}: ${window.escapeHtml(p.solution.substring(0,60))}${p.solution.length>60?'...':''}</div>` : ''}
                         <div class="point-meta-row"><span><i class="fa-solid fa-user"></i> ${window.escapeHtml(p.assignee)||t.no_assignee}</span>${p.images&&p.images.length?`<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>`:''}</div>
                     </div>
                     <div class="point-sort-column">${moveUp}${moveDown}</div>
@@ -2780,10 +2786,15 @@
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
                  const badgeStyle = p.status==='open' ? 'background:#fef2f2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#065f46; border:1px solid #bbf7d0;';
                  const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
-                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 let solutionHtml = '';
+                 if (p.solution && p.solution.trim()) {
+                     const solDateStr = p.solutionDate ? ` <span style="font-size:0.75rem; color:#666;">(${t.solution_last_edited}: ${new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })})</span>` : '';
+                     solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0;">${window.escapeHtml(p.solution)}</p></div>`;
+                 }
+                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}${solutionHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
-             const devBuild = "DEV-20260206B";
+             const devBuild = "DEV-20260210A";
              const previewEl = document.getElementById('pdf-preview');
              if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between; align-items:flex-start;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${logoSrc}" style="height:40px; width:126px; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
@@ -2846,7 +2857,7 @@
             customerHeader.title = currentReport.header.customer;
 
             if (relatedReports.length === 0) {
-                container.innerHTML = '<div class="no-related-reports">Keine weiteren Berichte</div>';
+                container.innerHTML = `<div class="no-related-reports">${translations[currentLang].no_related_reports}</div>`;
                 return;
             }
 
@@ -2863,7 +2874,7 @@
                 const openCount = (r.points || []).filter(p => p.status === 'open').length;
                 const hasOpen = openCount > 0;
                 const badgeClass = hasOpen ? 'has-open' : 'all-resolved';
-                const badgeText = hasOpen ? `${openCount} Offen` : 'Erledigt';
+                const badgeText = hasOpen ? `${openCount} ${translations[currentLang].sidebar_open}` : translations[currentLang].sidebar_done;
                 const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
                 const kwStr = formatKW(r.header.date_from);
                 const authorsStr = r.header.authors && r.header.authors.length
@@ -2890,7 +2901,7 @@
 
         window.translateReport = async function() {
             // DEPRECATED / DISABLED
-            window.showToast("Funktion aktuell deaktiviert.");
+            window.showToast(translations[currentLang].func_disabled);
         };
 
         // --- NEW: FETCH GLOBAL CONFIG ---
@@ -2916,19 +2927,52 @@
         // --- NEW: SAVE GLOBAL API KEY ---
         window.saveGlobalApiKey = async function() {
             const key = document.getElementById('admin-api-key-input').value.trim();
-            if(!key) { alert("Bitte Key eingeben"); return; }
-            
+            const t = translations[currentLang];
+            if(!key) { alert(t.err_key_empty); return; }
+
             try {
                 // Ensure document exists
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'secrets');
                 await setDoc(docRef, { gemini_key: key }, { merge: true });
                 globalGeminiKey = key;
-                alert("Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.");
+                alert(t.toast_key_saved);
                 document.getElementById('admin-api-key-input').value = '';
                 window.closeAdminToolsModal();
             } catch(e) {
                 console.error(e);
-                alert("Fehler beim Speichern: " + e.message);
+                alert(t.err_save_failed + ' ' + e.message);
+            }
+        };
+
+        // --- SHARED GEMINI API HELPER ---
+        window.callGeminiAPI = async function(prompt) {
+            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
+            if (!apiKey) throw new Error(translations[currentLang].err_no_api_key);
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            let attempt = 0;
+
+            while (attempt < 3) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
+                    });
+                    if (response.status === 403) throw new Error(translations[currentLang].err_api_key_invalid);
+                    if (response.status === 429 || response.status >= 500) { attempt++; await new Promise(r => setTimeout(r, 1000 * attempt)); continue; }
+                    if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+
+                    const result = await response.json();
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text.trim();
+                    }
+                    throw new Error("Keine Antwort von der KI erhalten.");
+                } catch(e) {
+                    if (attempt >= 2 || e.message.includes("Key")) throw e;
+                    attempt++;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
             }
         };
 
@@ -2937,130 +2981,85 @@
             const titleField = document.getElementById('p_title');
             const desc = descField.value.trim();
             const title = titleField.value.trim();
-
             if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
 
-            // PRIORITY: Global Cloud Key -> Local Storage Key
-            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
-
-            if(!apiKey) {
-                alert("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
-                return;
-            }
-
             const btn = document.getElementById('btn-improve-text');
-            const originalButtonHTML = btn.innerHTML;
+            const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
             const context = "GEA FarmTechnologies Melktechnik/Fütterungstechnik";
 
-            let userPrompt;
+            let prompt;
             if (!title) {
-                // Keine Überschrift vorhanden: Kurze Überschrift generieren + Text korrigieren
-                userPrompt = `Du bist ein technischer Redakteur für ${context}. Führe folgende Aufgaben aus:
+                prompt = `Du bist ein technischer Redakteur für ${context}.
+WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}. Überschrift und Text MÜSSEN auf ${targetLang} sein.
 
-1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter) basierend auf dem Text. Die Überschrift soll prägnant den Kerninhalt erfassen.
-2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+Führe folgende Aufgaben aus:
+1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter, auf ${targetLang}) basierend auf dem Text.
+2. Korrigiere Rechtschreibung und Grammatik. Bleibe MÖGLICHST NAH AM ORIGINAL.
 
-Antworte NUR im folgenden JSON-Format (keine anderen Texte):
-{"headline": "Kurze Überschrift hier", "text": "Korrigierter Text hier"}
-
-Sprache: ${targetLang}
+Antworte NUR im JSON-Format: {"headline": "...", "text": "..."}
 
 Text: "${desc}"`;
             } else {
-                // Überschrift vorhanden: Nur Rechtschreibprüfung für Titel + Text korrigieren
-                userPrompt = `Du bist ein technischer Redakteur für ${context}. Führe folgende Aufgaben aus:
+                prompt = `Du bist ein technischer Redakteur für ${context}.
+WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}. Überschrift und Text MÜSSEN auf ${targetLang} sein.
 
-1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Ändere nichts anderes, bleibe möglichst nah am Original.
-2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Die Überschrift MUSS auf ${targetLang} bleiben.
+2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe MÖGLICHST NAH AM ORIGINAL.
 
-Antworte NUR im folgenden JSON-Format (keine anderen Texte):
-{"headline": "Korrigierte Überschrift hier", "text": "Korrigierter Text hier"}
-
-Sprache: ${targetLang}
+Antworte NUR im JSON-Format: {"headline": "...", "text": "..."}
 
 Überschrift: "${title}"
 Text: "${desc}"`;
             }
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            try {
+                const aiResponse = await window.callGeminiAPI(prompt);
+                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    try {
+                        const parsed = JSON.parse(jsonMatch[0]);
+                        if (parsed.headline) titleField.value = parsed.headline;
+                        if (parsed.text) descField.value = parsed.text;
+                        window.showToast(title ? "Rechtschreibung korrigiert!" : "Überschrift erstellt & Text korrigiert!");
+                    } catch(parseErr) {
+                        descField.value = aiResponse;
+                        window.showToast("Text überarbeitet!");
+                    }
+                } else {
+                    descField.value = aiResponse;
+                    window.showToast("Text überarbeitet!");
+                }
+            } catch(e) { alert(e.message); }
 
-            let attempt = 0;
-            let success = false;
+            btn.innerHTML = originalHTML;
+        };
+
+        window.improveSolution = async function() {
+            const field = document.getElementById('p_solution');
+            const text = field.value.trim();
+            if (text.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+
+            const btn = document.getElementById('btn-improve-solution');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
 
             try {
-                while(attempt < 3 && !success) {
-                    try {
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: userPrompt }] }],
-                                generationConfig: { temperature: 0.1 }
-                            })
-                        });
+                const result = await window.callGeminiAPI(`Du bist ein technischer Redakteur für GEA FarmTechnologies Melktechnik/Fütterungstechnik.
+WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}.
+Korrigiere Rechtschreibung und Grammatik. Bleibe MÖGLICHST NAH AM ORIGINAL.
+Antworte NUR mit dem korrigierten Text (kein JSON, keine Erklärungen).
 
-                        if (response.status === 403) {
-                            throw new Error("API Key ungültig oder gesperrt.");
-                        }
+Text: "${text}"`);
+                field.value = result;
+                window.showToast("Rechtschreibung korrigiert!");
+            } catch(e) { alert(e.message); }
 
-                        if (response.status === 429 || response.status >= 500) {
-                            attempt++;
-                            console.warn(`API Busy/Limit (Status ${response.status}). Retrying ${attempt}/3...`);
-                            await new Promise(r => setTimeout(r, 1000 * attempt));
-                            continue;
-                        }
-
-                        if(!response.ok) {
-                            const errText = await response.text();
-                            throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                        }
-
-                        const result = await response.json();
-                        if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                            let aiResponse = result.candidates[0].content.parts[0].text.trim();
-                            // JSON aus der Antwort extrahieren (falls in Markdown-Block)
-                            const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-                            if (jsonMatch) {
-                                try {
-                                    const parsed = JSON.parse(jsonMatch[0]);
-                                    if (parsed.headline) {
-                                        titleField.value = parsed.headline;
-                                    }
-                                    if (parsed.text) {
-                                        descField.value = parsed.text;
-                                    }
-                                    window.showToast(title ? "Rechtschreibung korrigiert!" : "Überschrift erstellt & Text korrigiert!");
-                                    success = true;
-                                } catch(parseErr) {
-                                    console.error("JSON Parse Error:", parseErr);
-                                    // Fallback: Nur den Text übernehmen
-                                    descField.value = aiResponse;
-                                    window.showToast("Text überarbeitet!");
-                                    success = true;
-                                }
-                            } else {
-                                // Kein JSON gefunden: Fallback
-                                descField.value = aiResponse;
-                                window.showToast("Text überarbeitet!");
-                                success = true;
-                            }
-                        }
-                    } catch(innerEx) {
-                        console.warn("Attempt failed", innerEx);
-                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx;
-                        attempt++;
-                        await new Promise(r => setTimeout(r, 1000));
-                    }
-                }
-            } catch(e) {
-                console.error("Final API Failure:", e);
-                alert(e.message);
-            }
-
-            btn.innerHTML = originalButtonHTML;
+            btn.innerHTML = originalHTML;
         };
 
         window.renderReportList = function() {
@@ -3091,7 +3090,7 @@ Text: "${desc}"`;
                     const allAuthors = (rAuthor + ' ' + rAuthors).trim();
 
                     let inPoints = false;
-                    if(r.points) inPoints = r.points.some(p => (p.title && p.title.toLowerCase().includes(searchQuery)) || (p.desc && p.desc.toLowerCase().includes(searchQuery)));
+                    if(r.points) inPoints = r.points.some(p => (p.title && p.title.toLowerCase().includes(searchQuery)) || (p.desc && p.desc.toLowerCase().includes(searchQuery)) || (p.solution && p.solution.toLowerCase().includes(searchQuery)));
                     // Search in ID, customer, authors, and points
                     matchSearch = rId.includes(searchQuery) || rCustomer.includes(searchQuery) || allAuthors.includes(searchQuery) || inPoints;
                 }
@@ -3115,7 +3114,7 @@ Text: "${desc}"`;
             }
 
             list.innerHTML = filteredReports.map(r => {
-                let title = window.escapeHtml(r.header.customer) || "Neuer Bericht";
+                let title = window.escapeHtml(r.header.customer) || t.new_report;
                 if(r.header.date_from) { const d = new Date(r.header.date_from); if(!isNaN(d)) { const [w,y] = window.getWeekNumber(d); title = `KW ${w} ${y} - ${window.escapeHtml(r.header.customer)}`; } }
                 const openCount = (r.points||[]).filter(p=>p.status==='open').length;
                 const total = (r.points||[]).length;
@@ -3134,7 +3133,8 @@ Text: "${desc}"`;
                 const pointsTxt = total > 0 ? `${total} ${t.tab_points}` : t.no_points;
                 // Use authors array, fallback to deprecated author field
                 const authorsDisplay = window.escapeHtml((r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-'));
-                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button><button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button></div></div>`;
+                const deleteBtnHtml = window.isAdmin() ? `<button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button>` : '';
+                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button>${deleteBtnHtml}</div></div>`;
             }).join('');
         };
 
@@ -3152,7 +3152,7 @@ Text: "${desc}"`;
             } catch(e) {
                 console.error("Save failed", e);
                 if (e.message && e.message.includes("exceeds the maximum allowed size")) {
-                     alert("Fehler: Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.");
+                     alert(translations[currentLang].err_report_too_large);
                 } else if(e.code === 'permission-denied') {
                      console.warn("[ERR-S02] Firestore write permission denied");
                      window.showToast("Fehler S02 - Bitte neu anmelden");
@@ -3166,9 +3166,38 @@ Text: "${desc}"`;
             }
         };
 
+        // Delete all images in a Storage folder (e.g. images/{reportId}/)
+        window.deleteStorageFolder = async function(folderPath) {
+            try {
+                const folderRef = ref(storage, folderPath);
+                const result = await listAll(folderRef);
+                await Promise.all(result.items.map(item => deleteObject(item)));
+                console.log(`Storage cleanup: ${result.items.length} files deleted from ${folderPath}`);
+            } catch(e) {
+                console.warn("Storage cleanup failed:", e);
+            }
+        };
+
+        // Delete specific image URLs from Storage
+        window.deleteStorageImages = async function(images) {
+            if (!images || !images.length) return;
+            const deletes = images.map(img => {
+                const url = typeof img === 'string' ? img : (img.src || '');
+                if (!url || !url.includes('firebasestorage')) return Promise.resolve();
+                try {
+                    const storageRef = ref(storage, url);
+                    return deleteObject(storageRef);
+                } catch(e) { return Promise.resolve(); }
+            });
+            await Promise.allSettled(deletes);
+        };
+
         window.deleteReportFromFirestore = async function(id) {
             if (!currentUser) return;
             try {
+                // Delete all images in Storage for this report
+                await window.deleteStorageFolder(`images/${id}`);
+                // Delete Firestore document
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
             } catch(e) {
                 console.warn("[ERR-D01] Delete failed:", e.code, e.message);
@@ -3176,29 +3205,18 @@ Text: "${desc}"`;
             }
         };
         
-        window.configurePinModal = function(title, desc, color, icon, callback) {
-            document.getElementById('pin-title').innerText = title;
-            document.getElementById('pin-desc').innerText = desc;
-            
-            const iconEl = document.getElementById('pin-icon');
-            iconEl.style.color = color;
-            iconEl.innerHTML = `<i class="fa-solid ${icon}"></i>`;
-            
-            const btn = document.getElementById('pin-confirm-btn');
-            btn.style.background = color;
-            
-            document.getElementById('auth-pin').value = '';
-            pendingPinAction = callback;
-            
-            document.getElementById('pin-auth-modal').style.display = 'flex';
-            setTimeout(() => document.getElementById('auth-pin').focus(), 100);
-        };
 
         window.setupRealtimeListener = function() {
+            // Unsubscribe previous listener to prevent memory leaks
+            if (unsubscribeReportsListener) {
+                unsubscribeReportsListener();
+                unsubscribeReportsListener = null;
+            }
+
             const q = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
             let isFirstLoad = true;
 
-            onSnapshot(q, (snapshot) => {
+            unsubscribeReportsListener = onSnapshot(q, (snapshot) => {
                 const newReports = [];
                 snapshot.forEach(doc => newReports.push(doc.data()));
                 allReports = newReports;
@@ -3208,7 +3226,7 @@ Text: "${desc}"`;
 
                 window.renderReportList();
 
-                // SHARED LINK MODE: Apply on first load if URL has report parameter
+                // SHARED LINK MODE: Apply on first load if URL has share token or report parameter
                 if (isFirstLoad && sharedReportId) {
                     isFirstLoad = false;
                     window.applySharedLinkMode();
@@ -3278,9 +3296,15 @@ Text: "${desc}"`;
                 }
             });
             document.getElementById('search-input').placeholder = t.search_placeholder;
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if(t[key]) el.placeholder = t[key];
+            });
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.querySelector(`.lang-btn[data-lang="${lang}"]`);
             if(activeBtn) activeBtn.classList.add('active');
+            window.updateSyncStatus(!!currentUser);
+            window.updateUserUI();
             window.renderReportList();
             if(document.getElementById('points').classList.contains('active')) window.renderPointsList();
             if(document.getElementById('status').classList.contains('active')) window.renderStatusList();
@@ -3300,10 +3324,20 @@ Text: "${desc}"`;
             const buttons = container.getElementsByClassName('lang-btn');
             for(let btn of buttons) {
                 btn.classList.remove('active');
-                if((lang === 'de' && btn.innerText === 'Deutsch') || (lang === 'en' && btn.innerText === 'English')) {
+                if((lang === 'de' && btn.dataset.ailang === 'de') || (lang === 'en' && btn.dataset.ailang === 'en')) {
                     btn.classList.add('active');
                 }
             }
+            window.updateAiLangHints();
+        };
+
+        window.updateAiLangHints = function() {
+            const langLabel = aiTargetLang === 'de' ? 'DE' : 'EN';
+            const hintText = `→ ${langLabel}`;
+            const descHint = document.getElementById('ai-lang-hint-desc');
+            const solHint = document.getElementById('ai-lang-hint-sol');
+            if (descHint) descHint.textContent = hintText;
+            if (solHint) solHint.textContent = hintText;
         };
 
         window.goToDashboard = function() {
@@ -3377,6 +3411,35 @@ Text: "${desc}"`;
             window.saveReportToFirestore(r).then(() => window.openReport(r.id));
         };
 
+        // DEAKTIVIERT - Bericht duplizieren (Button ausgeblendet, Funktion bleibt für spätere Nutzung)
+        window.duplicateReport = function(e, id) {
+            if(e) e.stopPropagation();
+            const source = allReports.find(x => x.id === id);
+            if(!source) return;
+            const readableId = Math.floor(10000 + Math.random() * 90000).toString();
+            const today = new Date().toISOString().split('T')[0];
+            const r = {
+                id: Date.now().toString(),
+                readable_id: readableId,
+                created_at: Date.now(),
+                created_by: currentUser ? currentUser.uid : null,
+                created_by_name: currentUserProfile ? currentUserProfile.displayName : '',
+                header: {
+                    type: source.header.type || 'AMS',
+                    customer: source.header.customer || '',
+                    date_from: today,
+                    date_to: '',
+                    authors: source.header.authors ? [...source.header.authors] : [],
+                    participants: source.header.participants ? [...source.header.participants] : []
+                },
+                points: []
+            };
+            window.saveReportToFirestore(r).then(() => {
+                window.showToast('Bericht dupliziert');
+                window.openReport(r.id);
+            });
+        };
+
         window.updateCurrentReportHeader = function() {
             if(!currentReportId) return;
             if (headerUpdateTimeout) clearTimeout(headerUpdateTimeout);
@@ -3412,13 +3475,22 @@ Text: "${desc}"`;
 
         window.savePoint = function() {
              const idx = parseInt(document.getElementById('edit-index').value);
+             const newSolution = document.getElementById('p_solution').value;
+             const oldPoint = idx > -1 ? points[idx] : null;
+             let solutionDate = oldPoint ? oldPoint.solutionDate || null : null;
+             if (newSolution.trim() && newSolution !== (oldPoint ? oldPoint.solution || '' : '')) {
+                 solutionDate = Date.now();
+             }
+             if (!newSolution.trim()) { solutionDate = null; }
              const p = {
                 ticket: document.getElementById('p_ticket').value,
                 title: document.getElementById('p_title').value,
                 desc: document.getElementById('p_desc').value,
                 assignee: document.getElementById('p_assignee').value,
                 status: document.getElementById('p_status').value,
-                images: tempImages 
+                solution: newSolution,
+                solutionDate: solutionDate,
+                images: tempImages
              };
              if(idx === -1) points.push(p); else points[idx] = p;
              const r = window.getCurrentReport();
@@ -3428,6 +3500,7 @@ Text: "${desc}"`;
         
         window.askDeleteReport = function(e, id) {
             if(e) e.stopPropagation();
+            if (!window.isAdmin()) { alert(translations[currentLang].err_admin_only_delete); return; }
             const t = translations[currentLang];
             if (confirm(t.delete_report_msg)) {
                 window.deleteReportFromFirestore(id);
@@ -3438,7 +3511,7 @@ Text: "${desc}"`;
             if (window.isAdmin()) {
                 document.getElementById('admin-tools-modal').style.display = 'flex';
             } else {
-                alert('Nur Admins haben Zugriff auf diesen Bereich.');
+                alert(translations[currentLang].err_admin_only_access);
             }
         };
 
@@ -3452,44 +3525,8 @@ Text: "${desc}"`;
             document.body.appendChild(a); a.click(); a.remove();
         };
 
-        window.askExportBackup = function() {
-             window.configurePinModal(translations[currentLang].backup_save, translations[currentLang].admin_desc, 'var(--primary)', 'fa-file-export', window.performExport);
-        };
-
-        window.askImportBackup = function() {
-            window.configurePinModal(translations[currentLang].backup_load, translations[currentLang].admin_desc, 'var(--primary)', 'fa-file-export', () => document.getElementById('import-input').click());
-        };
-
         window.closeAdminToolsModal = function() {
             document.getElementById('admin-tools-modal').style.display = 'none';
-        };
-
-        window.closePinModal = function() {
-            document.getElementById('pin-auth-modal').style.display = 'none';
-            pendingPinAction = null;
-        };
-
-        window.verifyPin = function() {
-            // Admin role check replaces PIN for admin tools
-            if (pendingPinAction && pendingPinAction._isAdminAction) {
-                if (window.isAdmin()) {
-                    pendingPinAction();
-                    window.closePinModal();
-                } else {
-                    alert("Nur Admins haben Zugriff auf diese Funktion.");
-                    window.closePinModal();
-                }
-                return;
-            }
-            // For delete confirmations, accept any confirmation
-            const pin = document.getElementById('auth-pin').value;
-            if (pin === '0000' || window.isAdmin()) {
-                if (pendingPinAction) pendingPinAction();
-                window.closePinModal();
-            } else {
-                alert("Falsch");
-                document.getElementById('auth-pin').value = '';
-            }
         };
         
         // --- NEW: AUTOFILL LOGIC (Only on input > 0 chars) ---
@@ -3596,6 +3633,8 @@ Text: "${desc}"`;
         window.openModal = function(index = -1) {
             document.getElementById('edit-index').value = index;
             tempImages = [];
+            const solutionDateEl = document.getElementById('solution-date-display');
+            const solutionDateText = document.getElementById('solution-date-text');
             if(index > -1) {
                 const p = points[index];
                 document.getElementById('p_ticket').value = p.ticket || "";
@@ -3603,7 +3642,15 @@ Text: "${desc}"`;
                 document.getElementById('p_desc').value = p.desc || "";
                 document.getElementById('p_assignee').value = p.assignee || "";
                 document.getElementById('p_status').value = p.status || "open";
-                
+                document.getElementById('p_solution').value = p.solution || "";
+                if (p.solutionDate) {
+                    const t = translations[currentLang];
+                    solutionDateText.textContent = t.solution_last_edited + ': ' + new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    solutionDateEl.style.display = 'block';
+                } else {
+                    solutionDateEl.style.display = 'none';
+                }
+
                 tempImages = (p.images || []).map(img => {
                     if (typeof img === 'string') {
                         return { src: img, isLarge: false };
@@ -3616,11 +3663,14 @@ Text: "${desc}"`;
                 document.getElementById('p_desc').value = "";
                 document.getElementById('p_assignee').value = "";
                 document.getElementById('p_status').value = "open";
+                document.getElementById('p_solution').value = "";
+                solutionDateEl.style.display = 'none';
             }
             window.renderModalImages();
+            window.updateAiLangHints();
             document.getElementById('modal').style.display = 'flex';
         };
-        
+
         window.toggleImageSize = function(i) {
             if(tempImages[i]) {
                 tempImages[i].isLarge = !tempImages[i].isLarge;
@@ -3653,6 +3703,11 @@ Text: "${desc}"`;
         window.executeDeletePoint = function() {
              const idx = parseInt(document.getElementById('edit-index').value);
              if(idx > -1) {
+                 const deletedPoint = points[idx];
+                 // Clean up images from Storage
+                 if (deletedPoint && deletedPoint.images && deletedPoint.images.length) {
+                     window.deleteStorageImages(deletedPoint.images);
+                 }
                  points.splice(idx, 1);
                  const r = window.getCurrentReport();
                  if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_deleted)); }
@@ -3693,18 +3748,20 @@ Text: "${desc}"`;
             }
         };
         
-        window.performExport = function() { 
-            const a=document.createElement('a'); 
-            a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(allReports)); 
-            a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; 
-            document.body.appendChild(a); a.click(); a.remove(); 
+        window.performExport = function() {
+            if (!window.isAdmin()) { alert(translations[currentLang].err_admin_only_backup); return; }
+            const a=document.createElement('a');
+            a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(allReports));
+            a.download=`backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
         };
 
-        window.importBackup = function(input) { 
-            const f=input.files[0]; if(!f)return; 
-            const r=new FileReader(); 
-            r.onload=e=>{ try { const d=JSON.parse(e.target.result); if(Array.isArray(d)) { if(confirm('OK=Überschreiben, Abbrechen=Anfügen')) d.forEach(x=>window.saveReportToFirestore(x)); else d.forEach(x=>{ if(!allReports.find(y=>y.id===x.id))window.saveReportToFirestore(x); }); alert("Import verarbeitet."); } else if(d.id) { window.saveReportToFirestore(d); alert("Importiert."); } } catch(err){alert("Fehler");} }; 
-            r.readAsText(f); input.value=''; 
+        window.importBackup = function(input) {
+            if (!window.isAdmin()) { alert(translations[currentLang].err_admin_only_import); input.value=''; return; }
+            const f=input.files[0]; if(!f)return;
+            const r=new FileReader();
+            const t=translations[currentLang]; r.onload=e=>{ try { const d=JSON.parse(e.target.result); if(Array.isArray(d)) { if(confirm(t.import_overwrite_confirm)) d.forEach(x=>window.saveReportToFirestore(x)); else d.forEach(x=>{ if(!allReports.find(y=>y.id===x.id))window.saveReportToFirestore(x); }); alert(t.toast_import_done); } else if(d.id) { window.saveReportToFirestore(d); alert(t.toast_imported); } } catch(err){alert(t.err_generic);} };
+            r.readAsText(f); input.value='';
         };
         
         // --- PRINT REPORT (Native Browser Print for better quality) ---
@@ -3734,32 +3791,24 @@ Text: "${desc}"`;
         };
 
         // --- SHARE LINK FUNCTIONS ---
-        window.getShareLink = function(tab) {
-            if (!currentReportId) return '';
-            const baseUrl = window.location.origin + window.location.pathname;
-            let url = `${baseUrl}?report=${currentReportId}`;
-            if (tab) url += `&tab=${tab}`;
-            return url;
-        };
-
         window.copyShareLink = function(tab) {
-            const link = window.getShareLink(tab || 'export');
+            if (!currentReportId) return;
+            const baseUrl = window.location.origin + window.location.pathname;
+            const link = `${baseUrl}?report=${currentReportId}`;
+
             navigator.clipboard.writeText(link).then(() => {
                 window.showToast(translations[currentLang].toast_copied);
-                // Open shared view in new tab
                 window.open(link, '_blank');
                 const btn = document.getElementById('share-link-btn');
                 if (btn) {
                     btn.classList.add('copied');
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopiert!';
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> ${translations[currentLang].toast_copied}`;
                     setTimeout(() => {
                         btn.classList.remove('copied');
                         btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].share_title}`;
                     }, 2000);
                 }
             }).catch(() => {
-                // Fallback for older browsers
-                const link = window.getShareLink(tab || 'export');
                 window.open(link, '_blank');
                 window.showToast(translations[currentLang].toast_copied);
             });
@@ -3778,7 +3827,7 @@ Text: "${desc}"`;
             if (reportId) {
                 sharedReportId = reportId;
                 sharedTab = tab || 'export';
-                isReadOnly = true; // Shared links are read-only by default
+                isReadOnly = true;
             }
         };
 
@@ -3790,12 +3839,13 @@ Text: "${desc}"`;
             if (!report) {
                 console.warn('Shared report not found:', sharedReportId);
                 // Show error message
+                const t = translations[currentLang];
                 document.body.innerHTML = `
                     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;">
                         <i class="fa-solid fa-file-circle-question" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i>
-                        <h2 style="color:#1f2937; margin-bottom:10px;">Bericht nicht gefunden</h2>
-                        <p style="color:#64748b; margin-bottom:20px;">Der angeforderte Bericht existiert nicht oder wurde gelöscht.</p>
-                        <a href="?" style="color:var(--primary); font-weight:600;">Zur App</a>
+                        <h2 style="color:#1f2937; margin-bottom:10px;">${t.report_not_found}</h2>
+                        <p style="color:#64748b; margin-bottom:20px;">${t.report_not_found_desc}</p>
+                        <a href="?" style="color:var(--primary); font-weight:600;">${t.back_to_app}</a>
                     </div>
                 `;
                 return;
@@ -3811,14 +3861,14 @@ Text: "${desc}"`;
             const subtitleEl = document.getElementById('shared-report-subtitle');
 
             if (titleEl) {
-                titleEl.textContent = h.customer || 'Besuchsbericht';
+                titleEl.textContent = h.customer || translations[currentLang].pdf_title;
             }
             if (subtitleEl) {
                 let subtitle = '';
                 if (h.date_from) subtitle += formatDate(h.date_from);
                 if (h.date_to && h.date_to !== h.date_from) subtitle += ' - ' + formatDate(h.date_to);
                 if (h.authors && h.authors.length) subtitle += ' | ' + h.authors.join(', ');
-                subtitleEl.textContent = subtitle || 'Geteilter Bericht';
+                subtitleEl.textContent = subtitle || translations[currentLang].readonly_info;
             }
 
             // Show open points count
@@ -3881,7 +3931,7 @@ Text: "${desc}"`;
         };
         
         window.listen = function(id) {
-            if(!('webkitSpeechRecognition' in window)) return alert('Browser nicht unterstützt');
+            if(!('webkitSpeechRecognition' in window)) return alert(translations[currentLang].err_browser_unsupported);
             const r = new webkitSpeechRecognition();
             r.lang = currentLang === 'de' ? "de-DE" : "en-US";
             const btn = document.querySelector(`button[onclick*="${id}"]`);
@@ -4074,9 +4124,9 @@ Text: "${desc}"`;
 
                 currentUserProfile = profile;
 
-                // Update lastLogin timestamp
+                // Update lastLogin timestamp (setDoc+merge is more robust than updateDoc)
                 try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), { lastLogin: Date.now() });
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), { lastLogin: Date.now() }, { merge: true });
                 } catch(e) { console.error("lastLogin update failed:", e); }
 
                 // Hide login screen, show app
