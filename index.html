@@ -1672,15 +1672,15 @@
             <label data-i18n="lbl_ticket">Ticketnummer</label><div class="input-group"><input type="text" id="p_ticket" placeholder="z.B. 123456"><button class="mic-btn" onclick="window.listen('p_ticket')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_title">Titel / Thema</label><div class="input-group"><input type="text" id="p_title" placeholder="..."><button class="mic-btn" onclick="window.listen('p_title')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_desc">Beschreibung</label><div class="input-group"><textarea id="p_desc" rows="4" placeholder="..."></textarea><button class="mic-btn" onclick="window.listen('p_desc')"><i class="fa-solid fa-microphone"></i></button></div>
-            <button id="btn-improve-text" class="ai-btn" onclick="window.improveDescription()" title="Text mit KI überarbeiten" style="margin-top:5px;">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <button id="btn-improve-text" class="ai-btn" onclick="window.improveDescription()" style="margin-top:5px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="ai-lang-hint-desc" style="font-size:0.7rem;"></span>
             </button>
             <br>
             <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
             <label data-i18n="lbl_solution">Lösung</label><div class="input-group"><textarea id="p_solution" rows="3" placeholder="Lösung hier eingeben..." data-i18n-placeholder="solution_placeholder"></textarea><button class="mic-btn" onclick="window.listen('p_solution')"><i class="fa-solid fa-microphone"></i></button></div>
-            <button id="btn-improve-solution" class="ai-btn" onclick="window.improveSolution()" title="Lösung mit KI überarbeiten" style="margin-top:5px;">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <button id="btn-improve-solution" class="ai-btn" onclick="window.improveSolution()" style="margin-top:5px;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="ai-lang-hint-sol" style="font-size:0.7rem;"></span>
             </button>
             <div id="solution-date-display" style="font-size:0.7rem; color:var(--text-sub); margin-top:4px; margin-bottom:8px; display:none;"><i class="fa-solid fa-clock"></i> <span id="solution-date-text"></span></div>
             <br>
@@ -3398,6 +3398,16 @@ Text: "${solution}"`;
                     btn.classList.add('active');
                 }
             }
+            window.updateAiLangHints();
+        };
+
+        window.updateAiLangHints = function() {
+            const langLabel = aiTargetLang === 'de' ? 'DE' : 'EN';
+            const hintText = `→ ${langLabel}`;
+            const descHint = document.getElementById('ai-lang-hint-desc');
+            const solHint = document.getElementById('ai-lang-hint-sol');
+            if (descHint) descHint.textContent = hintText;
+            if (solHint) solHint.textContent = hintText;
         };
 
         window.goToDashboard = function() {
@@ -3698,9 +3708,10 @@ Text: "${solution}"`;
                 solutionDateEl.style.display = 'none';
             }
             window.renderModalImages();
+            window.updateAiLangHints();
             document.getElementById('modal').style.display = 'flex';
         };
-        
+
         window.toggleImageSize = function(i) {
             if(tempImages[i]) {
                 tempImages[i].isLarge = !tempImages[i].isLarge;
