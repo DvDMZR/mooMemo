@@ -1792,7 +1792,7 @@
         import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- KONFIGURATION START ---
         const myFirebaseConfig = {
@@ -1832,9 +1832,13 @@
                     "NEU: 'Zuletzt bearbeitet' Datum bei Lösungen.",
                     "NEU: Lösung wird im PDF-Export angezeigt (blaue Box).",
                     "NEU: Zauberstab zeigt Zielsprache an (→ DE / → EN).",
+                    "NEU: Bericht duplizieren - Kunde, Teilnehmer & Verfasser übernehmen.",
+                    "NEU: Share-Links mit Ablaufdatum (7 Tage) für mehr Sicherheit.",
                     "Sicherheit: Backup/Import/Löschen nur noch für Admins.",
                     "Fix: Letzter Login wird jetzt korrekt angezeigt.",
-                    "Fix: Zauberstab-Überschrift bleibt in gewählter Sprache."
+                    "Fix: Zauberstab-Überschrift bleibt in gewählter Sprache.",
+                    "Fix: Verwaiste Bilder werden beim Löschen aus dem Storage entfernt.",
+                    "Fix: Firestore Listener Memory-Leak behoben."
                 ]
             },
             {
@@ -1996,11 +2000,13 @@
         // SHARE LINK PARAMETERS
         let isReadOnly = false;
         let sharedReportId = null;
+        let sharedShareToken = null;
         let sharedTab = null;
         let exportFilter = 'all'; // 'all' | 'open'
 
         // DYNAMIC API KEY
-        let globalGeminiKey = ""; 
+        let globalGeminiKey = "";
+        let unsubscribeReportsListener = null;
 
         const translations = {
             de: {
@@ -2389,6 +2395,8 @@
         window.doLogout = async function() {
             window.toggleUserMenu();
             try {
+                // Clean up Firestore listener
+                if (unsubscribeReportsListener) { unsubscribeReportsListener(); unsubscribeReportsListener = null; }
                 currentUserProfile = null;
                 currentUser = null;
                 currentReportId = null;
@@ -2949,212 +2957,122 @@
             }
         };
 
+        // --- SHARED GEMINI API HELPER ---
+        window.callGeminiAPI = async function(prompt) {
+            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
+            if (!apiKey) throw new Error("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            let attempt = 0;
+
+            while (attempt < 3) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
+                    });
+                    if (response.status === 403) throw new Error("API Key ungültig oder gesperrt.");
+                    if (response.status === 429 || response.status >= 500) { attempt++; await new Promise(r => setTimeout(r, 1000 * attempt)); continue; }
+                    if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+
+                    const result = await response.json();
+                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text.trim();
+                    }
+                    throw new Error("Keine Antwort von der KI erhalten.");
+                } catch(e) {
+                    if (attempt >= 2 || e.message.includes("Key")) throw e;
+                    attempt++;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+        };
+
         window.improveDescription = async function() {
             const descField = document.getElementById('p_desc');
             const titleField = document.getElementById('p_title');
             const desc = descField.value.trim();
             const title = titleField.value.trim();
-
             if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
 
-            // PRIORITY: Global Cloud Key -> Local Storage Key
-            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
-
-            if(!apiKey) {
-                alert("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
-                return;
-            }
-
             const btn = document.getElementById('btn-improve-text');
-            const originalButtonHTML = btn.innerHTML;
+            const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
             const context = "GEA FarmTechnologies Melktechnik/Fütterungstechnik";
 
-            let userPrompt;
+            let prompt;
             if (!title) {
-                // Keine Überschrift vorhanden: Kurze Überschrift generieren + Text korrigieren
-                userPrompt = `Du bist ein technischer Redakteur für ${context}.
+                prompt = `Du bist ein technischer Redakteur für ${context}.
 WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}. Überschrift und Text MÜSSEN auf ${targetLang} sein.
 
 Führe folgende Aufgaben aus:
-1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter, auf ${targetLang}) basierend auf dem Text. Die Überschrift soll prägnant den Kerninhalt erfassen.
-2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+1. Erstelle eine SEHR KURZE Überschrift (max. 3-5 Wörter, auf ${targetLang}) basierend auf dem Text.
+2. Korrigiere Rechtschreibung und Grammatik. Bleibe MÖGLICHST NAH AM ORIGINAL.
 
-Antworte NUR im folgenden JSON-Format (keine anderen Texte):
-{"headline": "Kurze Überschrift auf ${targetLang}", "text": "Korrigierter Text hier"}
+Antworte NUR im JSON-Format: {"headline": "...", "text": "..."}
 
 Text: "${desc}"`;
             } else {
-                // Überschrift vorhanden: Nur Rechtschreibprüfung für Titel + Text korrigieren
-                userPrompt = `Du bist ein technischer Redakteur für ${context}.
+                prompt = `Du bist ein technischer Redakteur für ${context}.
 WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}. Überschrift und Text MÜSSEN auf ${targetLang} sein.
 
-Führe folgende Aufgaben aus:
-1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Ändere nichts anderes, bleibe möglichst nah am Original. Die Überschrift MUSS auf ${targetLang} bleiben.
-2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
+1. Prüfe die Überschrift NUR auf Rechtschreibfehler. Die Überschrift MUSS auf ${targetLang} bleiben.
+2. Korrigiere Rechtschreibung und Grammatik im Text. Bleibe MÖGLICHST NAH AM ORIGINAL.
 
-Antworte NUR im folgenden JSON-Format (keine anderen Texte):
-{"headline": "Korrigierte Überschrift auf ${targetLang}", "text": "Korrigierter Text hier"}
-
+Antworte NUR im JSON-Format: {"headline": "...", "text": "..."}
 
 Überschrift: "${title}"
 Text: "${desc}"`;
             }
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            let attempt = 0;
-            let success = false;
-
             try {
-                while(attempt < 3 && !success) {
+                const aiResponse = await window.callGeminiAPI(prompt);
+                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
                     try {
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: userPrompt }] }],
-                                generationConfig: { temperature: 0.1 }
-                            })
-                        });
-
-                        if (response.status === 403) {
-                            throw new Error("API Key ungültig oder gesperrt.");
-                        }
-
-                        if (response.status === 429 || response.status >= 500) {
-                            attempt++;
-                            console.warn(`API Busy/Limit (Status ${response.status}). Retrying ${attempt}/3...`);
-                            await new Promise(r => setTimeout(r, 1000 * attempt));
-                            continue;
-                        }
-
-                        if(!response.ok) {
-                            const errText = await response.text();
-                            throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                        }
-
-                        const result = await response.json();
-                        if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                            let aiResponse = result.candidates[0].content.parts[0].text.trim();
-                            // JSON aus der Antwort extrahieren (falls in Markdown-Block)
-                            const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-                            if (jsonMatch) {
-                                try {
-                                    const parsed = JSON.parse(jsonMatch[0]);
-                                    if (parsed.headline) {
-                                        titleField.value = parsed.headline;
-                                    }
-                                    if (parsed.text) {
-                                        descField.value = parsed.text;
-                                    }
-                                    window.showToast(title ? "Rechtschreibung korrigiert!" : "Überschrift erstellt & Text korrigiert!");
-                                    success = true;
-                                } catch(parseErr) {
-                                    console.error("JSON Parse Error:", parseErr);
-                                    // Fallback: Nur den Text übernehmen
-                                    descField.value = aiResponse;
-                                    window.showToast("Text überarbeitet!");
-                                    success = true;
-                                }
-                            } else {
-                                // Kein JSON gefunden: Fallback
-                                descField.value = aiResponse;
-                                window.showToast("Text überarbeitet!");
-                                success = true;
-                            }
-                        }
-                    } catch(innerEx) {
-                        console.warn("Attempt failed", innerEx);
-                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx;
-                        attempt++;
-                        await new Promise(r => setTimeout(r, 1000));
+                        const parsed = JSON.parse(jsonMatch[0]);
+                        if (parsed.headline) titleField.value = parsed.headline;
+                        if (parsed.text) descField.value = parsed.text;
+                        window.showToast(title ? "Rechtschreibung korrigiert!" : "Überschrift erstellt & Text korrigiert!");
+                    } catch(parseErr) {
+                        descField.value = aiResponse;
+                        window.showToast("Text überarbeitet!");
                     }
+                } else {
+                    descField.value = aiResponse;
+                    window.showToast("Text überarbeitet!");
                 }
-            } catch(e) {
-                console.error("Final API Failure:", e);
-                alert(e.message);
-            }
+            } catch(e) { alert(e.message); }
 
-            btn.innerHTML = originalButtonHTML;
+            btn.innerHTML = originalHTML;
         };
 
         window.improveSolution = async function() {
-            const solutionField = document.getElementById('p_solution');
-            const solution = solutionField.value.trim();
-
-            if (solution.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
-
-            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
-            if(!apiKey) {
-                alert("Kein API Key gefunden. Bitte als Admin im 'Admin Tools' Bereich einen Key für alle hinterlegen.");
-                return;
-            }
+            const field = document.getElementById('p_solution');
+            const text = field.value.trim();
+            if (text.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
 
             const btn = document.getElementById('btn-improve-solution');
-            const originalButtonHTML = btn.innerHTML;
+            const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
-            const context = "GEA FarmTechnologies Melktechnik/Fütterungstechnik";
-
-            const userPrompt = `Du bist ein technischer Redakteur für ${context}. Korrigiere Rechtschreibung und Grammatik im folgenden Text. Bleibe dabei MÖGLICHST NAH AM ORIGINAL. Ändere nur echte Fehler, keine stilistischen Anpassungen.
-
-Antworte NUR mit dem korrigierten Text (keine anderen Texte, kein JSON, keine Erklärungen).
-
-Sprache: ${targetLang}
-
-Text: "${solution}"`;
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            let attempt = 0;
-            let success = false;
 
             try {
-                while(attempt < 3 && !success) {
-                    try {
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: userPrompt }] }],
-                                generationConfig: { temperature: 0.1 }
-                            })
-                        });
+                const result = await window.callGeminiAPI(`Du bist ein technischer Redakteur für GEA FarmTechnologies Melktechnik/Fütterungstechnik.
+WICHTIG: Antworte AUSSCHLIESSLICH auf ${targetLang}.
+Korrigiere Rechtschreibung und Grammatik. Bleibe MÖGLICHST NAH AM ORIGINAL.
+Antworte NUR mit dem korrigierten Text (kein JSON, keine Erklärungen).
 
-                        if (response.status === 403) {
-                            throw new Error("API Key ungültig oder gesperrt.");
-                        }
-                        if (response.status === 429 || response.status >= 500) {
-                            attempt++;
-                            await new Promise(r => setTimeout(r, 1000 * attempt));
-                            continue;
-                        }
-                        if(!response.ok) {
-                            throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                        }
+Text: "${text}"`);
+                field.value = result;
+                window.showToast("Rechtschreibung korrigiert!");
+            } catch(e) { alert(e.message); }
 
-                        const result = await response.json();
-                        if(result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                            solutionField.value = result.candidates[0].content.parts[0].text.trim();
-                            window.showToast("Rechtschreibung korrigiert!");
-                            success = true;
-                        }
-                    } catch(innerEx) {
-                        if(attempt >= 2 || innerEx.message.includes("Key")) throw innerEx;
-                        attempt++;
-                        await new Promise(r => setTimeout(r, 1000));
-                    }
-                }
-            } catch(e) {
-                console.error("Final API Failure:", e);
-                alert(e.message);
-            }
-
-            btn.innerHTML = originalButtonHTML;
+            btn.innerHTML = originalHTML;
         };
 
         window.renderReportList = function() {
@@ -3229,7 +3147,7 @@ Text: "${solution}"`;
                 // Use authors array, fallback to deprecated author field
                 const authorsDisplay = window.escapeHtml((r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-'));
                 const deleteBtnHtml = window.isAdmin() ? `<button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button>` : '';
-                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button>${deleteBtnHtml}</div></div>`;
+                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.duplicateReport(event, '${r.id}')" title="Duplizieren"><i class="fa-solid fa-copy"></i></button><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button>${deleteBtnHtml}</div></div>`;
             }).join('');
         };
 
@@ -3261,9 +3179,38 @@ Text: "${solution}"`;
             }
         };
 
+        // Delete all images in a Storage folder (e.g. images/{reportId}/)
+        window.deleteStorageFolder = async function(folderPath) {
+            try {
+                const folderRef = ref(storage, folderPath);
+                const result = await listAll(folderRef);
+                await Promise.all(result.items.map(item => deleteObject(item)));
+                console.log(`Storage cleanup: ${result.items.length} files deleted from ${folderPath}`);
+            } catch(e) {
+                console.warn("Storage cleanup failed:", e);
+            }
+        };
+
+        // Delete specific image URLs from Storage
+        window.deleteStorageImages = async function(images) {
+            if (!images || !images.length) return;
+            const deletes = images.map(img => {
+                const url = typeof img === 'string' ? img : (img.src || '');
+                if (!url || !url.includes('firebasestorage')) return Promise.resolve();
+                try {
+                    const storageRef = ref(storage, url);
+                    return deleteObject(storageRef);
+                } catch(e) { return Promise.resolve(); }
+            });
+            await Promise.allSettled(deletes);
+        };
+
         window.deleteReportFromFirestore = async function(id) {
             if (!currentUser) return;
             try {
+                // Delete all images in Storage for this report
+                await window.deleteStorageFolder(`images/${id}`);
+                // Delete Firestore document
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
             } catch(e) {
                 console.warn("[ERR-D01] Delete failed:", e.code, e.message);
@@ -3273,10 +3220,16 @@ Text: "${solution}"`;
         
 
         window.setupRealtimeListener = function() {
+            // Unsubscribe previous listener to prevent memory leaks
+            if (unsubscribeReportsListener) {
+                unsubscribeReportsListener();
+                unsubscribeReportsListener = null;
+            }
+
             const q = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
             let isFirstLoad = true;
 
-            onSnapshot(q, (snapshot) => {
+            unsubscribeReportsListener = onSnapshot(q, (snapshot) => {
                 const newReports = [];
                 snapshot.forEach(doc => newReports.push(doc.data()));
                 allReports = newReports;
@@ -3286,8 +3239,8 @@ Text: "${solution}"`;
 
                 window.renderReportList();
 
-                // SHARED LINK MODE: Apply on first load if URL has report parameter
-                if (isFirstLoad && sharedReportId) {
+                // SHARED LINK MODE: Apply on first load if URL has share token or report parameter
+                if (isFirstLoad && (sharedShareToken || sharedReportId)) {
                     isFirstLoad = false;
                     window.applySharedLinkMode();
                     return; // Skip normal auto-restore logic
@@ -3467,6 +3420,34 @@ Text: "${solution}"`;
                 points: []
             };
             window.saveReportToFirestore(r).then(() => window.openReport(r.id));
+        };
+
+        window.duplicateReport = function(e, id) {
+            if(e) e.stopPropagation();
+            const source = allReports.find(x => x.id === id);
+            if(!source) return;
+            const readableId = Math.floor(10000 + Math.random() * 90000).toString();
+            const today = new Date().toISOString().split('T')[0];
+            const r = {
+                id: Date.now().toString(),
+                readable_id: readableId,
+                created_at: Date.now(),
+                created_by: currentUser ? currentUser.uid : null,
+                created_by_name: currentUserProfile ? currentUserProfile.displayName : '',
+                header: {
+                    type: source.header.type || 'AMS',
+                    customer: source.header.customer || '',
+                    date_from: today,
+                    date_to: '',
+                    authors: source.header.authors ? [...source.header.authors] : [],
+                    participants: source.header.participants ? [...source.header.participants] : []
+                },
+                points: []
+            };
+            window.saveReportToFirestore(r).then(() => {
+                window.showToast('Bericht dupliziert');
+                window.openReport(r.id);
+            });
         };
 
         window.updateCurrentReportHeader = function() {
@@ -3732,6 +3713,11 @@ Text: "${solution}"`;
         window.executeDeletePoint = function() {
              const idx = parseInt(document.getElementById('edit-index').value);
              if(idx > -1) {
+                 const deletedPoint = points[idx];
+                 // Clean up images from Storage
+                 if (deletedPoint && deletedPoint.images && deletedPoint.images.length) {
+                     window.deleteStorageImages(deletedPoint.images);
+                 }
                  points.splice(idx, 1);
                  const r = window.getCurrentReport();
                  if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_deleted)); }
@@ -3815,21 +3801,36 @@ Text: "${solution}"`;
         };
 
         // --- SHARE LINK FUNCTIONS ---
-        window.getShareLink = function(tab) {
-            if (!currentReportId) return '';
-            const baseUrl = window.location.origin + window.location.pathname;
-            let url = `${baseUrl}?report=${currentReportId}`;
-            if (tab) url += `&tab=${tab}`;
-            return url;
+        window.generateShareToken = function() {
+            return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
         };
 
-        window.copyShareLink = function(tab) {
-            const link = window.getShareLink(tab || 'export');
-            navigator.clipboard.writeText(link).then(() => {
+        window.copyShareLink = async function(tab) {
+            if (!currentReportId) return;
+            const btn = document.getElementById('share-link-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                // Generate token and store in Firestore with 7-day expiry
+                const token = window.generateShareToken();
+                const expiry = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'shared_links', token), {
+                    reportId: currentReportId,
+                    expiry: expiry,
+                    created_at: Date.now(),
+                    created_by: currentUser ? currentUser.uid : null
+                });
+
+                const baseUrl = window.location.origin + window.location.pathname;
+                const link = `${baseUrl}?share=${token}`;
+
+                await navigator.clipboard.writeText(link).catch(() => {});
                 window.showToast(translations[currentLang].toast_copied);
-                // Open shared view in new tab
                 window.open(link, '_blank');
-                const btn = document.getElementById('share-link-btn');
+
                 if (btn) {
                     btn.classList.add('copied');
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopiert!';
@@ -3838,12 +3839,11 @@ Text: "${solution}"`;
                         btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].share_title}`;
                     }, 2000);
                 }
-            }).catch(() => {
-                // Fallback for older browsers
-                const link = window.getShareLink(tab || 'export');
-                window.open(link, '_blank');
-                window.showToast(translations[currentLang].toast_copied);
-            });
+            } catch(e) {
+                console.error("Share link creation failed:", e);
+                window.showToast("Fehler beim Erstellen des Links");
+                if (btn) btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].share_title}`;
+            }
         };
 
         window.updateShareLink = function() {
@@ -3853,17 +3853,45 @@ Text: "${solution}"`;
         // --- URL PARAMETER PARSING ---
         window.parseUrlParams = function() {
             const params = new URLSearchParams(window.location.search);
+            // Support new token-based share links
+            const shareToken = params.get('share');
+            // Legacy: direct report ID (still supported for old links)
             const reportId = params.get('report');
             const tab = params.get('tab');
 
-            if (reportId) {
+            if (shareToken) {
+                sharedShareToken = shareToken;
+                sharedTab = tab || 'export';
+                isReadOnly = true;
+            } else if (reportId) {
                 sharedReportId = reportId;
                 sharedTab = tab || 'export';
-                isReadOnly = true; // Shared links are read-only by default
+                isReadOnly = true;
             }
         };
 
-        window.applySharedLinkMode = function() {
+        window.applySharedLinkMode = async function() {
+            // Token-based share link: validate token first
+            if (sharedShareToken) {
+                try {
+                    const tokenDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'shared_links', sharedShareToken));
+                    if (!tokenDoc.exists()) {
+                        document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;"><i class="fa-solid fa-link-slash" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i><h2 style="color:#1f2937;">Link ungültig</h2><p style="color:#64748b;">Dieser Link existiert nicht.</p><a href="?" style="color:var(--primary); font-weight:600; margin-top:15px;">Zur App</a></div>`;
+                        return;
+                    }
+                    const tokenData = tokenDoc.data();
+                    if (tokenData.expiry && tokenData.expiry < Date.now()) {
+                        document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;"><i class="fa-solid fa-clock" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i><h2 style="color:#1f2937;">Link abgelaufen</h2><p style="color:#64748b;">Dieser Link ist nicht mehr gültig. Bitte fordere einen neuen Link an.</p><a href="?" style="color:var(--primary); font-weight:600; margin-top:15px;">Zur App</a></div>`;
+                        return;
+                    }
+                    sharedReportId = tokenData.reportId;
+                } catch(e) {
+                    console.error("Share token validation failed:", e);
+                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding:20px;"><i class="fa-solid fa-triangle-exclamation" style="font-size:4rem; color:#cbd5e1; margin-bottom:20px;"></i><h2 style="color:#1f2937;">Fehler</h2><p style="color:#64748b;">Link konnte nicht überprüft werden.</p><a href="?" style="color:var(--primary); font-weight:600; margin-top:15px;">Zur App</a></div>`;
+                    return;
+                }
+            }
+
             if (!sharedReportId) return;
 
             // Find the report
@@ -4188,7 +4216,7 @@ Text: "${solution}"`;
                 }
 
                 // Check Version for Changelog
-                if (!sharedReportId) {
+                if (!sharedReportId && !sharedShareToken) {
                     window.checkVersion();
                 }
 
