@@ -3147,7 +3147,7 @@ Text: "${text}"`);
                 // Use authors array, fallback to deprecated author field
                 const authorsDisplay = window.escapeHtml((r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-'));
                 const deleteBtnHtml = window.isAdmin() ? `<button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button>` : '';
-                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.duplicateReport(event, '${r.id}')" title="Duplizieren"><i class="fa-solid fa-copy"></i></button><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button>${deleteBtnHtml}</div></div>`;
+                return `<div class="report-list-item ${statusClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div><div class="report-actions"><button type="button" class="btn-action" onclick="window.exportSingleReport(event, '${r.id}')" title="Exportieren"><i class="fa-solid fa-file-export"></i></button>${deleteBtnHtml}</div></div>`;
             }).join('');
         };
 
@@ -3422,6 +3422,7 @@ Text: "${text}"`);
             window.saveReportToFirestore(r).then(() => window.openReport(r.id));
         };
 
+        // DEAKTIVIERT - Bericht duplizieren (Button ausgeblendet, Funktion bleibt für spätere Nutzung)
         window.duplicateReport = function(e, id) {
             if(e) e.stopPropagation();
             const source = allReports.find(x => x.id === id);
