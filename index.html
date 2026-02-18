@@ -1422,7 +1422,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.2)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.3)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1635,7 +1635,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.7.2</div>
+                        <div class="info-version">mooMemo v1.7.3</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1805,7 +1805,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.7.2";
+        const APP_VERSION = "1.7.3";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1822,6 +1822,16 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.7.3",
+                date: "2026-02-18",
+                changes: [
+                    "Spracheingabe: Funktioniert jetzt browserübergreifend (Chrome, Firefox, Safari).",
+                    "Spracheingabe: Hört kontinuierlich zu – stoppt nicht mehr bei kurzen Pausen.",
+                    "Spracheingabe: Zwischenergebnisse werden live im Textfeld angezeigt.",
+                    "Spracheingabe: Zweiter Klick auf Mikrofon stoppt die Aufnahme."
+                ]
+            },
             {
                 ver: "1.7.2",
                 date: "2026-02-10",
@@ -3934,21 +3944,40 @@ Text: "${text}"`);
         };
         
         window.listen = function(id) {
-            if(!('webkitSpeechRecognition' in window)) return alert(translations[currentLang].err_browser_unsupported);
-            const r = new webkitSpeechRecognition();
-            r.lang = currentLang === 'de' ? "de-DE" : "en-US";
+            const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!SpeechRecognitionAPI) return alert(translations[currentLang].err_browser_unsupported);
             const btn = document.querySelector(`button[onclick*="${id}"]`);
+            // Toggle: zweiter Klick stoppt die Aufnahme
+            if(btn._recognition) {
+                btn._recognition.stop();
+                return;
+            }
+            const r = new SpeechRecognitionAPI();
+            r.lang = currentLang === 'de' ? "de-DE" : "en-US";
+            r.continuous = true;
+            r.interimResults = true;
             btn.classList.add('listening');
-            r.start();
-            r.onresult = e => { 
-                const txt = e.results[0][0].transcript;
-                const field = document.getElementById(id);
-                field.value += " " + txt; 
-                btn.classList.remove('listening'); 
+            btn._recognition = r;
+            const field = document.getElementById(id);
+            let baseValue = field.value;
+            r.onresult = e => {
+                let interim = '';
+                let final = '';
+                for(let i = e.resultIndex; i < e.results.length; i++) {
+                    if(e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+                    else interim += e.results[i][0].transcript;
+                }
+                if(final) baseValue += (baseValue.trim() ? ' ' : '') + final.trim();
+                field.value = baseValue + (interim ? ' ' + interim : '');
+            };
+            r.onerror = () => { btn.classList.remove('listening'); btn._recognition = null; };
+            r.onend = () => {
+                btn.classList.remove('listening');
+                btn._recognition = null;
+                field.value = baseValue.trim();
                 if(id.startsWith('h_')) window.updateCurrentReportHeader();
             };
-            r.onerror = () => btn.classList.remove('listening');
-            r.onend = () => btn.classList.remove('listening');
+            r.start();
         };
         
         // --- NEW FILE UPLOAD HANDLER ---
