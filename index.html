@@ -212,8 +212,8 @@
         
         .mic-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 8px; z-index: 10; transition: color 0.2s; }
         .mic-btn:hover { color: var(--primary); }
-        .mic-btn.listening { color: var(--danger); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.1); } 100% { transform: translateY(-50%) scale(1.1); } }
+        .mic-btn.listening { background: var(--danger); color: #fff; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.15); } 100% { transform: translateY(-50%) scale(1); } }
         
         .ai-btn { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; width: auto; display: inline-flex; align-items: center; gap: 6px; }
         .ai-btn:hover { background: #f1f5f9; }
@@ -1422,7 +1422,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.2)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.3)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1635,7 +1635,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.7.2</div>
+                        <div class="info-version">mooMemo v1.7.3</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1805,7 +1805,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.7.2";
+        const APP_VERSION = "1.7.3";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1822,6 +1822,18 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.7.3",
+                date: "2026-02-18",
+                changes: [
+                    "Spracheingabe: Funktioniert jetzt in Chrome & Edge (browserübergreifend).",
+                    "Spracheingabe: Hört kontinuierlich zu – stoppt nicht mehr bei kurzen Pausen.",
+                    "Spracheingabe: Zwischenergebnisse werden live im Textfeld angezeigt.",
+                    "Spracheingabe: Mikrofon-Button wird rot mit Stop-Icon – Klick stoppt die Aufnahme.",
+                    "Spracheingabe: Automatischer Stopp nach 8 Sekunden Stille.",
+                    "Spracheingabe: Klare Fehlermeldung wenn Mikrofon oder Sprachdienst (Edge) blockiert."
+                ]
+            },
             {
                 ver: "1.7.2",
                 date: "2026-02-10",
@@ -3934,21 +3946,76 @@ Text: "${text}"`);
         };
         
         window.listen = function(id) {
-            if(!('webkitSpeechRecognition' in window)) return alert(translations[currentLang].err_browser_unsupported);
-            const r = new webkitSpeechRecognition();
-            r.lang = currentLang === 'de' ? "de-DE" : "en-US";
+            const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!SpeechRecognitionAPI) return alert(translations[currentLang].err_browser_unsupported);
             const btn = document.querySelector(`button[onclick*="${id}"]`);
+            const icon = btn.querySelector('i');
+            // Toggle: zweiter Klick stoppt die Aufnahme
+            if(btn._recognition) {
+                btn._recognition.stop();
+                return;
+            }
+            const r = new SpeechRecognitionAPI();
+            r.lang = currentLang === 'de' ? "de-DE" : "en-US";
+            r.continuous = true;
+            r.interimResults = true;
+
+            // Visuell: Stop-Icon + Tooltip
             btn.classList.add('listening');
-            r.start();
-            r.onresult = e => { 
-                const txt = e.results[0][0].transcript;
-                const field = document.getElementById(id);
-                field.value += " " + txt; 
-                btn.classList.remove('listening'); 
+            icon.className = 'fa-solid fa-stop';
+            btn.title = currentLang === 'de' ? 'Zum Stoppen klicken' : 'Click to stop';
+            btn._recognition = r;
+
+            const field = document.getElementById(id);
+            let baseValue = field.value;
+
+            // 8s Silence-Timeout
+            const SILENCE_MS = 8000;
+            let silenceTimer = setTimeout(() => r.stop(), SILENCE_MS);
+
+            const resetTimer = () => { clearTimeout(silenceTimer); silenceTimer = setTimeout(() => r.stop(), SILENCE_MS); };
+            const clearAll = () => {
+                clearTimeout(silenceTimer);
+                btn.classList.remove('listening');
+                icon.className = 'fa-solid fa-microphone';
+                btn.title = '';
+                btn._recognition = null;
+            };
+
+            r.onresult = e => {
+                resetTimer();
+                let interim = '';
+                let final = '';
+                for(let i = e.resultIndex; i < e.results.length; i++) {
+                    if(e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+                    else interim += e.results[i][0].transcript;
+                }
+                if(final) baseValue += (baseValue.trim() ? ' ' : '') + final.trim();
+                field.value = baseValue + (interim ? ' ' + interim : '');
+            };
+            r.onerror = (e) => {
+                clearAll();
+                const msgs = {
+                    de: {
+                        'not-allowed':         'Mikrofon-Zugriff verweigert. Bitte Berechtigung im Browser erteilen.',
+                        'service-not-allowed': 'Sprachdienst in Edge nicht verfügbar.\nLösung: Edge-Einstellungen → Datenschutz → "Online-Spracherkennung" aktivieren\nODER Windows-Einstellungen → Datenschutz → Sprache → einschalten.',
+                        'network':             'Netzwerkfehler bei der Spracherkennung. Bitte Internetverbindung prüfen.'
+                    },
+                    en: {
+                        'not-allowed':         'Microphone access denied. Please grant permission in browser settings.',
+                        'service-not-allowed': 'Speech service not available in Edge.\nFix: Edge Settings → Privacy → enable "Online Speech Recognition"\nOR Windows Settings → Privacy → Speech → turn on.',
+                        'network':             'Network error during speech recognition. Please check your connection.'
+                    }
+                };
+                const msg = (msgs[currentLang] || msgs.de)[e.error];
+                if(msg) alert(msg);
+            };
+            r.onend = () => {
+                clearAll();
+                field.value = baseValue.trim();
                 if(id.startsWith('h_')) window.updateCurrentReportHeader();
             };
-            r.onerror = () => btn.classList.remove('listening');
-            r.onend = () => btn.classList.remove('listening');
+            r.start();
         };
         
         // --- NEW FILE UPLOAD HANDLER ---
