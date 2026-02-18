@@ -2777,7 +2777,10 @@
              // Apply export filter
              const filteredPoints = exportFilter === 'open' ? r.points.filter(p => p.status === 'open') : r.points;
 
-             const html = filteredPoints.map(p => {
+             const html = filteredPoints.map((p) => {
+                 const originalIndex = r.points.indexOf(p);
+                 const clickAttr = !isReadOnly ? `onclick="window.switchTab('points'); window.openModal(${originalIndex});" title="Zum Punkt navigieren"` : '';
+                 const clickStyle = !isReadOnly ? '; cursor:pointer; text-decoration:underline dotted;' : '';
                  const safeImages = (p.images||[]).map(img => {
                      const src = typeof img==='string' ? img : (img.src || img.base64);
                      const isLarge = typeof img==='string' ? false : img.isLarge;
@@ -2789,9 +2792,9 @@
                  let solutionHtml = '';
                  if (p.solution && p.solution.trim()) {
                      const solDateStr = p.solutionDate ? ` <span style="font-size:0.75rem; color:#666;">(${t.solution_last_edited}: ${new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })})</span>` : '';
-                     solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0;">${window.escapeHtml(p.solution)}</p></div>`;
+                     solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0; white-space:pre-wrap;">${window.escapeHtml(p.solution)}</p></div>`;
                  }
-                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}">${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p>${p.desc}</p>${assHtml}${solutionHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${p.desc}</p>${assHtml}${solutionHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
              const devBuild = "DEV-20260210A";
