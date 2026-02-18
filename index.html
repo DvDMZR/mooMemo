@@ -2952,7 +2952,7 @@
             const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
             if (!apiKey) throw new Error(translations[currentLang].err_no_api_key);
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             let attempt = 0;
 
             while (attempt < 3) {
