@@ -3970,7 +3970,24 @@ Text: "${text}"`);
                 if(final) baseValue += (baseValue.trim() ? ' ' : '') + final.trim();
                 field.value = baseValue + (interim ? ' ' + interim : '');
             };
-            r.onerror = () => { btn.classList.remove('listening'); btn._recognition = null; };
+            r.onerror = (e) => {
+                btn.classList.remove('listening');
+                btn._recognition = null;
+                const msgs = {
+                    de: {
+                        'not-allowed':       'Mikrofon-Zugriff verweigert. Bitte Berechtigung im Browser erteilen.',
+                        'service-not-allowed': 'Sprachdienst in Edge nicht verfügbar.\nLösung: Edge-Einstellungen → Datenschutz → "Online-Spracherkennung" aktivieren\nODER Windows-Einstellungen → Datenschutz → Sprache → einschalten.',
+                        'network':           'Netzwerkfehler bei der Spracherkennung. Bitte Internetverbindung prüfen.'
+                    },
+                    en: {
+                        'not-allowed':       'Microphone access denied. Please grant permission in browser settings.',
+                        'service-not-allowed': 'Speech service not available in Edge.\nFix: Edge Settings → Privacy → enable "Online Speech Recognition"\nOR Windows Settings → Privacy → Speech → turn on.',
+                        'network':           'Network error during speech recognition. Please check your connection.'
+                    }
+                };
+                const msg = (msgs[currentLang] || msgs.de)[e.error];
+                if(msg) alert(msg);
+            };
             r.onend = () => {
                 btn.classList.remove('listening');
                 btn._recognition = null;
