@@ -1482,7 +1482,7 @@
                 <button class="filter-pill active" onclick="window.setFilterType('all')" data-i18n="filter_all">Alle</button>
                 <button class="filter-pill" onclick="window.setFilterType('AMS')">AMS</button>
                 <button class="filter-pill" onclick="window.setFilterType('CMS')">CMS</button>
-                <button class="filter-pill" onclick="window.setFilterType('AS')">AS</button>
+                <button class="filter-pill" onclick="window.setFilterType('AFS')">AFS</button>
             </div>
             <div class="filter-control-group">
                 <select class="year-select" id="year-filter" onchange="window.setFilterYear(this.value)"><option value="all" data-i18n="filter_all_years">Alle Jahre</option></select>
@@ -1509,7 +1509,7 @@
         <h2><i class="fa-solid fa-info-circle"></i> <span data-i18n="h_base">Basisdaten</span></h2>
         <div class="card">
             <label data-i18n="lbl_area">Bereich</label>
-            <select id="h_type" onchange="window.updateCurrentReportHeader()" style="margin-bottom: 20px;"><option value="AMS">AMS</option><option value="CMS">CMS</option><option value="AS">AS</option></select>
+            <select id="h_type" onchange="window.updateCurrentReportHeader()" style="margin-bottom: 20px;"><option value="AMS">AMS</option><option value="CMS">CMS</option><option value="AFS">AFS</option></select>
             <label data-i18n="lbl_customer">Kunde / Projekt</label>
             <div class="input-group"><input type="text" id="h_customer" placeholder="z.B. Müller GmbH" data-i18n-placeholder="ph_customer" oninput="window.updateCurrentReportHeader()"><button class="mic-btn" onclick="window.listen('h_customer')"><i class="fa-solid fa-microphone"></i></button></div>
             <br><label data-i18n="lbl_date">Datum (von - bis)</label>
