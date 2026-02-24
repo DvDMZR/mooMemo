@@ -3415,8 +3415,7 @@ Text: "${text}"`);
                 if (rVis === 'published') rVis = 'all';
                 if (rVis === 'draft') rVis = 'authors_only';
                 const onlyPrefix = currentLang === 'de' ? 'nur ' : 'only ';
-                const resolvedDept = r.created_by_dept || (r.created_by === (currentUser ? currentUser.uid : '') && currentUserProfile ? currentUserProfile.department : '') || '';
-                const teamOnlyLabel = resolvedDept ? (onlyPrefix + resolvedDept) : (t.vis_team_only || 'Mein Team');
+                const teamOnlyLabel = r.created_by_dept ? (onlyPrefix + r.created_by_dept) : (t.vis_team_only || 'Mein Team');
                 const selTeams = r.header.visible_teams || [];
                 const selectedTeamsLabel = selTeams.length === 1 ? (onlyPrefix + selTeams[0]) : (selTeams.join(', ') || (t.vis_selected_teams || 'Teams'));
                 const visLabels = { authors_only: t.vis_authors_only || 'Nur Verfasser', team_only: teamOnlyLabel, selected_teams: selectedTeamsLabel, all: '' };
@@ -3702,11 +3701,6 @@ Text: "${text}"`);
             let vis = report.header.visibility || 'authors_only';
             if (vis === 'published') vis = 'all';
             if (vis === 'draft') vis = 'authors_only';
-            // Update "Mein Team" option to show actual team name
-            const teamOpt = document.querySelector('#h_visibility option[value="team_only"]');
-            if (teamOpt && currentUserProfile && currentUserProfile.department) {
-                teamOpt.textContent = currentUserProfile.department;
-            }
             document.getElementById('h_visibility').value = vis;
             window.toggleTeamChips(vis, report);
 
