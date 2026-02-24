@@ -2659,8 +2659,17 @@
 
                 menuName.textContent = currentUserProfile.displayName || '-';
                 menuEmail.textContent = currentUserProfile.email || '-';
-                menuRole.textContent = currentUserProfile.role === 'admin' ? translations[currentLang].role_admin : translations[currentLang].role_user;
-                menuRole.className = 'user-role' + (currentUserProfile.role === 'admin' ? ' admin' : '');
+                const t_role = translations[currentLang];
+                if (window.isSuperAdmin(currentUserProfile)) {
+                    menuRole.textContent = t_role.role_sadmin || 'S-Admin';
+                    menuRole.className = 'user-role admin';
+                } else if (currentUserProfile.role === 'admin') {
+                    menuRole.textContent = t_role.role_admin;
+                    menuRole.className = 'user-role admin';
+                } else {
+                    menuRole.textContent = t_role.role_user;
+                    menuRole.className = 'user-role';
+                }
 
                 // Show/hide admin tools buttons
                 const adminBtn = document.getElementById('admin-tools-btn');
@@ -2770,6 +2779,14 @@
                         <option value="R&C" ${u.department==='R&C' ? 'selected' : ''}>R&C</option>
                         <option value="All" ${u.department==='All' ? 'selected' : ''}>All</option>
                     </select>`;
+                    const isSAdmin = window.isSuperAdmin(u);
+                    const canChangeRole = !isSelf && (!isSAdmin || window.isSuperAdmin(currentUserProfile));
+                    const roleSelect = isSAdmin && !window.isSuperAdmin(currentUserProfile)
+                        ? `<select disabled style="font-size:0.7rem; padding:2px 4px; border:1px solid #e2e8f0; border-radius:6px; background:#f1f5f9; cursor:default;"><option selected>${t.role_sadmin || 'S-Admin'}</option></select>`
+                        : `<select onchange="window.changeUserRole('${u.uid}', this.value)" style="font-size:0.7rem; padding:2px 4px; border:1px solid #e2e8f0; border-radius:6px; background:white; cursor:pointer;" ${!canChangeRole ? 'disabled' : ''}>
+                            <option value="user" ${u.role !== 'admin' ? 'selected' : ''}>${t.role_user}</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>${t.role_admin}</option>
+                        </select>`;
                     return `
                     <div class="user-list-item" style="flex-wrap:wrap;">
                         <div class="user-info" style="flex:1; min-width:150px;">
@@ -2783,11 +2800,7 @@
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
                             ${deptSelect}
-                            <span class="role-badge ${window.isSuperAdmin(u) ? 'admin' : (u.role === 'admin' ? 'admin' : 'user')}"
-                                  ${window.isSuperAdmin(u) && !window.isSuperAdmin(currentUserProfile) ? '' : `onclick="window.toggleUserRole('${u.uid}')" title="Klicken zum Ändern" style="cursor:pointer;"`}
-                                  ${window.isSuperAdmin(u) && !window.isSuperAdmin(currentUserProfile) ? 'style="cursor:default;"' : ''}>
-                                ${window.isSuperAdmin(u) ? (t.role_sadmin || 'S-Admin') : (u.role === 'admin' ? t.role_admin : t.role_user)}
-                            </span>
+                            ${roleSelect}
                             ${u.department ? `<span style="font-size:0.6rem; font-weight:700; padding:2px 7px; border-radius:10px; background:#e0e7ff; color:#3730a3; text-transform:uppercase; letter-spacing:0.03em;">${window.escapeHtml(u.department)}</span>` : ''}
                             ${deleteBtn}
                         </div>
@@ -2799,7 +2812,7 @@
             }
         };
 
-        window.toggleUserRole = async function(uid) {
+        window.changeUserRole = async function(uid, newRole) {
             const t = translations[currentLang];
             if (!window.isAdmin()) { alert(t.err_admin_only_roles); return; }
             if (uid === currentUser.uid) { alert(t.err_own_role); return; }
@@ -2808,16 +2821,14 @@
                 const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
                 if (!docSnap.exists()) return;
                 const user = docSnap.data();
-                // Protect S-Admin from changes by other admins
                 if (window.isSuperAdmin(user) && !window.isSuperAdmin(currentUserProfile)) {
                     alert(t.err_sadmin_protected); return;
                 }
-                const newRole = user.role === 'admin' ? 'user' : 'admin';
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { role: newRole }, { merge: true });
                 window.showToast(`${t.toast_role_changed} ${newRole === 'admin' ? t.role_admin : t.role_user}`);
                 await window.loadUserList();
             } catch(e) {
-                console.error("Toggle role failed:", e);
+                console.error("Change role failed:", e);
                 alert(t.err_generic + ': ' + e.message);
             }
         };
