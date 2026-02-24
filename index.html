@@ -1501,9 +1501,9 @@
             <div class="filter-group-labeled label-left">
                 <span class="filter-group-label" data-i18n="filter_label_scope">Rolle</span>
                 <div class="filter-tabs" id="filter-scope-container">
-                    <button class="filter-pill active" onclick="window.setFilterScope('mine')" data-i18n="scope_mine">Meine</button>
+                    <button class="filter-pill" onclick="window.setFilterScope('mine')" data-i18n="scope_mine">Meine</button>
                     <button class="filter-pill" onclick="window.setFilterScope('team')" data-i18n="scope_team">Mein Team</button>
-                    <button class="filter-pill" onclick="window.setFilterScope('all')" data-i18n="scope_all">Alle</button>
+                    <button class="filter-pill active" onclick="window.setFilterScope('all')" data-i18n="scope_all">Alle</button>
                 </div>
             </div>
             <div class="filter-group-labeled label-right">
@@ -2042,7 +2042,7 @@
         let filterType = 'all';
         let filterYear = 'all';
         let sortMethod = 'date_desc';
-        let filterScope = 'mine';
+        let filterScope = 'all';
         let currentLang = 'de';
         let aiTargetLang = 'de';
 
