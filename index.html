@@ -2987,7 +2987,7 @@
              const html = filteredPoints.map((p) => {
                  const originalIndex = r.points.indexOf(p);
                  const clickAttr = !isReadOnly ? `onclick="window.switchTab('points'); window.openModal(${originalIndex});" title="Zum Punkt navigieren"` : '';
-                 const clickStyle = !isReadOnly ? '; cursor:pointer; text-decoration:underline dotted;' : '';
+                 const clickStyle = !isReadOnly ? '; cursor:pointer;' : '';
                  const safeImages = (p.images||[]).map(img => {
                      const src = typeof img==='string' ? img : (img.src || img.base64);
                      const isLarge = typeof img==='string' ? false : img.isLarge;
