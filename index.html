@@ -1266,6 +1266,58 @@
         .login-error { color: var(--danger); font-size: 0.85rem; margin-bottom: 10px; display: none; min-height: 0; }
         .login-error.visible { display: block; }
 
+        /* Scope info tag */
+        .scope-info-tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+            display: inline-block;
+            letter-spacing: 0.02em;
+        }
+
+        /* Info help button (glowing question mark) */
+        .info-help-btn {
+            position: relative;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            font-size: 0.95rem;
+            color: var(--accent);
+            animation: glow-pulse 2s ease-in-out infinite;
+            transition: all 0.2s;
+        }
+        .info-help-btn:hover { color: var(--accent-hover); transform: scale(1.1); }
+        @keyframes glow-pulse {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(232, 119, 34, 0.3)); }
+            50% { filter: drop-shadow(0 0 8px rgba(232, 119, 34, 0.7)); }
+        }
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            line-height: 1.5;
+            width: 260px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            z-index: 300;
+            pointer-events: none;
+        }
+        .info-help-btn:hover .info-tooltip,
+        .info-help-btn:focus .info-tooltip { display: block; }
+        .info-tooltip strong { color: var(--primary); }
+
         /* User badge in header */
         .user-badge {
             display: flex;
@@ -1396,7 +1448,6 @@
                     <option value="T&I">T&I</option>
                     <option value="DV">DV</option>
                     <option value="R&C">R&C</option>
-                    <option value="All">All</option>
                 </select>
                 <input type="text" id="reg-invite" placeholder="Einladungscode">
                 <button class="btn btn-primary" onclick="window.doRegister()" id="register-btn">
@@ -1450,6 +1501,10 @@
             </div>
         </div>
         <div class="header-controls">
+            <button class="info-help-btn" id="info-help-btn" style="display:none;" aria-label="Info">
+                <i class="fa-solid fa-circle-question"></i>
+                <div class="info-tooltip" id="info-tooltip"></div>
+            </button>
             <button class="user-badge" id="user-badge" onclick="window.toggleUserMenu()" style="display:none;">
                 <i class="fa-solid fa-user-circle"></i>
                 <span id="user-badge-name">User</span>
@@ -1506,6 +1561,7 @@
                     <button class="filter-pill" onclick="window.setFilterScope('team')" data-i18n="scope_team">Mein Team</button>
                     <button class="filter-pill active" onclick="window.setFilterScope('all')" data-i18n="scope_all">Alle</button>
                 </div>
+                <span id="scope-info-tag" class="scope-info-tag" style="display:none;"></span>
             </div>
             <div class="filter-group-labeled label-right">
                 <span class="filter-group-label" data-i18n="filter_label_type">Anlage</span>
@@ -1856,9 +1912,11 @@
             "David Mazur", "Lena Krippendorf", "Stefan Marten", "Walter Weymann", 
             "Jan Mühlnickel", "Simon Kirchhof", "Katrin Schilkowski", "Ibrar Aslam", 
             "Ismail Songur", "Tobias Haupt", "Manuel Bury", "Philipp Wiemann", 
-            "Armin Höhnscheid", "Christina Jerichen", "Dennis Jeffries", "Kevin Preece", "Michael Maffo Lando"
+            "Armin Höhnscheid", "Christina Jerichen", "Dennis Jeffries", "Kevin Preece", "Michael Maffo Lando",
+            "Liang Cheng"
         ];
         const CONST_DEPARTMENTS = ["T&I", "QM", "Customer Care", "TSS", "Händler", "Dealer"];
+        const SUPER_ADMIN_EMAIL = 'david.mazur@gea.com';
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
@@ -2059,10 +2117,18 @@
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Globaler API Key (Cloud)", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Zuletzt Online:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode...", lbl_department: "Abteilung:", lbl_visibility: "Sichtbarkeit", vis_authors_only: "Nur Verfasser", vis_team_only: "Mein Team", vis_selected_teams: "Ausgewählte Teams", vis_all: "Alle", btn_publish: "Für alle freigeben", toast_published: "Bericht für alle freigegeben", toast_dept_changed: "Abteilung geändert", scope_mine: "Meine", scope_team: "Mein Team", scope_all: "Alle", filter_label_scope: "Rolle", filter_label_type: "Anlage", err_no_self_remove: "Du kannst dich nicht selbst als Verfasser entfernen."
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Globaler API Key (Cloud)", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Zuletzt Online:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode...", lbl_department: "Abteilung:", lbl_visibility: "Sichtbarkeit", vis_authors_only: "Nur Verfasser", vis_team_only: "Mein Team", vis_selected_teams: "Ausgewählte Teams", vis_all: "Alle", btn_publish: "Für alle freigeben", toast_published: "Bericht für alle freigegeben", toast_dept_changed: "Abteilung geändert", scope_mine: "Meine", scope_team: "Mein Team", scope_all: "Alle", filter_label_scope: "Rolle", filter_label_type: "Anlage", err_no_self_remove: "Du kannst dich nicht selbst als Verfasser entfernen.",
+                info_tooltip_text: "<strong>Neu ab v1.8:</strong> Die Sichtbarkeit der Berichte wurde auf die freigegebenen Berichte eingeschränkt. Nur Berichte, die für dein Team oder alle freigegeben wurden, sind sichtbar.",
+                scope_team_label: "Mein Team",
+                err_sadmin_protected: "Dieser Benutzer ist S-Admin und kann nicht geändert werden.",
+                role_sadmin: "S-Admin"
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Global API Key (Cloud)", admin_save_cloud: "Save to Cloud", admin_key_desc: "This key is stored centrally. All employees use it automatically.", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Online:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code...", lbl_department: "Department:", lbl_visibility: "Visibility", vis_authors_only: "Authors Only", vis_team_only: "My Team", vis_selected_teams: "Selected Teams", vis_all: "All", btn_publish: "Make visible to all", toast_published: "Report visible to all", toast_dept_changed: "Department changed", scope_mine: "My Reports", scope_team: "My Team", scope_all: "All", filter_label_scope: "Role", filter_label_type: "System", err_no_self_remove: "You cannot remove yourself as author."
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Global API Key (Cloud)", admin_save_cloud: "Save to Cloud", admin_key_desc: "This key is stored centrally. All employees use it automatically.", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Online:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code...", lbl_department: "Department:", lbl_visibility: "Visibility", vis_authors_only: "Authors Only", vis_team_only: "My Team", vis_selected_teams: "Selected Teams", vis_all: "All", btn_publish: "Make visible to all", toast_published: "Report visible to all", toast_dept_changed: "Department changed", scope_mine: "My Reports", scope_team: "My Team", scope_all: "All", filter_label_scope: "Role", filter_label_type: "System", err_no_self_remove: "You cannot remove yourself as author.",
+                info_tooltip_text: "<strong>New in v1.8:</strong> Report visibility has been restricted to shared reports. Only reports shared with your team or everyone are visible.",
+                scope_team_label: "My Team",
+                err_sadmin_protected: "This user is S-Admin and cannot be changed.",
+                role_sadmin: "S-Admin"
             }
         };
 
@@ -2188,6 +2254,8 @@
             document.querySelector('.app-logo-header').style.display = '';
             document.querySelectorAll('.section').forEach(s => s.style.display = '');
             document.getElementById('dashboard').classList.add('active');
+            // Update scope info tag for initial state
+            if (window.updateScopeInfoTag) window.updateScopeInfoTag(filterScope);
         };
 
         window.showLoginForm = function() {
@@ -2429,6 +2497,7 @@
                     if (currentUserProfile.settings.aiLang) window.setAiTargetLang(currentUserProfile.settings.aiLang);
                 }
                 window.checkVersion();
+                window.loadRegisteredUserNames();
                 window.fetchGlobalConfig().then(() => window.setupRealtimeListener());
                 window.initBackButtonHandler();
             } catch(e) {
@@ -2570,6 +2639,11 @@
             return currentUserProfile && currentUserProfile.role === 'admin';
         };
 
+        window.isSuperAdmin = function(emailOrProfile) {
+            const email = typeof emailOrProfile === 'string' ? emailOrProfile : (emailOrProfile && emailOrProfile.email ? emailOrProfile.email : '');
+            return email.toLowerCase() === SUPER_ADMIN_EMAIL;
+        };
+
         // --- USER UI UPDATE ---
         window.updateUserUI = function() {
             const badge = document.getElementById('user-badge');
@@ -2593,8 +2667,18 @@
                 if (adminBtn) adminBtn.style.display = currentUserProfile.role === 'admin' ? '' : 'none';
                 const menuAdminBtn = document.getElementById('menu-admin-btn');
                 if (menuAdminBtn) menuAdminBtn.style.display = currentUserProfile.role === 'admin' ? '' : 'none';
+
+                // Show info help button with tooltip
+                const infoBtn = document.getElementById('info-help-btn');
+                const infoTooltip = document.getElementById('info-tooltip');
+                if (infoBtn) {
+                    infoBtn.style.display = '';
+                    if (infoTooltip) infoTooltip.innerHTML = translations[currentLang].info_tooltip_text;
+                }
             } else {
                 badge.style.display = 'none';
+                const infoBtn = document.getElementById('info-help-btn');
+                if (infoBtn) infoBtn.style.display = 'none';
             }
         };
 
@@ -2672,7 +2756,8 @@
 
                 container.innerHTML = users.map(u => {
                     const isSelf = u.uid === currentUser.uid;
-                    const deleteBtn = isSelf ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
+                    const isSAdminTarget = window.isSuperAdmin(u) && !window.isSuperAdmin(currentUserProfile);
+                    const deleteBtn = (isSelf || isSAdminTarget) ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
                     const createdStr = u.created_at ? new Date(u.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
                     const lastLoginTs = u.lastLogin || u.created_at;
                     const lastLoginStr = lastLoginTs ? new Date(lastLoginTs).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
@@ -2696,13 +2781,14 @@
                                 <i class="fa-solid fa-right-to-bracket" style="width:14px;"></i> ${t.lbl_last_login} ${lastLoginStr}
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:4px;">
+                        <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
                             ${deptSelect}
-                            <span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
-                                  onclick="window.toggleUserRole('${u.uid}')"
-                                  title="Klicken zum Ändern">
-                                ${u.role === 'admin' ? t.role_admin : t.role_user}
+                            <span class="role-badge ${window.isSuperAdmin(u) ? 'admin' : (u.role === 'admin' ? 'admin' : 'user')}"
+                                  ${window.isSuperAdmin(u) && !window.isSuperAdmin(currentUserProfile) ? '' : `onclick="window.toggleUserRole('${u.uid}')" title="Klicken zum Ändern" style="cursor:pointer;"`}
+                                  ${window.isSuperAdmin(u) && !window.isSuperAdmin(currentUserProfile) ? 'style="cursor:default;"' : ''}>
+                                ${window.isSuperAdmin(u) ? (t.role_sadmin || 'S-Admin') : (u.role === 'admin' ? t.role_admin : t.role_user)}
                             </span>
+                            ${u.department ? `<span style="font-size:0.6rem; font-weight:700; padding:2px 7px; border-radius:10px; background:#e0e7ff; color:#3730a3; text-transform:uppercase; letter-spacing:0.03em;">${window.escapeHtml(u.department)}</span>` : ''}
                             ${deleteBtn}
                         </div>
                     </div>`;
@@ -2722,6 +2808,10 @@
                 const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
                 if (!docSnap.exists()) return;
                 const user = docSnap.data();
+                // Protect S-Admin from changes by other admins
+                if (window.isSuperAdmin(user) && !window.isSuperAdmin(currentUserProfile)) {
+                    alert(t.err_sadmin_protected); return;
+                }
                 const newRole = user.role === 'admin' ? 'user' : 'admin';
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { role: newRole }, { merge: true });
                 window.showToast(`${t.toast_role_changed} ${newRole === 'admin' ? t.role_admin : t.role_user}`);
@@ -2735,6 +2825,13 @@
         window.changeUserDepartment = async function(uid, newDept) {
             const t = translations[currentLang];
             if (!window.isAdmin()) return;
+            // Protect S-Admin from department changes
+            try {
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
+                if (snap.exists() && window.isSuperAdmin(snap.data()) && !window.isSuperAdmin(currentUserProfile)) {
+                    alert(t.err_sadmin_protected); return;
+                }
+            } catch(e) { /* proceed */ }
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { department: newDept }, { merge: true });
                 window.showToast(t.toast_dept_changed);
@@ -2747,6 +2844,13 @@
             const t = translations[currentLang];
             if (!window.isAdmin()) return;
             if (uid === currentUser.uid) { alert(t.err_self_delete); return; }
+            // Protect S-Admin
+            try {
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
+                if (snap.exists() && window.isSuperAdmin(snap.data()) && !window.isSuperAdmin(currentUserProfile)) {
+                    alert(t.err_sadmin_protected); return;
+                }
+            } catch(e) { /* proceed */ }
             if (!confirm(t.confirm_delete_user)) return;
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
@@ -2932,11 +3036,35 @@
             // Normalize customer name for matching (lowercase, trimmed)
             const currentCustomer = currentReport.header.customer.toLowerCase().trim();
 
-            // Find other reports with the same customer (exclude current report)
+            // Find other reports with the same customer (exclude current report + apply visibility)
+            const userName = currentUserProfile ? (currentUserProfile.displayName || '') : '';
+            const userDept = currentUserProfile ? (currentUserProfile.department || '') : '';
+            const isAdm = window.isAdmin();
             const relatedReports = allReports.filter(r => {
                 if (r.id === currentReportId) return false;
                 const rCustomer = (r.header.customer || '').toLowerCase().trim();
-                return rCustomer === currentCustomer;
+                if (rCustomer !== currentCustomer) return false;
+
+                // Apply same visibility rules as dashboard
+                const isCreator = currentUser && r.created_by === currentUser.uid;
+                const isAuthor = isCreator || (r.header.authors || []).includes(userName) || (r.header.author || '') === userName;
+                if (!isAdm && !isAuthor) {
+                    if (!userDept) return false;
+                    let vis = r.header.visibility || 'authors_only';
+                    if (vis === 'published') vis = 'all';
+                    if (vis === 'draft') vis = 'authors_only';
+                    if (vis === 'authors_only') return false;
+                    if (vis === 'team_only') {
+                        if (userDept !== 'All') {
+                            const creatorDept = r.created_by_dept || '';
+                            if (userDept !== creatorDept) return false;
+                        }
+                    } else if (vis === 'selected_teams') {
+                        const visibleTeams = r.header.visible_teams || [];
+                        if (userDept !== 'All' && !visibleTeams.includes(userDept)) return false;
+                    }
+                }
+                return true;
             });
 
             // Sort by date descending
@@ -3429,7 +3557,22 @@ Text: "${text}"`);
             filterScope = scope;
             document.querySelectorAll('#filter-scope-container .filter-pill').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.filter-pill').classList.add('active');
+            window.updateScopeInfoTag(scope);
             window.renderReportList();
+        };
+        window.updateScopeInfoTag = function(scope) {
+            const tag = document.getElementById('scope-info-tag');
+            if (!tag) return;
+            const t = translations[currentLang];
+            if (scope === 'team' && currentUserProfile && currentUserProfile.department) {
+                tag.textContent = currentUserProfile.department;
+                tag.style.display = 'inline-block';
+            } else if (scope === 'all') {
+                tag.textContent = t.scope_all || 'Alle';
+                tag.style.display = 'inline-block';
+            } else {
+                tag.style.display = 'none';
+            }
         };
         window.setFilterType = function(type) {
             filterType = type;
@@ -3791,11 +3934,39 @@ Text: "${text}"`);
              }
         };
 
+        // Cache for registered user names (loaded from Firestore)
+        let registeredUserNames = [];
+
+        window.loadRegisteredUserNames = async function() {
+            try {
+                const usersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
+                const names = [];
+                usersSnap.forEach(d => {
+                    const u = d.data();
+                    // Prefer displayName, fallback to email-derived name
+                    if (u.displayName) {
+                        names.push(u.displayName);
+                    } else if (u.email && u.email.toLowerCase().endsWith('@gea.com')) {
+                        const local = u.email.split('@')[0]; // e.g. "Vorname.Nachname"
+                        const parts = local.split('.');
+                        const formatted = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+                        names.push(formatted);
+                    }
+                });
+                registeredUserNames = names;
+                window.updateNameSuggestions();
+            } catch(e) {
+                console.warn("Could not load user names for autofill:", e);
+            }
+        };
+
         window.updateNameSuggestions = function() {
-            // STRICT MODE: Only use CONST_NAMES
-            const names = CONST_NAMES.slice().sort();
-            const assignees = [...CONST_NAMES, ...CONST_DEPARTMENTS].sort();
-            
+            // Merge CONST_NAMES with registered user names, avoiding duplicates
+            const nameSet = new Set(CONST_NAMES.map(n => n.trim()));
+            registeredUserNames.forEach(n => nameSet.add(n.trim()));
+            const names = [...nameSet].sort();
+            const assignees = [...new Set([...names, ...CONST_DEPARTMENTS])].sort();
+
             // Populate "list-names" (For Authors/Participants)
             const listNames = document.getElementById('list-names');
             if(listNames) {
@@ -4463,6 +4634,9 @@ Text: "${text}"`);
                 if (!sharedReportId) {
                     window.checkVersion();
                 }
+
+                // Load registered user names for autofill
+                window.loadRegisteredUserNames();
 
                 // Fetch Key & Listen
                 window.fetchGlobalConfig().then(() => {
