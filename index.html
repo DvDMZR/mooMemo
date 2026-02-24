@@ -1442,7 +1442,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.7.3)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.9)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1677,7 +1677,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.8</div>
+                        <div class="info-version">mooMemo v1.9</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1847,7 +1847,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8";
+        const APP_VERSION = "1.9";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1865,19 +1865,25 @@
         // CHANGELOG DEFINITION
         const CHANGELOG = [
             {
-                ver: "1.8",
+                ver: "1.9",
                 date: "2026-02-24",
                 changes: [
+                    "NEU: Berichte für ausgewählte Teams freigeben (z.B. nur TSS + DV).",
+                    "NEU: Filter in der Übersicht – Meine / Mein Team / Alle Berichte.",
+                    "NEU: Filtergruppen mit Beschriftung (Rolle & Anlage) für bessere Übersicht.",
+                    "Sichtbarkeit: Nicht freigegebene Berichte werden in der Übersicht hervorgehoben.",
+                    "Verfasser können sich nicht mehr selbst aus einem Bericht entfernen.",
+                    "Dropdowns zeigen jetzt nur noch die eingestellte Sprache an.",
+                    "Bereich: AS wurde in AFS umbenannt (bestehende Berichte werden migriert)."
+                ]
+            },
+            {
+                ver: "1.8",
+                date: "2026-02-23",
+                changes: [
                     "Sichtbarkeit: Neue Stufen 'Nur Verfasser' (Standard), 'Mein Team', 'Alle'.",
-                    "Nur Verfasser: Berichte sind nur für eingetragene Verfasser und Ersteller sichtbar.",
-                    "Mein Team: Berichte sind nur für die eigene Abteilung sichtbar.",
                     "Benutzergruppen: Abteilung wählen bei Registrierung (TSS, T&I, DV, All).",
-                    "Rolle 'All': Sieht alle Berichte unabhängig von Abteilung.",
-                    "Rolle '-': Sieht nur eigene / als Verfasser eingetragene Berichte.",
-                    "Admin: Sieht alle Berichte + kann Sichtbarkeit auf 'Alle' setzen.",
-                    "Admin: Abteilung von Benutzern nachträglich ändern.",
-                    "Neuer Bericht: Verfasser wird automatisch vorausgefüllt (entfernbar).",
-                    "Bereich: AS wurde in AFS umbenannt (bestehende Berichte werden migriert).",
+                    "Neuer Bericht: Verfasser wird automatisch vorausgefüllt.",
                     "Bugfix: 'Zuletzt Online' zeigte fälschlicherweise das Registrierungsdatum."
                 ]
             },
