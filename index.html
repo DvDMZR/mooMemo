@@ -1561,9 +1561,9 @@
             <div class="filter-group-labeled label-left">
                 <span class="filter-group-label" data-i18n="filter_label_scope">Rolle</span>
                 <div class="filter-tabs" id="filter-scope-container">
-                    <button class="filter-pill" onclick="window.setFilterScope('mine')" data-i18n="scope_mine">Meine</button>
-                    <button class="filter-pill" onclick="window.setFilterScope('team')" data-i18n="scope_team">Mein Team</button>
-                    <button class="filter-pill active" onclick="window.setFilterScope('all')" data-i18n="scope_all">Alle</button>
+                    <button class="filter-pill" data-scope="mine" onclick="window.setFilterScope('mine')" data-i18n="scope_mine">Meine</button>
+                    <button class="filter-pill" data-scope="team" id="scope-team-pill" onclick="window.setFilterScope('team')">Mein Team</button>
+                    <button class="filter-pill active" data-scope="all" onclick="window.setFilterScope('all')" data-i18n="scope_all">Alle</button>
                 </div>
             </div>
             <div class="filter-group-labeled label-right">
@@ -2660,6 +2660,26 @@
                 if (menuAdminBtn) menuAdminBtn.style.display = currentUserProfile.role === 'admin' ? '' : 'none';
             } else {
                 badge.style.display = 'none';
+            }
+            window.updateScopeFilterUI();
+        };
+
+        window.updateScopeFilterUI = function() {
+            const dept = currentUserProfile ? currentUserProfile.department : null;
+            const teamPill = document.getElementById('scope-team-pill');
+            if (!teamPill) return;
+            // If dept is 'All' or empty, hide the team pill to avoid duplicate 'All'
+            if (!dept || dept === 'All') {
+                teamPill.style.display = 'none';
+                if (filterScope === 'team') {
+                    filterScope = 'all';
+                    document.querySelectorAll('#filter-scope-container .filter-pill').forEach(b => b.classList.remove('active'));
+                    const allPill = document.querySelector('#filter-scope-container .filter-pill[data-scope="all"]');
+                    if (allPill) allPill.classList.add('active');
+                }
+            } else {
+                teamPill.style.display = '';
+                teamPill.textContent = dept; // e.g. "TSS", "T&I", "DV", "R&C"
             }
         };
 
