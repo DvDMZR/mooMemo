@@ -1562,7 +1562,7 @@
                 <span class="filter-group-label" data-i18n="filter_label_scope">Rolle</span>
                 <div class="filter-tabs" id="filter-scope-container">
                     <button class="filter-pill" data-scope="mine" onclick="window.setFilterScope('mine')" data-i18n="scope_mine">Meine</button>
-                    <button class="filter-pill" data-scope="team" id="scope-team-pill" onclick="window.setFilterScope('team')">Mein Team</button>
+                    <button class="filter-pill" data-scope="team" id="scope-team-pill" onclick="window.setFilterScope('team')" style="display:none;"></button>
                     <button class="filter-pill active" data-scope="all" onclick="window.setFilterScope('all')" data-i18n="scope_all">Alle</button>
                 </div>
             </div>
@@ -2827,7 +2827,7 @@
             if (!window.isAdmin()) return;
             try {
                 const targetSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
-                if (targetSnap.exists() && window.isSuperAdmin(targetSnap.data())) return;
+                if (targetSnap.exists() && window.isSuperAdmin(targetSnap.data()) && !window.isSuperAdmin(currentUserProfile)) return;
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), { department: newDept }, { merge: true });
                 window.showToast(t.toast_dept_changed);
             } catch(e) {
