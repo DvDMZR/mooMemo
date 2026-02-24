@@ -1395,6 +1395,7 @@
                     <option value="TSS">TSS</option>
                     <option value="T&I">T&I</option>
                     <option value="DV">DV</option>
+                    <option value="R&C">R&C</option>
                     <option value="All">All</option>
                 </select>
                 <input type="text" id="reg-invite" placeholder="Einladungscode">
@@ -2681,6 +2682,7 @@
                         <option value="TSS" ${u.department==='TSS' ? 'selected' : ''}>TSS</option>
                         <option value="T&I" ${u.department==='T&I' ? 'selected' : ''}>T&I</option>
                         <option value="DV" ${u.department==='DV' ? 'selected' : ''}>DV</option>
+                        <option value="R&C" ${u.department==='R&C' ? 'selected' : ''}>R&C</option>
                         <option value="All" ${u.department==='All' ? 'selected' : ''}>All</option>
                     </select>`;
                     return `
@@ -3630,7 +3632,7 @@ Text: "${text}"`);
         };
 
         // Known departments (from registration)
-        const knownDepartments = ['TSS', 'T&I', 'DV'];
+        const knownDepartments = ['TSS', 'T&I', 'DV', 'R&C'];
 
         window.toggleTeamChips = function(vis, report) {
             const container = document.getElementById('team-chips-container');
