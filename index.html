@@ -3316,8 +3316,15 @@ Text: "${text}"`);
                     if (!isAuthor) return false;
                 } else if (filterScope === 'team') {
                     if (!isAuthor) {
+                        if (!userDept) return false;
                         const creatorDept = r.created_by_dept || '';
-                        if (!userDept || (userDept !== 'All' && userDept !== creatorDept)) return false;
+                        const visibleTeams = r.header.visible_teams || [];
+                        let vis = r.header.visibility || 'authors_only';
+                        if (vis === 'published') vis = 'all';
+                        if (vis === 'draft') vis = 'authors_only';
+                        const createdBySameDept = userDept === 'All' || userDept === creatorDept;
+                        const sharedWithDept = vis === 'all' || (vis === 'team_only' && (userDept === 'All' || userDept === creatorDept)) || (vis === 'selected_teams' && (userDept === 'All' || visibleTeams.includes(userDept)));
+                        if (!createdBySameDept && !sharedWithDept) return false;
                     }
                 }
                 // filterScope === 'all' => show everything user is allowed to see
