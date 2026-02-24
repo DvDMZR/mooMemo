@@ -2770,38 +2770,27 @@
                     const createdStr = u.created_at ? new Date(u.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
                     const lastLoginTs = u.lastLogin || u.created_at;
                     const lastLoginStr = lastLoginTs ? new Date(lastLoginTs).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
-                    const deptValue = u.department || '-';
-                    const deptSelect = `<select onchange="window.changeUserDepartment('${u.uid}', this.value)" style="font-size:0.7rem; padding:2px 4px; border:1px solid #e2e8f0; border-radius:6px; background:white; cursor:pointer;">
-                        <option value="" ${!u.department ? 'selected' : ''}>-</option>
-                        <option value="TSS" ${u.department==='TSS' ? 'selected' : ''}>TSS</option>
-                        <option value="T&I" ${u.department==='T&I' ? 'selected' : ''}>T&I</option>
-                        <option value="DV" ${u.department==='DV' ? 'selected' : ''}>DV</option>
-                        <option value="R&C" ${u.department==='R&C' ? 'selected' : ''}>R&C</option>
-                        <option value="All" ${u.department==='All' ? 'selected' : ''}>All</option>
-                    </select>`;
                     const isSAdmin = window.isSuperAdmin(u);
                     const canChangeRole = !isSelf && (!isSAdmin || window.isSuperAdmin(currentUserProfile));
                     const roleSelect = isSAdmin && !window.isSuperAdmin(currentUserProfile)
-                        ? `<select disabled style="font-size:0.7rem; padding:2px 4px; border:1px solid #e2e8f0; border-radius:6px; background:#f1f5f9; cursor:default;"><option selected>${t.role_sadmin || 'S-Admin'}</option></select>`
+                        ? `<span class="role-badge admin" style="font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:10px; background:var(--accent); color:white; text-transform:uppercase; letter-spacing:0.05em;">S-Admin</span>`
                         : `<select onchange="window.changeUserRole('${u.uid}', this.value)" style="font-size:0.7rem; padding:2px 4px; border:1px solid #e2e8f0; border-radius:6px; background:white; cursor:pointer;" ${!canChangeRole ? 'disabled' : ''}>
                             <option value="user" ${u.role !== 'admin' ? 'selected' : ''}>${t.role_user}</option>
                             <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>${t.role_admin}</option>
                         </select>`;
                     return `
-                    <div class="user-list-item" style="flex-wrap:wrap;">
+                    <div class="user-list-item">
                         <div class="user-info" style="flex:1; min-width:150px;">
                             <div class="name">${window.escapeHtml(u.displayName || '-')}</div>
                             <div class="email">${window.escapeHtml(u.email || '-')}</div>
                             <div style="font-size:0.7rem; color:var(--text-sub); margin-top:2px;">
-                                <i class="fa-solid fa-calendar-plus" style="width:14px;"></i> ${t.lbl_registered} ${createdStr}
+                                <i class="fa-solid fa-calendar-plus" style="width:14px;"></i> ${createdStr}
                                 &nbsp;|&nbsp;
-                                <i class="fa-solid fa-right-to-bracket" style="width:14px;"></i> ${t.lbl_last_login} ${lastLoginStr}
+                                <i class="fa-solid fa-right-to-bracket" style="width:14px;"></i> ${lastLoginStr}
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-                            ${deptSelect}
+                        <div style="display:flex; align-items:center; gap:6px;">
                             ${roleSelect}
-                            ${u.department ? `<span style="font-size:0.6rem; font-weight:700; padding:2px 7px; border-radius:10px; background:#e0e7ff; color:#3730a3; text-transform:uppercase; letter-spacing:0.03em;">${window.escapeHtml(u.department)}</span>` : ''}
                             ${deleteBtn}
                         </div>
                     </div>`;
@@ -3426,7 +3415,8 @@ Text: "${text}"`);
                 if (rVis === 'published') rVis = 'all';
                 if (rVis === 'draft') rVis = 'authors_only';
                 const onlyPrefix = currentLang === 'de' ? 'nur ' : 'only ';
-                const teamOnlyLabel = r.created_by_dept ? (onlyPrefix + r.created_by_dept) : (t.vis_team_only || 'Mein Team');
+                const resolvedDept = r.created_by_dept || (r.created_by === (currentUser ? currentUser.uid : '') && currentUserProfile ? currentUserProfile.department : '') || '';
+                const teamOnlyLabel = resolvedDept ? (onlyPrefix + resolvedDept) : (t.vis_team_only || 'Mein Team');
                 const selTeams = r.header.visible_teams || [];
                 const selectedTeamsLabel = selTeams.length === 1 ? (onlyPrefix + selTeams[0]) : (selTeams.join(', ') || (t.vis_selected_teams || 'Teams'));
                 const visLabels = { authors_only: t.vis_authors_only || 'Nur Verfasser', team_only: teamOnlyLabel, selected_teams: selectedTeamsLabel, all: '' };
@@ -3712,6 +3702,11 @@ Text: "${text}"`);
             let vis = report.header.visibility || 'authors_only';
             if (vis === 'published') vis = 'all';
             if (vis === 'draft') vis = 'authors_only';
+            // Update "Mein Team" option to show actual team name
+            const teamOpt = document.querySelector('#h_visibility option[value="team_only"]');
+            if (teamOpt && currentUserProfile && currentUserProfile.department) {
+                teamOpt.textContent = currentUserProfile.department;
+            }
             document.getElementById('h_visibility').value = vis;
             window.toggleTeamChips(vis, report);
 
