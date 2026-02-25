@@ -4367,14 +4367,14 @@ Text: "${text}"`);
 
             r.onresult = e => {
                 resetTimer();
-                const result = e.results[e.results.length - 1];
-                const transcript = result[0].transcript.trim();
-                if(result.isFinal) {
-                    baseValue += (baseValue.trim() ? ' ' : '') + transcript;
-                    field.value = baseValue;
-                } else {
-                    field.value = baseValue + (baseValue.trim() ? ' ' : '') + transcript;
+                // Rebuild full transcript from ALL results on every event
+                // to avoid duplication between interim and final results
+                let transcript = '';
+                for (let i = 0; i < e.results.length; i++) {
+                    transcript += e.results[i][0].transcript;
                 }
+                transcript = transcript.trim();
+                field.value = baseValue + (baseValue.trim() && transcript ? ' ' : '') + transcript;
             };
             r.onerror = (e) => {
                 clearAll();
@@ -4395,7 +4395,9 @@ Text: "${text}"`);
             };
             r.onend = () => {
                 clearAll();
-                field.value = baseValue.trim();
+                // Capture whatever is in the field as the final value
+                baseValue = field.value.trim();
+                field.value = baseValue;
                 if(id.startsWith('h_')) window.updateCurrentReportHeader();
             };
             r.start();
