@@ -4344,6 +4344,7 @@ Text: "${text}"`);
 
             const field = document.getElementById(id);
             let baseValue = field.value;
+            const processedIndices = new Set();
 
             // 8s Silence-Timeout
             const SILENCE_MS = 8000;
@@ -4363,8 +4364,14 @@ Text: "${text}"`);
                 let interim = '';
                 let final = '';
                 for(let i = e.resultIndex; i < e.results.length; i++) {
-                    if(e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-                    else interim += e.results[i][0].transcript;
+                    if(e.results[i].isFinal) {
+                        if(!processedIndices.has(i)) {
+                            processedIndices.add(i);
+                            final += e.results[i][0].transcript + ' ';
+                        }
+                    } else {
+                        interim += e.results[i][0].transcript;
+                    }
                 }
                 if(final) baseValue += (baseValue.trim() ? ' ' : '') + final.trim();
                 field.value = baseValue + (interim ? ' ' + interim : '');
