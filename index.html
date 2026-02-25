@@ -3278,17 +3278,17 @@
 
         // --- SHARED GEMINI API HELPER ---
         window.callGeminiAPI = async function(prompt) {
-            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
+            const apiKey = globalGeminiKey;
             if (!apiKey) throw new Error(translations[currentLang].err_no_api_key);
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
             let attempt = 0;
 
             while (attempt < 3) {
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
                     });
                     if (response.status === 403) throw new Error(translations[currentLang].err_api_key_invalid);
