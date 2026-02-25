@@ -766,7 +766,22 @@
                 min-height: 120px;
             }
         }
-        
+
+        /* Mobile: modal as bottom sheet */
+        @media (max-width: 600px) {
+            .modal-overlay {
+                align-items: flex-end;
+            }
+            .modal-content {
+                width: 100%;
+                max-width: 100%;
+                max-height: 92dvh;
+                border-radius: 20px 20px 0 0;
+                padding: 20px 16px;
+                margin: 0;
+            }
+        }
+
         .lang-toggle-container { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
         .lang-btn { border: 2px solid var(--primary); background: white; color: var(--primary); padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .lang-btn.active { background: var(--primary); color: white; }
