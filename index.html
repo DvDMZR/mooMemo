@@ -79,6 +79,7 @@
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
             line-height: 1.5;
+            overflow-x: hidden;
         }
 
         /* --- HEADER --- */
@@ -699,6 +700,70 @@
             .shared-btn {
                 flex: 1;
                 justify-content: center;
+            }
+        }
+
+        /* Mobile filter toggle button (hidden on desktop) */
+        .mobile-filter-toggle {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            /* Hide overlapping help button */
+            #visibility-help-btn {
+                display: none !important;
+            }
+
+            /* Hide report meta info in header (Back button needs the space) */
+            #header-report-info {
+                display: none !important;
+            }
+
+            /* Search row: shrink search input, show toggle button beside it */
+            .search-container {
+                width: auto;
+                flex: 1;
+                margin-bottom: 0;
+            }
+            .mobile-filter-toggle {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                border: 1px solid rgba(0, 51, 102, 0.3);
+                background: white;
+                color: var(--primary);
+                padding: 6px 12px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .mobile-filter-toggle.active {
+                background: var(--primary);
+                color: white;
+            }
+
+            /* Hide filter groups by default; show when filters-open */
+            .filter-group-labeled,
+            .filter-control-group {
+                display: none;
+                width: 100%;
+            }
+            .filter-container.filters-open .filter-group-labeled,
+            .filter-container.filters-open .filter-control-group {
+                display: flex;
+            }
+        }
+
+        /* Desktop: larger textareas in point modal */
+        @media (min-width: 768px) {
+            #p_desc {
+                min-height: 160px;
+            }
+            #p_solution {
+                min-height: 120px;
             }
         }
         
@@ -1553,10 +1618,13 @@
             <h2 style="margin-bottom:0;"><i class="fa-solid fa-folder-open"></i> <span data-i18n="dash_title">Berichte (Cloud)</span></h2>
             <button class="icon-btn" id="admin-tools-btn" onclick="window.askAdminTools()" style="color:var(--primary); display:none;" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
         </div>
-        <div class="filter-container">
+        <div class="filter-container" id="filter-container">
              <div class="search-container">
                 <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, Verfasser)" data-i18n-placeholder="search_placeholder" oninput="window.renderReportList()">
             </div>
+            <button class="mobile-filter-toggle" id="mobile-filter-toggle-btn" onclick="window.toggleMobileFilter()" aria-expanded="false">
+                <i class="fa-solid fa-sliders"></i> Filter
+            </button>
             
             <div class="filter-group-labeled label-left">
                 <span class="filter-group-label" data-i18n="filter_label_scope">Rolle</span>
@@ -3570,6 +3638,14 @@ Text: "${text}"`);
         };
         window.setFilterYear = function(year) { filterYear = year; window.renderReportList(); };
         window.setSortMethod = function(method) { sortMethod = method; window.renderReportList(); };
+        window.toggleMobileFilter = function() {
+            const container = document.getElementById('filter-container');
+            const btn = document.getElementById('mobile-filter-toggle-btn');
+            if (!container || !btn) return;
+            const isOpen = container.classList.toggle('filters-open');
+            btn.classList.toggle('active', isOpen);
+            btn.setAttribute('aria-expanded', isOpen);
+        };
 
         window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; };
         window.closeSettings = function() { document.getElementById('settings-modal').style.display = 'none'; };
