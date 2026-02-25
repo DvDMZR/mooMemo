@@ -79,6 +79,7 @@
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
             line-height: 1.5;
+            overflow-x: hidden;
         }
 
         /* --- HEADER --- */
@@ -399,7 +400,7 @@
         .fab:hover { transform: scale(1.05); background-color: #002850; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 200; }
-        .modal-content { background: white; width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 30px; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+        .modal-content { background: white; width: 90%; max-width: 1100px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 30px; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
         .modal-content h3 { margin-top: 0; color: var(--text-main); font-size: 1.3rem; }
         .close-modal { position: absolute; top: 20px; right: 25px; font-size: 28px; cursor: pointer; color: #9ca3af; transition: color 0.2s; }
         
@@ -701,7 +702,86 @@
                 justify-content: center;
             }
         }
-        
+
+        /* Mobile filter toggle button (hidden on desktop) */
+        .mobile-filter-toggle {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            /* Hide overlapping help button */
+            #visibility-help-btn {
+                display: none !important;
+            }
+
+            /* Hide report meta info in header (Back button needs the space) */
+            #header-report-info {
+                display: none !important;
+            }
+
+            /* Search row: shrink search input, show toggle button beside it */
+            .search-container {
+                width: auto;
+                flex: 1;
+                margin-bottom: 0;
+            }
+            .mobile-filter-toggle {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                border: 1px solid rgba(0, 51, 102, 0.3);
+                background: white;
+                color: var(--primary);
+                padding: 6px 12px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .mobile-filter-toggle.active {
+                background: var(--primary);
+                color: white;
+            }
+
+            /* Hide filter groups by default; show when filters-open */
+            .filter-group-labeled,
+            .filter-control-group {
+                display: none;
+                width: 100%;
+            }
+            .filter-container.filters-open .filter-group-labeled,
+            .filter-container.filters-open .filter-control-group {
+                display: flex;
+            }
+        }
+
+        /* Desktop: larger textareas in point modal */
+        @media (min-width: 768px) {
+            #p_desc {
+                min-height: 160px;
+            }
+            #p_solution {
+                min-height: 120px;
+            }
+        }
+
+        /* Mobile: modal as bottom sheet */
+        @media (max-width: 600px) {
+            .modal-overlay {
+                align-items: flex-end;
+            }
+            .modal-content {
+                width: 100%;
+                max-width: 100%;
+                max-height: 92dvh;
+                border-radius: 20px 20px 0 0;
+                padding: 20px 16px;
+                margin: 0;
+            }
+        }
+
         .lang-toggle-container { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
         .lang-btn { border: 2px solid var(--primary); background: white; color: var(--primary); padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .lang-btn.active { background: var(--primary); color: white; }
@@ -1498,7 +1578,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.1)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.3)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1553,10 +1633,13 @@
             <h2 style="margin-bottom:0;"><i class="fa-solid fa-folder-open"></i> <span data-i18n="dash_title">Berichte (Cloud)</span></h2>
             <button class="icon-btn" id="admin-tools-btn" onclick="window.askAdminTools()" style="color:var(--primary); display:none;" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
         </div>
-        <div class="filter-container">
+        <div class="filter-container" id="filter-container">
              <div class="search-container">
                 <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, Verfasser)" data-i18n-placeholder="search_placeholder" oninput="window.renderReportList()">
             </div>
+            <button class="mobile-filter-toggle" id="mobile-filter-toggle-btn" onclick="window.toggleMobileFilter()" aria-expanded="false">
+                <i class="fa-solid fa-sliders"></i> Filter
+            </button>
             
             <div class="filter-group-labeled label-left">
                 <span class="filter-group-label" data-i18n="filter_label_scope">Rolle</span>
@@ -1734,7 +1817,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.8.1</div>
+                        <div class="info-version">mooMemo v1.8.3</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1793,7 +1876,7 @@
                  ondrop="event.preventDefault(); this.classList.remove('dragover'); window.processFiles(event.dataTransfer.files);">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span data-i18n="drop_zone_text">Bilder hier ablegen oder klicken</span>
-                <input type="file" id="p_images" multiple accept="image/*" style="display:none" onchange="window.handleImageUpload()">
+                <input type="file" id="p_images" multiple accept="image/*,.heic,.HEIC,.heif,.HEIF" style="display:none" onchange="window.handleImageUpload()">
             </div>
 
             <div id="modal-img-preview" class="img-grid"></div>
@@ -1885,6 +1968,9 @@
 
     <div id="toast"></div>
 
+    <!-- HEIC support for desktop browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+
     <!-- LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -1904,7 +1990,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8.1";
+        const APP_VERSION = "1.8.3";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1921,6 +2007,22 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.8.3",
+                date: "2026-02-25",
+                changes: [
+                    "HEIC-Bilder (iPhone-Format) lassen sich jetzt auch vom PC hochladen."
+                ]
+            },
+            {
+                ver: "1.8.2",
+                date: "2026-02-25",
+                changes: [
+                    "Mobile: Punkt-Formular öffnet jetzt als Bottom Sheet – kein versehentliches Scrollen mehr.",
+                    "Mobile: Filter lassen sich per Toggle-Button ein-/ausblenden.",
+                    "Desktop: Modal deutlich breiter (max. 1100 px) für mehr Übersicht."
+                ]
+            },
             {
                 ver: "1.8.1",
                 date: "2026-02-25",
@@ -3570,6 +3672,14 @@ Text: "${text}"`);
         };
         window.setFilterYear = function(year) { filterYear = year; window.renderReportList(); };
         window.setSortMethod = function(method) { sortMethod = method; window.renderReportList(); };
+        window.toggleMobileFilter = function() {
+            const container = document.getElementById('filter-container');
+            const btn = document.getElementById('mobile-filter-toggle-btn');
+            if (!container || !btn) return;
+            const isOpen = container.classList.toggle('filters-open');
+            btn.classList.toggle('active', isOpen);
+            btn.setAttribute('aria-expanded', isOpen);
+        };
 
         window.openSettings = function() { document.getElementById('settings-modal').style.display = 'flex'; };
         window.closeSettings = function() { document.getElementById('settings-modal').style.display = 'none'; };
@@ -4405,7 +4515,15 @@ Text: "${text}"`);
         
         // --- NEW FILE UPLOAD HANDLER ---
         
-        function resizeImage(file) {
+        async function resizeImage(file) {
+            // Convert HEIC/HEIF to JPEG on desktop browsers that can't decode it natively
+            let processedFile = file;
+            const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+                           /\.(heic|heif)$/i.test(file.name);
+            if (isHeic && window.heic2any) {
+                const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+                processedFile = Array.isArray(converted) ? converted[0] : converted;
+            }
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = e => {
@@ -4427,7 +4545,7 @@ Text: "${text}"`);
                     img.src = e.target.result;
                 };
                 reader.onerror = reject;
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(processedFile);
             });
         }
 
