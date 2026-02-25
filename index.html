@@ -1498,7 +1498,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.1)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1734,7 +1734,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.8</div>
+                        <div class="info-version">mooMemo v1.8.1</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1904,7 +1904,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8";
+        const APP_VERSION = "1.8.1";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -1921,6 +1921,13 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.8.1",
+                date: "2026-02-25",
+                changes: [
+                    "Bugfix: Spracheingabe hat Wörter mehrfach aufgenommen – behoben."
+                ]
+            },
             {
                 ver: "1.8",
                 date: "2026-02-24",
@@ -4344,6 +4351,7 @@ Text: "${text}"`);
 
             const field = document.getElementById(id);
             let baseValue = field.value;
+            const processedIndices = new Set();
 
             // 8s Silence-Timeout
             const SILENCE_MS = 8000;
@@ -4363,8 +4371,14 @@ Text: "${text}"`);
                 let interim = '';
                 let final = '';
                 for(let i = e.resultIndex; i < e.results.length; i++) {
-                    if(e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-                    else interim += e.results[i][0].transcript;
+                    if(e.results[i].isFinal) {
+                        if(!processedIndices.has(i)) {
+                            processedIndices.add(i);
+                            final += e.results[i][0].transcript + ' ';
+                        }
+                    } else {
+                        interim += e.results[i][0].transcript;
+                    }
                 }
                 if(final) baseValue += (baseValue.trim() ? ' ' : '') + final.trim();
                 field.value = baseValue + (interim ? ' ' + interim : '');
