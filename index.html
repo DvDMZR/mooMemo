@@ -4340,7 +4340,7 @@ Text: "${text}"`);
             }
             const r = new SpeechRecognitionAPI();
             r.lang = currentLang === 'de' ? "de-DE" : "en-US";
-            r.continuous = true;
+            r.continuous = false;
             r.interimResults = true;
 
             // Visuell: Stop-Icon + Tooltip
@@ -4351,7 +4351,6 @@ Text: "${text}"`);
 
             const field = document.getElementById(id);
             let baseValue = field.value;
-            const processedIndices = new Set();
 
             // 8s Silence-Timeout
             const SILENCE_MS = 8000;
@@ -4368,20 +4367,14 @@ Text: "${text}"`);
 
             r.onresult = e => {
                 resetTimer();
-                let interim = '';
-                let final = '';
-                for(let i = e.resultIndex; i < e.results.length; i++) {
-                    if(e.results[i].isFinal) {
-                        if(!processedIndices.has(i)) {
-                            processedIndices.add(i);
-                            final += e.results[i][0].transcript + ' ';
-                        }
-                    } else {
-                        interim += e.results[i][0].transcript;
-                    }
+                const result = e.results[e.results.length - 1];
+                const transcript = result[0].transcript.trim();
+                if(result.isFinal) {
+                    baseValue += (baseValue.trim() ? ' ' : '') + transcript;
+                    field.value = baseValue;
+                } else {
+                    field.value = baseValue + (baseValue.trim() ? ' ' : '') + transcript;
                 }
-                if(final) baseValue += (baseValue.trim() ? ' ' : '') + final.trim();
-                field.value = baseValue + (interim ? ' ' + interim : '');
             };
             r.onerror = (e) => {
                 clearAll();
