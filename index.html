@@ -4295,7 +4295,14 @@ Text: "${text}"`);
                     }
                 }));
             }
+            const r = window.getCurrentReport();
+            const originalTitle = document.title;
+            if (r && r.header && r.header.customer) {
+                const dateStr = r.header.date_from ? r.header.date_from.replace(/-/g, '') : '';
+                document.title = `Besuchsbericht_${r.header.customer}${dateStr ? '_' + dateStr : ''}`;
+            }
             window.print();
+            document.title = originalTitle;
         };
 
         // --- SHARE LINK FUNCTIONS ---
