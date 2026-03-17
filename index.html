@@ -1578,7 +1578,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.3)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.4)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -1817,7 +1817,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.8.3</div>
+                        <div class="info-version">mooMemo v1.8.4</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1990,7 +1990,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8.3";
+        const APP_VERSION = "1.8.4";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -2007,6 +2007,16 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.8.4",
+                date: "2026-03-16",
+                changes: [
+                    "PDF-Export: Dateiname jetzt automatisch auf Englisch – Format: 'Visit Report [Kunde] Week WW YY'.",
+                    "PDF-Export: Header-Design überarbeitet – Kundenname groß und prominent, Metadaten kompakt darunter.",
+                    "PDF-Export: Gepunktete Unterstreichung bei Punkt-Titeln entfernt.",
+                    "Export: Weitere Berichte (Sidebar) wurde bei bestimmten Nutzern nicht mehr angezeigt – behoben. Sichtbarkeitsregeln werden jetzt korrekt angewendet."
+                ]
+            },
             {
                 ver: "1.8.3",
                 date: "2026-02-25",
@@ -3088,7 +3098,7 @@
              const html = filteredPoints.map((p) => {
                  const originalIndex = r.points.indexOf(p);
                  const clickAttr = !isReadOnly ? `onclick="window.switchTab('points'); window.openModal(${originalIndex});" title="Zum Punkt navigieren"` : '';
-                 const clickStyle = !isReadOnly ? '; cursor:pointer; text-decoration:underline dotted;' : '';
+                 const clickStyle = !isReadOnly ? '; cursor:pointer;' : '';
                  const safeImages = (p.images||[]).map(img => {
                      const src = typeof img==='string' ? img : (img.src || img.base64);
                      const isLarge = typeof img==='string' ? false : img.isLarge;
@@ -3102,12 +3112,12 @@
                      const solDateStr = p.solutionDate ? ` <span style="font-size:0.75rem; color:#666;">(${t.solution_last_edited}: ${new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })})</span>` : '';
                      solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0; white-space:pre-wrap;">${window.escapeHtml(p.solution)}</p></div>`;
                  }
-                 return `<div style="margin-bottom:25px; page-break-inside: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${p.desc}</p>${assHtml}${solutionHtml}<div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 return `<div style="margin-bottom:25px;"><div style="page-break-inside: avoid; page-break-after: avoid; break-after: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${p.desc}</p>${assHtml}${solutionHtml}</div><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
-             const devBuild = "DEV-20260210A";
+             const devBuild = "DEV-20260316A";
              const previewEl = document.getElementById('pdf-preview');
-             if(previewEl) previewEl.innerHTML = `<div class="pdf-header" style="display:flex; justify-content:space-between; align-items:flex-start;"><div><h1 style="margin:0;">${t.pdf_title}</h1><p style="color:#666;">${new Date().toLocaleDateString(currentLang==='de'?'de-DE':'en-US')}</p></div><img src="${logoSrc}" style="height:40px; width:126px; object-fit:contain; flex-shrink:0;"></div><div style="background:#f8fafc; padding:15px; margin-bottom:30px; border-radius:8px;"><div><strong>${t.lbl_customer}:</strong> ${h.customer}</div><div><strong>${t.lbl_date}:</strong> ${formatDate(h.date_from)} bis ${formatDate(h.date_to)}</div><div><strong>${t.lbl_author}:</strong> ${aList}</div><div><strong>${t.lbl_participants}:</strong> ${pList}</div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
+             if(previewEl) previewEl.innerHTML = `<div style="margin-bottom:28px; page-break-after:avoid; break-after:avoid;"><div style="display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:14px; margin-bottom:14px; border-bottom:2.5px solid #111827;"><div><div style="font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9ca3af; margin-bottom:6px;">${t.pdf_title}</div><div style="font-size:1.5rem; font-weight:800; color:#111827; line-height:1.15;">${h.customer}</div><div style="font-size:0.82rem; color:#6b7280; margin-top:4px;">${formatDate(h.date_from)}${h.date_to && h.date_to !== h.date_from ? ' \u2013 ' + formatDate(h.date_to) : ''}</div></div><img src="${logoSrc}" style="height:32px; width:auto; object-fit:contain; flex-shrink:0; margin-bottom:4px;"></div><div style="display:flex; gap:32px; flex-wrap:wrap; font-size:0.82rem; color:#374151;"><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_author}</span><strong>${aList}</strong></div><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_participants}</span><strong>${pList}</strong></div></div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(window.getCurrentReport());
@@ -3133,6 +3143,7 @@
                 if (sidebar) sidebar.style.display = 'none';
                 return;
             }
+            if (sidebar) sidebar.style.display = '';
 
             // Normalize customer name for matching (lowercase, trimmed)
             const currentCustomer = currentReport.header.customer.toLowerCase().trim();
@@ -3278,17 +3289,17 @@
 
         // --- SHARED GEMINI API HELPER ---
         window.callGeminiAPI = async function(prompt) {
-            const apiKey = globalGeminiKey || localStorage.getItem('moo_gemini_api_key');
+            const apiKey = globalGeminiKey;
             if (!apiKey) throw new Error(translations[currentLang].err_no_api_key);
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
             let attempt = 0;
 
             while (attempt < 3) {
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
                     });
                     if (response.status === 403) throw new Error(translations[currentLang].err_api_key_invalid);
@@ -4295,7 +4306,20 @@ Text: "${text}"`);
                     }
                 }));
             }
+            const r = window.getCurrentReport();
+            const originalTitle = document.title;
+            if (r && r.header && r.header.customer) {
+                let weekPart = '';
+                if (r.header.date_from) {
+                    const d = new Date(r.header.date_from);
+                    const [week, year] = window.getWeekNumber(d);
+                    const yy = String(year).slice(-2);
+                    weekPart = ` Week ${String(week).padStart(2,'0')} ${yy}`;
+                }
+                document.title = `Visit Report ${r.header.customer}${weekPart}`;
+            }
             window.print();
+            document.title = originalTitle;
         };
 
         // --- SHARE LINK FUNCTIONS ---
