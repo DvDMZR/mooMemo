@@ -1578,7 +1578,7 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.4)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.5)</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
@@ -2008,6 +2008,14 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.8.5",
+                date: "2026-04-08",
+                changes: [
+                    "KI-Sicherheit: Gemini API-Key wird nicht mehr im Browser übertragen – alle KI-Anfragen laufen jetzt über eine serverseitige Firebase Cloud Function.",
+                    "KI-Korrektur: Fehler beim Zurücksetzen des Textes bei fehlgeschlagener KI-Anfrage behoben."
+                ]
+            },
             {
                 ver: "1.8.4",
                 date: "2026-03-16",
