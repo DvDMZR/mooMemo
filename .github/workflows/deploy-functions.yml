@@ -21,7 +21,7 @@ jobs:
           cache-dependency-path: functions/package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: functions
 
       - name: Write service account key
