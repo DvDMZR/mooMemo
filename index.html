@@ -1978,6 +1978,7 @@
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         // --- KONFIGURATION START ---
         const myFirebaseConfig = {
@@ -2206,7 +2207,8 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app); // Init Storage
+        const storage = getStorage(app);
+        const functionsInstance = getFunctions(app, 'europe-west1');
 
         let currentUser = null;
         let currentUserProfile = null; // User profile from Firestore { displayName, email, role, settings }
@@ -2232,8 +2234,6 @@
         let sharedTab = null;
         let exportFilter = 'all'; // 'all' | 'open'
 
-        // DYNAMIC API KEY
-        let globalGeminiKey = "";
         let unsubscribeReportsListener = null;
 
         const translations = {
@@ -2608,7 +2608,7 @@
                     if (currentUserProfile.settings.aiLang) window.setAiTargetLang(currentUserProfile.settings.aiLang);
                 }
                 window.checkVersion();
-                window.fetchGlobalConfig().then(() => window.setupRealtimeListener());
+                window.setupRealtimeListener();
                 window.initBackButtonHandler();
             } catch(e) {
                 isRegistering = false;
@@ -3247,37 +3247,15 @@
             window.showToast(translations[currentLang].func_disabled);
         };
 
-        // --- NEW: FETCH GLOBAL CONFIG ---
-        window.fetchGlobalConfig = async function() {
-            try {
-                // IMPORTANT: The path must match strict rules
-                // artifacts/{appId}/public/data/app_config/secrets
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'secrets');
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if(data.gemini_key) {
-                        globalGeminiKey = data.gemini_key;
-                        console.log("Global Config Loaded");
-                    }
-                }
-            } catch(e) {
-                console.warn("Could not fetch global config (maybe not set yet):", e);
-            }
-        };
-
-        // --- NEW: SAVE GLOBAL API KEY ---
+        // --- SAVE GLOBAL API KEY (read server-side by Cloud Function, never sent to browser) ---
         window.saveGlobalApiKey = async function() {
             const key = document.getElementById('admin-api-key-input').value.trim();
             const t = translations[currentLang];
             if(!key) { alert(t.err_key_empty); return; }
 
             try {
-                // Ensure document exists
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'secrets');
                 await setDoc(docRef, { gemini_key: key }, { merge: true });
-                globalGeminiKey = key;
                 alert(t.toast_key_saved);
                 document.getElementById('admin-api-key-input').value = '';
                 window.closeAdminToolsModal();
@@ -3287,36 +3265,44 @@
             }
         };
 
-        // --- SHARED GEMINI API HELPER ---
+        // --- SHARED GEMINI API HELPER (proxied via Cloud Function – key never leaves server) ---
         window.callGeminiAPI = async function(prompt) {
-            const apiKey = globalGeminiKey;
-            if (!apiKey) throw new Error(translations[currentLang].err_no_api_key);
+            const callGemini = httpsCallable(functionsInstance, 'callGemini');
+            const MAX_ATTEMPTS = 4;
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
-            let attempt = 0;
-
-            while (attempt < 3) {
+            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
                 try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
-                    });
-                    if (response.status === 403) throw new Error(translations[currentLang].err_api_key_invalid);
-                    if (response.status === 429 || response.status >= 500) { attempt++; await new Promise(r => setTimeout(r, 1000 * attempt)); continue; }
-                    if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
-
-                    const result = await response.json();
-                    if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        return result.candidates[0].content.parts[0].text.trim();
-                    }
-                    throw new Error("Keine Antwort von der KI erhalten.");
+                    const result = await callGemini({ prompt });
+                    return result.data.text;
                 } catch(e) {
-                    if (attempt >= 2 || e.message.includes("Key")) throw e;
-                    attempt++;
-                    await new Promise(r => setTimeout(r, 1000));
+                    // Definitive errors – do not retry
+                    if (e.code === 'functions/unauthenticated') throw new Error("Anmeldung erforderlich.");
+                    if (e.code === 'functions/not-found')       throw new Error("API-Key nicht konfiguriert. Bitte im Admin-Panel eintragen.");
+                    if (e.code === 'functions/permission-denied') throw new Error(translations[currentLang].err_api_key_invalid);
+
+                    if (e.code === 'functions/resource-exhausted') {
+                        if (attempt >= MAX_ATTEMPTS - 1) throw new Error("Rate-Limit der KI-API erreicht. Bitte kurz warten und erneut versuchen.");
+                        const waitMs = Math.pow(2, attempt + 1) * 1000;
+                        window.showToast(`KI: Zu viele Anfragen – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                        await new Promise(r => setTimeout(r, waitMs));
+                        continue;
+                    }
+
+                    if (e.code === 'functions/unavailable') {
+                        if (attempt >= MAX_ATTEMPTS - 1) throw new Error("KI-Server nicht erreichbar. Bitte später erneut versuchen.");
+                        const waitMs = Math.pow(2, attempt + 1) * 1000;
+                        window.showToast(`KI: Server-Fehler – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                        await new Promise(r => setTimeout(r, waitMs));
+                        continue;
+                    }
+
+                    if (attempt >= MAX_ATTEMPTS - 1) throw e;
+                    const waitMs = Math.pow(2, attempt + 1) * 1000;
+                    window.showToast(`KI: Verbindungsfehler – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                    await new Promise(r => setTimeout(r, waitMs));
                 }
             }
+            throw new Error("KI-Anfrage fehlgeschlagen nach mehreren Versuchen.");
         };
 
         window.improveDescription = async function() {
@@ -3325,6 +3311,9 @@
             const desc = descField.value.trim();
             const title = titleField.value.trim();
             if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+
+            const originalDesc = descField.value;
+            const originalTitle = titleField.value;
 
             const btn = document.getElementById('btn-improve-text');
             const originalHTML = btn.innerHTML;
@@ -3375,7 +3364,11 @@ Text: "${desc}"`;
                     descField.value = aiResponse;
                     window.showToast("Text überarbeitet!");
                 }
-            } catch(e) { alert(e.message); }
+            } catch(e) {
+                descField.value = originalDesc;
+                titleField.value = originalTitle;
+                window.showToast("KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.");
+            }
 
             btn.innerHTML = originalHTML;
         };
@@ -3384,6 +3377,8 @@ Text: "${desc}"`;
             const field = document.getElementById('p_solution');
             const text = field.value.trim();
             if (text.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+
+            const originalText = field.value;
 
             const btn = document.getElementById('btn-improve-solution');
             const originalHTML = btn.innerHTML;
@@ -3400,7 +3395,10 @@ Antworte NUR mit dem korrigierten Text (kein JSON, keine Erklärungen).
 Text: "${text}"`);
                 field.value = result;
                 window.showToast("Rechtschreibung korrigiert!");
-            } catch(e) { alert(e.message); }
+            } catch(e) {
+                field.value = originalText;
+                window.showToast("KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.");
+            }
 
             btn.innerHTML = originalHTML;
         };
@@ -4760,11 +4758,8 @@ Text: "${text}"`);
                     window.checkVersion();
                 }
 
-                // Fetch Key & Listen
-                window.fetchGlobalConfig().then(() => {
-                    window.setupRealtimeListener();
-                    window.loadRegisteredUserNames();
-                });
+                window.setupRealtimeListener();
+                window.loadRegisteredUserNames();
 
                 // Initialize mobile back button handler
                 window.initBackButtonHandler();
