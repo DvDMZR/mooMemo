@@ -3293,18 +3293,36 @@
             if (!apiKey) throw new Error(translations[currentLang].err_no_api_key);
 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
-            let attempt = 0;
+            const MAX_ATTEMPTS = 4;
 
-            while (attempt < 3) {
+            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } })
                     });
+
                     if (response.status === 403) throw new Error(translations[currentLang].err_api_key_invalid);
-                    if (response.status === 429 || response.status >= 500) { attempt++; await new Promise(r => setTimeout(r, 1000 * attempt)); continue; }
-                    if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+
+                    if (response.status === 429) {
+                        if (attempt >= MAX_ATTEMPTS - 1) throw new Error("KI-Anfrage fehlgeschlagen: Rate-Limit erreicht. Bitte kurz warten und erneut versuchen.");
+                        const retryAfterSec = parseInt(response.headers.get('Retry-After') || '0', 10);
+                        const waitMs = Math.min(retryAfterSec > 0 ? retryAfterSec * 1000 : Math.pow(2, attempt + 1) * 1000, 15000);
+                        window.showToast(`KI: Zu viele Anfragen – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                        await new Promise(r => setTimeout(r, waitMs));
+                        continue;
+                    }
+
+                    if (response.status >= 500) {
+                        if (attempt >= MAX_ATTEMPTS - 1) throw new Error(`KI-Server nicht erreichbar (${response.status}). Bitte später erneut versuchen.`);
+                        const waitMs = Math.pow(2, attempt + 1) * 1000;
+                        window.showToast(`KI: Server-Fehler – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                        await new Promise(r => setTimeout(r, waitMs));
+                        continue;
+                    }
+
+                    if (!response.ok) throw new Error(`API-Fehler: ${response.status} ${response.statusText}`);
 
                     const result = await response.json();
                     if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
@@ -3312,9 +3330,10 @@
                     }
                     throw new Error("Keine Antwort von der KI erhalten.");
                 } catch(e) {
-                    if (attempt >= 2 || e.message.includes("Key")) throw e;
-                    attempt++;
-                    await new Promise(r => setTimeout(r, 1000));
+                    if (attempt >= MAX_ATTEMPTS - 1 || e.message.includes("Key") || e.message.includes("Rate-Limit") || e.message.includes("Server nicht erreichbar")) throw e;
+                    const waitMs = Math.pow(2, attempt + 1) * 1000;
+                    window.showToast(`KI: Verbindungsfehler – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                    await new Promise(r => setTimeout(r, waitMs));
                 }
             }
             throw new Error("KI-Anfrage fehlgeschlagen nach mehreren Versuchen.");
