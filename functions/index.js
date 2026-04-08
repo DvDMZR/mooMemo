@@ -1,3 +1,4 @@
+// mooMemo Cloud Functions – v1
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
