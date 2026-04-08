@@ -3273,7 +3273,9 @@
             for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
                 try {
                     const result = await callGemini({ prompt });
-                    return result.data.text;
+                    const text = result?.data?.text;
+                    if (typeof text !== 'string' || !text) throw new Error("Keine Textantwort von der KI erhalten.");
+                    return text;
                 } catch(e) {
                     // Definitive errors – do not retry
                     if (e.code === 'functions/unauthenticated') throw new Error("Anmeldung erforderlich.");
