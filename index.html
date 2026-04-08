@@ -3317,6 +3317,7 @@
                     await new Promise(r => setTimeout(r, 1000));
                 }
             }
+            throw new Error("KI-Anfrage fehlgeschlagen nach mehreren Versuchen.");
         };
 
         window.improveDescription = async function() {
@@ -3325,6 +3326,9 @@
             const desc = descField.value.trim();
             const title = titleField.value.trim();
             if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+
+            const originalDesc = descField.value;
+            const originalTitle = titleField.value;
 
             const btn = document.getElementById('btn-improve-text');
             const originalHTML = btn.innerHTML;
@@ -3375,7 +3379,11 @@ Text: "${desc}"`;
                     descField.value = aiResponse;
                     window.showToast("Text überarbeitet!");
                 }
-            } catch(e) { alert(e.message); }
+            } catch(e) {
+                descField.value = originalDesc;
+                titleField.value = originalTitle;
+                window.showToast("KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.");
+            }
 
             btn.innerHTML = originalHTML;
         };
@@ -3384,6 +3392,8 @@ Text: "${desc}"`;
             const field = document.getElementById('p_solution');
             const text = field.value.trim();
             if (text.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+
+            const originalText = field.value;
 
             const btn = document.getElementById('btn-improve-solution');
             const originalHTML = btn.innerHTML;
@@ -3400,7 +3410,10 @@ Antworte NUR mit dem korrigierten Text (kein JSON, keine Erklärungen).
 Text: "${text}"`);
                 field.value = result;
                 window.showToast("Rechtschreibung korrigiert!");
-            } catch(e) { alert(e.message); }
+            } catch(e) {
+                field.value = originalText;
+                window.showToast("KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.");
+            }
 
             btn.innerHTML = originalHTML;
         };
