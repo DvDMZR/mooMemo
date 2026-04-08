@@ -4,7 +4,7 @@
   "description": "Firebase Cloud Functions for mooMemo – Gemini API proxy",
   "main": "index.js",
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {
     "firebase-admin": "^12.0.0",
