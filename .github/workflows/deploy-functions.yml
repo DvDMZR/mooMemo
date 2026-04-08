@@ -1,0 +1,29 @@
+name: Deploy Firebase Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'functions/**'
+      - 'firebase.json'
+
+jobs:
+  deploy-functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: functions/package.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Deploy Firebase Functions
+        run: npx firebase-tools deploy --only functions --token "$FIREBASE_TOKEN" --project moomemo-a9012
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
