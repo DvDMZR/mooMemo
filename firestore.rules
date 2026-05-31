@@ -1,0 +1,79 @@
+rules_version = '2';
+
+// mooMemo Firestore Security Rules
+//
+// Datenmodell (siehe index.html): artifacts/{appId}/public/data/...
+//   - users/{uid}            -> Benutzerprofile (role, department, settings, ...)
+//   - app_config/auth        -> { invite_code }
+//   - app_config/secrets     -> { gemini_key }  (nur serverseitig lesbar!)
+//   - reports/{reportId}     -> Berichte
+//
+// Kernprinzipien:
+//   * Nur authentifizierte @gea.com-Nutzer haben Zugriff.
+//   * Niemand kann sich selbst zum Admin machen (role/department nur durch Admins).
+//   * Der Gemini-Key (secrets) ist für KEINEN Client lesbar; die Cloud Function
+//     liest ihn über das Admin-SDK (umgeht diese Rules). Admins dürfen ihn setzen.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isGea() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower().matches('.*@gea[.]com');
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() == 'david.mazur@gea.com';
+    }
+
+    function isAdmin(appId) {
+      return isSuperAdmin()
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/artifacts/$(appId)/public/data/users/$(request.auth.uid))
+            && get(/databases/$(database)/documents/artifacts/$(appId)/public/data/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // --- Benutzerprofile ---
+    match /artifacts/{appId}/public/data/users/{uid} {
+      allow read: if isGea();
+
+      // Eigenes Profil bei der Registrierung anlegen – ohne Selbstzuweisung von Admin
+      allow create: if isGea()
+                    && request.auth.uid == uid
+                    && request.resource.data.role == 'user';
+
+      // Eigenes Profil aktualisieren, aber role/department NICHT selbst ändern
+      allow update: if isGea()
+                    && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.department == resource.data.department;
+
+      // Admins dürfen beliebige Profile ändern (inkl. role/department) und löschen
+      allow update, delete: if isAdmin(appId);
+    }
+
+    // --- Einladungscode ---
+    match /artifacts/{appId}/public/data/app_config/auth {
+      allow read: if isGea();
+      allow write: if isAdmin(appId);
+    }
+
+    // --- Secrets (Gemini-Key): kein Client-Read; nur Admins dürfen schreiben ---
+    match /artifacts/{appId}/public/data/app_config/secrets {
+      allow read: if false;
+      allow write: if isAdmin(appId);
+    }
+
+    // --- Berichte ---
+    match /artifacts/{appId}/public/data/reports/{reportId} {
+      allow read, write: if isGea();
+    }
+  }
+}

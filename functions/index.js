@@ -19,6 +19,11 @@ exports.callGemini = onCall({ region: "europe-west1" }, async (request) => {
   if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
     throw new HttpsError("invalid-argument", "Kein Prompt angegeben.");
   }
+  // Längenlimit zum Schutz vor Missbrauch / Kostenexplosion
+  const MAX_PROMPT_LENGTH = 12000;
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    throw new HttpsError("invalid-argument", "Prompt zu lang.");
+  }
 
   // 2. Read API key server-side via Admin SDK (bypasses Firestore security rules,
   //    key is never sent to any browser)
@@ -49,7 +54,9 @@ exports.callGemini = onCall({ region: "europe-west1" }, async (request) => {
   });
 
   if (response.status === 403) {
-    throw new HttpsError("permission-denied", "Ungültiger Gemini API-Key.");
+    // Konfigurationsproblem serverseitig loggen, dem Client nur generisch melden.
+    console.error("Gemini API returned 403 (invalid/unauthorized key).");
+    throw new HttpsError("internal", "KI-Dienst aktuell nicht verfügbar. Bitte später erneut versuchen.");
   }
   if (response.status === 429) {
     throw new HttpsError(
@@ -58,13 +65,15 @@ exports.callGemini = onCall({ region: "europe-west1" }, async (request) => {
     );
   }
   if (response.status >= 500) {
+    console.error(`Gemini API server error: ${response.status}`);
     throw new HttpsError(
       "unavailable",
-      `KI-Server nicht erreichbar (${response.status}). Bitte später erneut versuchen.`
+      "KI-Server nicht erreichbar. Bitte später erneut versuchen."
     );
   }
   if (!response.ok) {
-    throw new HttpsError("internal", `API-Fehler: ${response.status} ${response.statusText}`);
+    console.error(`Gemini API error: ${response.status} ${response.statusText}`);
+    throw new HttpsError("internal", "KI-Anfrage fehlgeschlagen. Bitte später erneut versuchen.");
   }
 
   const result = await response.json();

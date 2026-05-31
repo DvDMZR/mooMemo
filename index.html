@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#003366">
     <title>mooMemo (Cloud)</title>
     
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <style>
         :root {
@@ -279,9 +279,10 @@
             font-size: 1.1rem;
         }
         
-        .mic-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 8px; z-index: 10; transition: color 0.2s; }
-        .mic-btn:hover { color: var(--primary); }
-        .mic-btn.listening { background: var(--danger); color: #fff; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .mic-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background: none; border: none; border-radius: 50%; color: #9ca3af; cursor: pointer; font-size: 1.1rem; line-height: 1; z-index: 10; transition: color 0.2s, background 0.2s; }
+        .mic-btn:hover { color: var(--primary); background: #f1f5f9; }
+        .mic-btn.listening { background: var(--danger); color: #fff; animation: pulse 1.5s infinite; }
+        .mic-btn.listening:hover { background: var(--danger); }
         @keyframes pulse { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.15); } 100% { transform: translateY(-50%) scale(1); } }
         
         .ai-btn { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; width: auto; display: inline-flex; align-items: center; gap: 6px; }
@@ -1969,7 +1970,7 @@
     <div id="toast"></div>
 
     <!-- HEIC support for desktop browsers -->
-    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js" integrity="sha384-OTofQ0MEeiSgh62havBcemCIK0gqj809wX6UA0uPISNMRnR6NZyCdGzX3SbLrgwL" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- LOGIC -->
     <script type="module">
@@ -3091,8 +3092,8 @@
 
         window.renderPDFPreviewWithData = function(r) {
              if(!r) return;
-             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-';
-             const aList=r.header.authors?r.header.authors.join(', '):(r.header.author || '-');
+             const h=r.header; const pList=r.header.participants?r.header.participants.map(window.escapeHtml).join(', '):'-';
+             const aList=r.header.authors?r.header.authors.map(window.escapeHtml).join(', '):window.escapeHtml(r.header.author || '-');
              const t=translations[currentLang];
              const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
 
@@ -3113,18 +3114,18 @@
                  });
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
                  const badgeStyle = p.status==='open' ? 'background:#fef2f2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#065f46; border:1px solid #bbf7d0;';
-                 const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
+                 const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${window.escapeHtml(p.assignee)}</p>` : '';
                  let solutionHtml = '';
                  if (p.solution && p.solution.trim()) {
                      const solDateStr = p.solutionDate ? ` <span style="font-size:0.75rem; color:#666;">(${t.solution_last_edited}: ${new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })})</span>` : '';
                      solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0; white-space:pre-wrap;">${window.escapeHtml(p.solution)}</p></div>`;
                  }
-                 return `<div style="margin-bottom:25px;"><div style="page-break-inside: avoid; page-break-after: avoid; break-after: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${p.desc}</p>${assHtml}${solutionHtml}</div><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 return `<div style="margin-bottom:25px;"><div style="page-break-inside: avoid; page-break-after: avoid; break-after: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${window.escapeHtml(p.ticket)}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${window.escapeHtml(p.title)}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${window.escapeHtml(p.desc)}</p>${assHtml}${solutionHtml}</div><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
              const devBuild = "DEV-20260316A";
              const previewEl = document.getElementById('pdf-preview');
-             if(previewEl) previewEl.innerHTML = `<div style="margin-bottom:28px; page-break-after:avoid; break-after:avoid;"><div style="display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:14px; margin-bottom:14px; border-bottom:2.5px solid #111827;"><div><div style="font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9ca3af; margin-bottom:6px;">${t.pdf_title}</div><div style="font-size:1.5rem; font-weight:800; color:#111827; line-height:1.15;">${h.customer}</div><div style="font-size:0.82rem; color:#6b7280; margin-top:4px;">${formatDate(h.date_from)}${h.date_to && h.date_to !== h.date_from ? ' \u2013 ' + formatDate(h.date_to) : ''}</div></div><img src="${logoSrc}" style="height:32px; width:auto; object-fit:contain; flex-shrink:0; margin-bottom:4px;"></div><div style="display:flex; gap:32px; flex-wrap:wrap; font-size:0.82rem; color:#374151;"><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_author}</span><strong>${aList}</strong></div><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_participants}</span><strong>${pList}</strong></div></div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
+             if(previewEl) previewEl.innerHTML = `<div style="margin-bottom:28px; page-break-after:avoid; break-after:avoid;"><div style="display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:14px; margin-bottom:14px; border-bottom:2.5px solid #111827;"><div><div style="font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9ca3af; margin-bottom:6px;">${t.pdf_title}</div><div style="font-size:1.5rem; font-weight:800; color:#111827; line-height:1.15;">${window.escapeHtml(h.customer)}</div><div style="font-size:0.82rem; color:#6b7280; margin-top:4px;">${formatDate(h.date_from)}${h.date_to && h.date_to !== h.date_from ? ' \u2013 ' + formatDate(h.date_to) : ''}</div></div><img src="${logoSrc}" style="height:32px; width:auto; object-fit:contain; flex-shrink:0; margin-bottom:4px;"></div><div style="display:flex; gap:32px; flex-wrap:wrap; font-size:0.82rem; color:#374151;"><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_author}</span><strong>${aList}</strong></div><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_participants}</span><strong>${pList}</strong></div></div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(window.getCurrentReport());
@@ -3228,8 +3229,8 @@
                 const displayId = r.readable_id ? `#${r.readable_id}` : `#${r.id.slice(-5)}`;
                 const kwStr = formatKW(r.header.date_from);
                 const authorsStr = r.header.authors && r.header.authors.length
-                    ? r.header.authors.join(', ')
-                    : (r.header.author || '-');
+                    ? r.header.authors.map(window.escapeHtml).join(', ')
+                    : window.escapeHtml(r.header.author || '-');
 
                 return `
                     <div class="related-report-item ${hasOpen ? 'has-open-points' : ''}" onclick="window.openRelatedReport('${r.id}')">
@@ -4476,12 +4477,14 @@ Text: "${text}"`);
             const icon = btn.querySelector('i');
             // Toggle: zweiter Klick stoppt die Aufnahme
             if(btn._recognition) {
-                btn._recognition.stop();
+                btn._recognition._stopListening();
                 return;
             }
             const r = new SpeechRecognitionAPI();
             r.lang = currentLang === 'de' ? "de-DE" : "en-US";
-            r.continuous = false;
+            // continuous=true: der Dienst beendet die Erkennung nicht nach jeder
+            // einzelnen Äußerung. So überbrücken wir kurze Sprechpausen.
+            r.continuous = true;
             r.interimResults = true;
 
             // Visuell: Stop-Icon + Tooltip
@@ -4493,18 +4496,48 @@ Text: "${text}"`);
             const field = document.getElementById(id);
             let baseValue = field.value;
 
-            // 8s Silence-Timeout
-            const SILENCE_MS = 8000;
-            let silenceTimer = setTimeout(() => r.stop(), SILENCE_MS);
+            // Bis zu 10 s Stille werden überbrückt; erst danach stoppt die Aufnahme.
+            const SILENCE_MS = 10000;
+            let manualStop = false;          // true = Nutzer/Timeout hat beendet -> kein Auto-Restart
+            let lastSpeechTs = Date.now();   // Zeitpunkt der letzten erkannten Sprache
+            let silenceTimer = null;
 
-            const resetTimer = () => { clearTimeout(silenceTimer); silenceTimer = setTimeout(() => r.stop(), SILENCE_MS); };
+            const resetTimer = () => {
+                lastSpeechTs = Date.now();
+                clearTimeout(silenceTimer);
+                silenceTimer = setTimeout(() => stopListening(), SILENCE_MS);
+            };
+
+            // Mikrofon zuverlässig freigeben (wichtig für iOS Safari): abort() statt
+            // stop() erzwingt das Beenden des Audio-Streams; Handler werden entfernt
+            // und alle Referenzen gelöst, damit das Mikrofon nicht aktiv bleibt.
             const clearAll = () => {
                 clearTimeout(silenceTimer);
+                try { r.onresult = r.onerror = r.onend = r.onstart = null; } catch(_) {}
+                try { r.abort(); } catch(_) {}
                 btn.classList.remove('listening');
                 icon.className = 'fa-solid fa-microphone';
                 btn.title = '';
                 btn._recognition = null;
+                window.removeEventListener('pagehide', onPageHide);
+                document.removeEventListener('visibilitychange', onVisibilityChange);
             };
+
+            const stopListening = () => {
+                manualStop = true;
+                clearAll();
+                // Capture whatever is in the field as the final value
+                baseValue = field.value.trim();
+                field.value = baseValue;
+                if(id.startsWith('h_')) window.updateCurrentReportHeader();
+            };
+            // erlaubt dem Toggle-Klick, sauber zu stoppen
+            r._stopListening = stopListening;
+
+            const onPageHide = () => stopListening();
+            const onVisibilityChange = () => { if(document.hidden) stopListening(); };
+            window.addEventListener('pagehide', onPageHide);
+            document.addEventListener('visibilitychange', onVisibilityChange);
 
             r.onresult = e => {
                 resetTimer();
@@ -4518,7 +4551,10 @@ Text: "${text}"`);
                 field.value = baseValue + (baseValue.trim() && transcript ? ' ' : '') + transcript;
             };
             r.onerror = (e) => {
-                clearAll();
+                // 'no-speech'/'aborted' sind bei continuous=true normal -> nicht abbrechen,
+                // onend regelt ggf. den Neustart.
+                if(e.error === 'no-speech' || e.error === 'aborted') return;
+                stopListening();
                 const msgs = {
                     de: {
                         'not-allowed':         'Mikrofon-Zugriff verweigert. Bitte Berechtigung im Browser erteilen.',
@@ -4535,12 +4571,15 @@ Text: "${text}"`);
                 if(msg) alert(msg);
             };
             r.onend = () => {
-                clearAll();
-                // Capture whatever is in the field as the final value
-                baseValue = field.value.trim();
-                field.value = baseValue;
-                if(id.startsWith('h_')) window.updateCurrentReportHeader();
+                // Manche Browser (v.a. iOS Safari) beenden die Erkennung in Sprechpausen
+                // eigenmächtig. Solange der Nutzer nicht gestoppt hat und das Stille-
+                // Fenster noch nicht abgelaufen ist, starten wir nahtlos neu.
+                if(!manualStop && (Date.now() - lastSpeechTs) < SILENCE_MS) {
+                    try { r.start(); return; } catch(_) { /* fällt unten in Aufräumen */ }
+                }
+                if(!manualStop) stopListening();
             };
+            resetTimer();
             r.start();
         };
         
