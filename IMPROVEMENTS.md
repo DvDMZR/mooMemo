@@ -17,6 +17,21 @@ Architektur. Sicherheitsthemen stehen separat in **SECURITY.md**.
 > Aufnahme gleichzeitig, präziser Button-Selektor, Start-Hinweis).
 > Offen bleiben: 3.9 Upload-Fortschritt, 3.12 Touch-Sortierung (SortableJS),
 > 3.14 Status-Filter, Abschnitt 4.2/4.3/4.5–4.8 sowie Abschnitt 5 komplett.
+>
+> **Update v1.8.8 (2026-07-04):** Auch 3.9 (Upload-Fortschritt pro Bild),
+> 3.12 (Touch-Sortierung via SortableJS, natives HTML5-D&D entfernt) und
+> 3.14 (Verantwortlichen-Filter im Status-Tab) sind umgesetzt. Dazu aus der
+> UX-Nachprüfung: Titel-Pflichtfeld, Datumsplausibilität (bis ≥ von),
+> Enter-Taste in Login/Registrierung, Such-Lösch-X, vollständige Übersetzung
+> aller Meldungen (KI/Fehler/Shared-Header/Tooltips), Einstellungen bleiben
+> beim Sprachwechsel offen, Filter/Sortierung überleben den Reload,
+> Strg+Enter speichert den Punkt, Lightbox-Galerie (Pfeile/Tasten/Wischen),
+> Changelog-Hinweis als dezenter Punkt am Zahnrad statt Start-Popup,
+> Tastatur-Bedienung für Tabs/Berichtskarten + role=dialog an Modals.
+> **Damit verbleiben nur noch:** Abschnitt 4.2/4.3/4.5–4.8 (Offline/PWA
+> zurückgestellt, Erinnerungen, Papierkorb, Übersetzung, Historie, SSO)
+> und Abschnitt 5 (Architektur: Aufteilung, Datenmodell, Tests, Monitoring,
+> CDN-Selbsthosting, Fokus-Trap als A11y-Feinschliff).
 
 ---
 
