@@ -6,6 +6,18 @@ Ergebnis der sorgfältigen Code-Prüfung – gegliedert nach: bereits umgesetzt,
 kaputter/toter Code, Benutzerfreundlichkeit, fehlende Features, Performance &
 Architektur. Sicherheitsthemen stehen separat in **SECURITY.md**.
 
+> **Update v1.8.7 (2026-07-04):** Abschnitt 2 (toter Code) ist vollständig
+> abgearbeitet. Aus Abschnitt 3 umgesetzt: 3.1 Skeleton, 3.2 Debounce,
+> 3.3 einheitliche Dialoge (Bericht/Benutzer löschen), 3.4 Klartext-Fehler,
+> 3.5 Share-Verhalten, 3.6 Passwort-Reset, 3.7 ESC/Overlay + Fokus,
+> 3.8 teilweise (aria-labels, FAB per Tastatur), 3.10 Kamera-Aufnahme,
+> 3.11 Undo beim Punkt-Löschen, 3.13 Suchtreffer-Snippet, 3.15 Export-Filter
+> im Share-Link. Aus Abschnitt 4: 4.1 Duplizieren, 4.4 CSV-Export.
+> Zusätzlich Spracheingabe überarbeitet (kontinuierliches Zuhören, nur eine
+> Aufnahme gleichzeitig, präziser Button-Selektor, Start-Hinweis).
+> Offen bleiben: 3.9 Upload-Fortschritt, 3.12 Touch-Sortierung (SortableJS),
+> 3.14 Status-Filter, Abschnitt 4.2/4.3/4.5–4.8 sowie Abschnitt 5 komplett.
+
 ---
 
 ## 1. In diesem Branch bereits umgesetzt (v1.8.6)
