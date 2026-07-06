@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// mooMemo Storage Security Rules
+// Zugriff nur für freigeschaltete Nutzer (Custom Claim "approved").
+// Uploads sind auf Bilder < 5 MB beschränkt (der Client skaliert ohnehin
+// auf max. 2048px JPEG).
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function approved() {
+      return request.auth != null && request.auth.token.get('approved', false) == true;
+    }
+
+    match /images/{reportId}/{fileName} {
+      allow read: if approved();
+      allow create, update: if approved()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if approved();
+    }
+
+    // Alles andere: Default-Deny
+  }
+}

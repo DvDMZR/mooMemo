@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "header.visibility", "order": "ASCENDING" },
+        { "fieldPath": "header.visible_teams", "arrayConfig": "CONTAINS" }
+      ]
+    },
+    {
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "header.visibility", "order": "ASCENDING" },
+        { "fieldPath": "created_by_dept", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

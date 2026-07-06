@@ -1924,14 +1924,11 @@
             <h3 style="color:var(--text-main)" data-i18n="admin_area">Admin Bereich</h3>
             
             <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:20px; border:1px solid #e2e8f0;">
-                <p style="font-weight:700; margin-top:0; font-size:0.9rem;" data-i18n="admin_api_key">Globaler API Key (Cloud)</p>
-                <input type="password" id="admin-api-key-input" placeholder="Hier Key eingeben..." data-i18n-placeholder="ph_api_key" style="text-align:center; margin-bottom:10px; width:100%; box-sizing:border-box; padding:10px; border-radius:8px; border:1px solid #ccc;">
-                <button class="btn btn-primary" onclick="window.saveGlobalApiKey()" style="margin-top:0; font-size:0.85rem; width:100%;">
-                    <span data-i18n="admin_save_cloud">In Cloud speichern</span>
-                </button>
+                <p style="font-weight:700; margin-top:0; font-size:0.9rem;" data-i18n="admin_api_key">Gemini API-Key</p>
                 <p style="font-size:0.75rem; color:#64748b; margin-bottom:0; margin-top:8px;" data-i18n="admin_key_desc">
-                    Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.
+                    Der Key liegt sicher im Firebase Secret Manager (nicht in der Datenbank).
                 </p>
+                <code style="display:block; font-size:0.7rem; background:#e2e8f0; padding:6px 8px; border-radius:6px; margin-top:8px; word-break:break-all;">firebase functions:secrets:set GEMINI_API_KEY</code>
             </div>
 
             <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-top:20px; border:1px solid #e2e8f0;">
@@ -2009,8 +2006,8 @@
     <!-- LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
@@ -2026,7 +2023,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8.8";
+        const APP_VERSION = "1.9.0";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -2043,6 +2040,18 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.9.0",
+                date: "2026-07-04",
+                changes: [
+                    "SICHERHEIT: Berichte sind jetzt auch serverseitig geschützt – wer einen Bericht nicht sehen darf, kann ihn technisch nicht mehr abrufen (Firestore Security Rules).",
+                    "SICHERHEIT: Registrierung läuft komplett über den Server – Einladungscode kann nicht mehr umgangen werden.",
+                    "SICHERHEIT: Der KI-Schlüssel liegt im geschützten Secret Manager statt in der Datenbank.",
+                    "SICHERHEIT: KI-Anfragen sind pro Nutzer auf 60 pro Stunde begrenzt (Kostenschutz).",
+                    "SICHERHEIT: Bild-Uploads serverseitig auf Bilder unter 5 MB beschränkt.",
+                    "Rollen/Abteilungen wirken jetzt über geprüfte Berechtigungen (Custom Claims); Bestandskonten werden beim nächsten Login automatisch migriert."
+                ]
+            },
             {
                 ver: "1.8.8",
                 date: "2026-07-04",
@@ -2302,8 +2311,6 @@
         };
         // --- KONFIGURATION ENDE ---
 
-        let isRegistering = false; // Flag to prevent onAuthStateChanged race condition during registration
-
         let firebaseConfig;
         let appId;
         
@@ -2319,6 +2326,7 @@
 
         let currentUser = null;
         let currentUserProfile = null; // User profile from Firestore { displayName, email, role, settings }
+        let currentUserClaims = null;  // Custom Claims aus dem ID-Token { approved, admin, department }
         let allReports = [];
         let allRegisteredUserNames = [];
         let currentReportId = null;
@@ -2343,10 +2351,10 @@
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", modal_edit_point: "Punkt bearbeiten", btn_undo: "Rückgängig", btn_take_photo: "Foto aufnehmen", btn_csv: "CSV Export", btn_duplicate: "Bericht duplizieren", toast_duplicated: "Bericht dupliziert", mic_recording: "Aufnahme läuft – zum Stoppen Mikrofon erneut antippen", err_title_required: "Bitte einen Titel eingeben.", toast_ai_corrected: "Rechtschreibung korrigiert!", toast_ai_title_created: "Überschrift erstellt & Text korrigiert!", toast_ai_improved: "Text überarbeitet!", err_ai_failed: "KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.", err_ai_more_text: "Bitte mehr Text zur Überarbeitung eingeben.", ai_retry: "KI: Warte {s}s … (Versuch {a}/{m})", err_upload_failed: "{n} Bild(er) konnten nicht hochgeladen werden.", err_save_relogin: "Speichern fehlgeschlagen – bitte neu anmelden (Code S02)", err_storage_full: "Cloud-Speicher voll – bitte Admin kontaktieren (Code S03)", err_save_generic: "Speichern fehlgeschlagen – bitte Admin kontaktieren (Code S04)", err_sync_relogin: "Verbindung verloren – bitte neu anmelden (Code S01)", err_delete_failed: "Löschen fehlgeschlagen – bitte Admin kontaktieren (Code D01)", err_user_delete_failed: "Benutzer konnte nicht entfernt werden (Code U01)", tooltip_toggle_role: "Klicken zum Ändern", tooltip_remove_profile: "Profil entfernen", filter_all_assignees: "Alle Verantwortlichen", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_reports: "Noch keine Berichte vorhanden.", no_reports_found: "Keine Berichte gefunden. Suche oder Filter anpassen.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Globaler API Key (Cloud)", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Zuletzt Online:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode...", lbl_department: "Abteilung:", lbl_visibility: "Sichtbarkeit", vis_authors_only: "Nur Verfasser", vis_team_only: "Mein Team", vis_selected_teams: "Ausgewählte Teams", vis_all: "Alle", btn_publish: "Für alle freigeben", toast_published: "Bericht für alle freigegeben", toast_dept_changed: "Abteilung geändert", scope_mine: "Meine", scope_team: "Mein Team", scope_all: "Alle", filter_label_scope: "Rolle", filter_label_type: "Anlage", err_no_self_remove: "Du kannst dich nicht selbst als Verfasser entfernen.", visibility_help_tooltip: "Ab v1.8 ist die Sichtbarkeit der Berichte verändert: Nur Berichte, die für dein Team oder alle freigegeben wurden, sind für dich sichtbar.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin Rolle kann nicht geändert werden."
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", modal_edit_point: "Punkt bearbeiten", btn_undo: "Rückgängig", btn_take_photo: "Foto aufnehmen", btn_csv: "CSV Export", btn_duplicate: "Bericht duplizieren", toast_duplicated: "Bericht dupliziert", mic_recording: "Aufnahme läuft – zum Stoppen Mikrofon erneut antippen", err_title_required: "Bitte einen Titel eingeben.", toast_ai_corrected: "Rechtschreibung korrigiert!", toast_ai_title_created: "Überschrift erstellt & Text korrigiert!", toast_ai_improved: "Text überarbeitet!", err_ai_failed: "KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.", err_ai_more_text: "Bitte mehr Text zur Überarbeitung eingeben.", ai_retry: "KI: Warte {s}s … (Versuch {a}/{m})", err_upload_failed: "{n} Bild(er) konnten nicht hochgeladen werden.", err_save_relogin: "Speichern fehlgeschlagen – bitte neu anmelden (Code S02)", err_storage_full: "Cloud-Speicher voll – bitte Admin kontaktieren (Code S03)", err_save_generic: "Speichern fehlgeschlagen – bitte Admin kontaktieren (Code S04)", err_sync_relogin: "Verbindung verloren – bitte neu anmelden (Code S01)", err_delete_failed: "Löschen fehlgeschlagen – bitte Admin kontaktieren (Code D01)", err_user_delete_failed: "Benutzer konnte nicht entfernt werden (Code U01)", tooltip_toggle_role: "Klicken zum Ändern", tooltip_remove_profile: "Profil entfernen", filter_all_assignees: "Alle Verantwortlichen", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_reports: "Noch keine Berichte vorhanden.", no_reports_found: "Keine Berichte gefunden. Suche oder Filter anpassen.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Gemini API-Key", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Der Key liegt sicher im Firebase Secret Manager (nicht in der Datenbank). Ändern per Kommandozeile:", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Zuletzt Online:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode...", lbl_department: "Abteilung:", lbl_visibility: "Sichtbarkeit", vis_authors_only: "Nur Verfasser", vis_team_only: "Mein Team", vis_selected_teams: "Ausgewählte Teams", vis_all: "Alle", btn_publish: "Für alle freigeben", toast_published: "Bericht für alle freigegeben", toast_dept_changed: "Abteilung geändert", scope_mine: "Meine", scope_team: "Mein Team", scope_all: "Alle", filter_label_scope: "Rolle", filter_label_type: "Anlage", err_no_self_remove: "Du kannst dich nicht selbst als Verfasser entfernen.", visibility_help_tooltip: "Ab v1.8 ist die Sichtbarkeit der Berichte verändert: Nur Berichte, die für dein Team oder alle freigegeben wurden, sind für dich sichtbar.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin Rolle kann nicht geändert werden."
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", modal_edit_point: "Edit Point", btn_undo: "Undo", btn_take_photo: "Take Photo", btn_csv: "CSV Export", btn_duplicate: "Duplicate report", toast_duplicated: "Report duplicated", mic_recording: "Recording – tap the microphone again to stop", err_title_required: "Please enter a title.", toast_ai_corrected: "Spelling corrected!", toast_ai_title_created: "Headline created & text corrected!", toast_ai_improved: "Text improved!", err_ai_failed: "AI correction failed. Original text restored.", err_ai_more_text: "Please enter more text to improve.", ai_retry: "AI: waiting {s}s … (attempt {a}/{m})", err_upload_failed: "{n} image(s) could not be uploaded.", err_save_relogin: "Saving failed – please sign in again (code S02)", err_storage_full: "Cloud storage full – please contact an admin (code S03)", err_save_generic: "Saving failed – please contact an admin (code S04)", err_sync_relogin: "Connection lost – please sign in again (code S01)", err_delete_failed: "Delete failed – please contact an admin (code D01)", err_user_delete_failed: "Could not remove user (code U01)", tooltip_toggle_role: "Click to change", tooltip_remove_profile: "Remove profile", filter_all_assignees: "All responsibles", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_reports: "No reports yet.", no_reports_found: "No reports found. Adjust search or filters.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Global API Key (Cloud)", admin_save_cloud: "Save to Cloud", admin_key_desc: "This key is stored centrally. All employees use it automatically.", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Online:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code...", lbl_department: "Department:", lbl_visibility: "Visibility", vis_authors_only: "Authors Only", vis_team_only: "My Team", vis_selected_teams: "Selected Teams", vis_all: "All", btn_publish: "Make visible to all", toast_published: "Report visible to all", toast_dept_changed: "Department changed", scope_mine: "My Reports", scope_team: "My Team", scope_all: "All", filter_label_scope: "Role", filter_label_type: "System", err_no_self_remove: "You cannot remove yourself as author.", visibility_help_tooltip: "Since v1.8, report visibility has changed: Only reports shared with your team or everyone are visible to you.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin role cannot be changed."
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", modal_edit_point: "Edit Point", btn_undo: "Undo", btn_take_photo: "Take Photo", btn_csv: "CSV Export", btn_duplicate: "Duplicate report", toast_duplicated: "Report duplicated", mic_recording: "Recording – tap the microphone again to stop", err_title_required: "Please enter a title.", toast_ai_corrected: "Spelling corrected!", toast_ai_title_created: "Headline created & text corrected!", toast_ai_improved: "Text improved!", err_ai_failed: "AI correction failed. Original text restored.", err_ai_more_text: "Please enter more text to improve.", ai_retry: "AI: waiting {s}s … (attempt {a}/{m})", err_upload_failed: "{n} image(s) could not be uploaded.", err_save_relogin: "Saving failed – please sign in again (code S02)", err_storage_full: "Cloud storage full – please contact an admin (code S03)", err_save_generic: "Saving failed – please contact an admin (code S04)", err_sync_relogin: "Connection lost – please sign in again (code S01)", err_delete_failed: "Delete failed – please contact an admin (code D01)", err_user_delete_failed: "Could not remove user (code U01)", tooltip_toggle_role: "Click to change", tooltip_remove_profile: "Remove profile", filter_all_assignees: "All responsibles", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_reports: "No reports yet.", no_reports_found: "No reports found. Adjust search or filters.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Gemini API Key", admin_save_cloud: "Save to Cloud", admin_key_desc: "The key is stored securely in Firebase Secret Manager (not in the database). Change via command line:", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Online:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code...", lbl_department: "Department:", lbl_visibility: "Visibility", vis_authors_only: "Authors Only", vis_team_only: "My Team", vis_selected_teams: "Selected Teams", vis_all: "All", btn_publish: "Make visible to all", toast_published: "Report visible to all", toast_dept_changed: "Department changed", scope_mine: "My Reports", scope_team: "My Team", scope_all: "All", filter_label_scope: "Role", filter_label_type: "System", err_no_self_remove: "You cannot remove yourself as author.", visibility_help_tooltip: "Since v1.8, report visibility has changed: Only reports shared with your team or everyone are visible to you.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin role cannot be changed."
             }
         };
 
@@ -2457,6 +2465,11 @@
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
             // Apply saved login language
             window.setLoginLang(loginLang);
+            // Ggf. Hinweis aus einem erzwungenen Logout anzeigen
+            if (pendingLoginError) {
+                window.showLoginError(pendingLoginError);
+                pendingLoginError = null;
+            }
         };
 
         window.hideLoginScreen = function() {
@@ -2495,6 +2508,9 @@
 
         // --- LOGIN SCREEN LANGUAGE ---
         let loginLang = localStorage.getItem('mooMemo_lang') || 'de';
+        // Fehlermeldung, die nach einem erzwungenen Logout (fehlende Freischaltung)
+        // auf dem Login-Screen angezeigt werden soll
+        let pendingLoginError = null;
 
         const loginTranslations = {
             de: {
@@ -2533,6 +2549,7 @@
                 err_reg_fail: 'Registrierung fehlgeschlagen.',
                 err_email_used: 'Diese E-Mail wird bereits verwendet.',
                 err_pw_weak: 'Passwort ist zu schwach.',
+                err_not_approved: 'Dieses Konto ist nicht freigeschaltet. Bitte über die App registrieren oder David.Mazur@gea.com kontaktieren.',
                 pw_reset_prompt: 'Bitte E-Mail Adresse eingeben:',
                 pw_reset_sent: 'E-Mail zum Zurücksetzen des Passworts wurde versendet. Bitte Postfach (und Spam-Ordner) prüfen.',
                 pw_reset_error: 'Zurücksetzen fehlgeschlagen. Ist die E-Mail Adresse korrekt?'
@@ -2573,6 +2590,7 @@
                 err_reg_fail: 'Registration failed.',
                 err_email_used: 'This email is already in use.',
                 err_pw_weak: 'Password is too weak.',
+                err_not_approved: 'This account is not activated. Please register via the app or contact David.Mazur@gea.com.',
                 pw_reset_prompt: 'Please enter your email address:',
                 pw_reset_sent: 'Password reset email sent. Please check your inbox (and spam folder).',
                 pw_reset_error: 'Reset failed. Is the email address correct?'
@@ -2658,70 +2676,27 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + lt.register_loading;
 
+            if (!inviteCode) { window.showRegisterError(lt.err_invite_required); return; }
+
             try {
-                // Block onAuthStateChanged from running during registration
-                isRegistering = true;
-
-                // Step 1: Create Firebase Auth user FIRST (no Firestore access needed)
-                const cred = await createUserWithEmailAndPassword(auth, email, pw);
-                await updateProfile(cred.user, { displayName: name });
-
-                // Step 2: Now authenticated - check if this is the first user profile
-                const isFirstUser = await window.checkFirstUser();
-
-                if (!isFirstUser) {
-                    // Verify invite code (now we have Firestore access)
-                    const storedCode = await window.loadInviteCode();
-                    if (!inviteCode) {
-                        // No invite code entered
-                        isRegistering = false;
-                        await cred.user.delete();
-                        window.showRegisterError(lt.err_invite_required);
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> ' + lt.register_btn;
-                        return;
-                    }
-                    if (!storedCode || inviteCode !== storedCode) {
-                        // Wrong code - delete the just-created auth account
-                        isRegistering = false;
-                        await cred.user.delete();
-                        window.showRegisterError(storedCode ? lt.err_invite_wrong : lt.err_reg_unavailable);
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> ' + lt.register_btn;
-                        return;
-                    }
-                }
-
-                // Step 3: Create user profile in Firestore
-                const role = isFirstUser ? 'admin' : 'user';
-                await window.createUserProfile(cred.user.uid, email, name, role, department);
-
-                // Step 4: Done - let onAuthStateChanged take over
-                isRegistering = false;
-                // Manually trigger the post-login setup
-                currentUser = cred.user;
-                currentUserProfile = await window.loadUserProfile(cred.user.uid);
-                window.hideLoginScreen();
-                window.updateUserUI();
-                window.updateSyncStatus(true);
-                // Apply login language as app language for new user
-                window.setLanguage(loginLang);
-                if (currentUserProfile && currentUserProfile.settings) {
-                    if (currentUserProfile.settings.aiLang) window.setAiTargetLang(currentUserProfile.settings.aiLang);
-                }
-                window.checkVersion();
-                window.setupRealtimeListener();
-                window.initBackButtonHandler();
+                // Registrierung läuft komplett serverseitig (Cloud Function):
+                // Invite-Code und E-Mail-Domain werden dort maßgeblich geprüft,
+                // Profil + Berechtigungen (Custom Claims) werden dort angelegt.
+                const register = httpsCallable(functionsInstance, 'registerUser');
+                const res = await register({ name, email, password: pw, department, inviteCode, lang: loginLang });
+                // Mit dem zurückgegebenen Token anmelden – onAuthStateChanged übernimmt den Rest
+                await signInWithCustomToken(auth, res.data.token);
             } catch(e) {
-                isRegistering = false;
                 console.error("Register failed:", e);
                 let msg = lt.err_reg_fail;
-                if (e.code === 'auth/email-already-in-use') {
+                if (e.code === 'functions/already-exists') {
                     msg = lt.err_email_used;
-                } else if (e.code === 'auth/invalid-email') {
-                    msg = lt.err_invalid_email;
-                } else if (e.code === 'auth/weak-password') {
-                    msg = lt.err_pw_weak;
+                } else if (e.code === 'functions/permission-denied') {
+                    msg = lt.err_invite_wrong;
+                } else if (e.code === 'functions/failed-precondition') {
+                    msg = lt.err_reg_unavailable;
+                } else if (e.code === 'functions/invalid-argument') {
+                    msg = e.message || lt.err_reg_fail;
                 }
                 window.showRegisterError(msg);
                 btn.disabled = false;
@@ -2735,6 +2710,7 @@
             try {
                 // Clean up Firestore listener
                 if (unsubscribeReportsListener) { unsubscribeReportsListener(); unsubscribeReportsListener = null; }
+                currentUserClaims = null;
                 currentUserProfile = null;
                 currentUser = null;
                 currentReportId = null;
@@ -2805,24 +2781,8 @@
         };
 
         // --- USER PROFILE MANAGEMENT ---
-        window.createUserProfile = async function(uid, email, displayName, role, department) {
-            const profile = {
-                uid: uid,
-                email: email,
-                displayName: displayName,
-                role: role || 'user',
-                department: department || '',
-                settings: {
-                    lang: 'de',
-                    aiLang: 'de'
-                },
-                created_at: Date.now(),
-                lastLogin: Date.now()
-            };
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid), profile);
-            return profile;
-        };
-
+        // Profile werden ausschließlich serverseitig angelegt (registerUser-Function);
+        // der Client liest sie nur noch und darf settings/lastLogin aktualisieren.
         window.loadUserProfile = async function(uid) {
             try {
                 const docSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
@@ -2843,16 +2803,6 @@
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid), { settings: settings }, { merge: true });
             } catch(e) {
                 console.error("Save settings failed:", e);
-            }
-        };
-
-        window.checkFirstUser = async function() {
-            try {
-                const usersSnap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
-                return usersSnap.empty;
-            } catch(e) {
-                console.warn("Could not check users collection:", e);
-                return false;
             }
         };
 
@@ -3426,24 +3376,6 @@
             window.switchTab('export');
         };
 
-        // --- SAVE GLOBAL API KEY (read server-side by Cloud Function, never sent to browser) ---
-        window.saveGlobalApiKey = async function() {
-            const key = document.getElementById('admin-api-key-input').value.trim();
-            const t = translations[currentLang];
-            if(!key) { alert(t.err_key_empty); return; }
-
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'app_config', 'secrets');
-                await setDoc(docRef, { gemini_key: key }, { merge: true });
-                alert(t.toast_key_saved);
-                document.getElementById('admin-api-key-input').value = '';
-                window.closeAdminToolsModal();
-            } catch(e) {
-                console.error(e);
-                alert(t.err_save_failed + ' ' + e.message);
-            }
-        };
-
         // --- SHARED GEMINI API HELPER (proxied via Cloud Function – key never leaves server) ---
         window.callGeminiAPI = async function(prompt) {
             const callGemini = httpsCallable(functionsInstance, 'callGemini');
@@ -3813,19 +3745,51 @@ Text: "${text}"`);
         
 
         window.setupRealtimeListener = function() {
-            // Unsubscribe previous listener to prevent memory leaks
+            // Unsubscribe previous listeners to prevent memory leaks
             if (unsubscribeReportsListener) {
                 unsubscribeReportsListener();
                 unsubscribeReportsListener = null;
             }
 
-            const q = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
-            let isFirstLoad = true;
+            const base = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
+            const claims = currentUserClaims || {};
+            // WICHTIG: für die authors-Query muss der Name dem ID-Token entsprechen
+            // (die Security Rules vergleichen gegen request.auth.token.name)
+            const myName = (currentUser && currentUser.displayName) || '';
 
-            unsubscribeReportsListener = onSnapshot(q, (snapshot) => {
+            // Die Firestore Rules erlauben kein pauschales Lesen der Collection mehr.
+            // Statt eines Listeners auf alles: mehrere gefilterte Queries, deren
+            // Ergebnisse zusammengeführt werden. Admins und Abteilung "All" dürfen
+            // laut Rules weiterhin alles lesen -> eine Query genügt dort.
+            let queries;
+            if (claims.admin === true || claims.department === 'All') {
+                queries = [query(base)];
+            } else {
+                queries = [
+                    query(base, where('created_by', '==', currentUser.uid)),
+                    query(base, where('header.visibility', 'in', ['all', 'published']))
+                ];
+                if (myName) {
+                    queries.push(query(base, where('header.authors', 'array-contains', myName)));
+                }
+                if (claims.department) {
+                    queries.push(query(base,
+                        where('header.visibility', '==', 'team_only'),
+                        where('created_by_dept', '==', claims.department)));
+                    queries.push(query(base,
+                        where('header.visibility', '==', 'selected_teams'),
+                        where('header.visible_teams', 'array-contains', claims.department)));
+                }
+            }
+
+            let isFirstLoad = true;
+            const buckets = queries.map(() => new Map());
+
+            const mergeAndProcess = () => {
+                const merged = new Map();
+                buckets.forEach(b => b.forEach((v, k) => merged.set(k, v)));
                 const newReports = [];
-                snapshot.forEach(doc => {
-                    const d = doc.data();
+                merged.forEach(d => {
                     // Migrate legacy "AS" type to "AFS"
                     if (d.header && d.header.type === 'AS') d.header.type = 'AFS';
                     newReports.push(d);
@@ -3866,13 +3830,23 @@ Text: "${text}"`);
                         window.goToDashboard(); window.showToast(translations[currentLang].toast_removed);
                     }
                 }
-            }, (error) => {
+            };
+
+            const onError = (error) => {
                 console.error("Sync error:", error);
                 if (error.code === 'permission-denied') {
                     console.warn("[ERR-S01] Firestore permission denied on realtime listener"); if (currentUser) window.showToast(translations[currentLang].err_sync_relogin, 'error');
                 }
                 window.updateSyncStatus(false);
-            });
+            };
+
+            const unsubs = queries.map((q, idx) => onSnapshot(q, (snapshot) => {
+                buckets[idx].clear();
+                snapshot.forEach(docSnap => buckets[idx].set(docSnap.id, docSnap.data()));
+                mergeAndProcess();
+            }, onError));
+
+            unsubscribeReportsListener = () => unsubs.forEach(u => u());
         };
         
         window.setFilterScope = function(scope) {
@@ -5102,9 +5076,6 @@ Text: "${text}"`);
 
         // Only run after everything is defined
         onAuthStateChanged(auth, async (user) => {
-            // Skip if registration is in progress (doRegister handles everything)
-            if (isRegistering) return;
-
             if (user) {
                 currentUser = user;
                 window.updateSyncStatus(true);
@@ -5115,18 +5086,35 @@ Text: "${text}"`);
                     return;
                 }
 
-                // Load user profile
-                let profile = await window.loadUserProfile(user.uid);
+                // --- CLAIMS PRÜFEN (Berechtigungen kommen aus dem ID-Token) ---
+                // Bestandsnutzer von vor der Claims-Einführung werden über die
+                // syncMyClaims-Function einmalig migriert (liest ihr Profil serverseitig).
+                let tokenResult = await user.getIdTokenResult();
+                if (tokenResult.claims.approved !== true) {
+                    try {
+                        const syncClaims = httpsCallable(functionsInstance, 'syncMyClaims');
+                        await syncClaims();
+                        await user.getIdToken(true); // Token mit neuen Claims erzwingen
+                        tokenResult = await user.getIdTokenResult();
+                    } catch(e) {
+                        console.warn("Claims sync failed:", e.code || e.message);
+                    }
+                }
+                if (tokenResult.claims.approved !== true) {
+                    // Kein Profil / nicht freigeschaltet (z. B. Konto an der App vorbei
+                    // erstellt) -> kein Datenzugriff, zurück zum Login mit Hinweis
+                    pendingLoginError = loginTranslations[loginLang].err_not_approved;
+                    await signOut(auth);
+                    return;
+                }
+                currentUserClaims = tokenResult.claims;
 
-                // If profile doesn't exist (e.g. created via another method), create one
-                if (!profile && user.email) {
-                    const isFirst = await window.checkFirstUser();
-                    profile = await window.createUserProfile(
-                        user.uid,
-                        user.email,
-                        user.displayName || user.email.split('@')[0],
-                        isFirst ? 'admin' : 'user'
-                    );
+                // Load user profile
+                const profile = await window.loadUserProfile(user.uid);
+                if (!profile) {
+                    pendingLoginError = loginTranslations[loginLang].err_not_approved;
+                    await signOut(auth);
+                    return;
                 }
 
                 currentUserProfile = profile;

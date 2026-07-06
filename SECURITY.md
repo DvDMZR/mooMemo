@@ -2,6 +2,47 @@
 
 Stand: 2026-07-04 · Analysierte Version: 1.8.5 (index.html) + Cloud Function `callGemini`
 
+> **Umsetzungsstand v1.9.0:** S1, S2, S3, S4, S6 und S7 sind implementiert
+> (Firestore/Storage-Rules mit Custom Claims, serverseitige Registrierung,
+> Key im Secret Manager, Rate-Limit). S5 teilweise (Rate-Limit ✅, App Check
+> offen), S8 behoben, S9 offen. **Vor dem Merge unbedingt die
+> Migrations-Checkliste am Ende dieses Dokuments lesen** – ohne das Secret
+> `GEMINI_API_KEY` schlägt das Function-Deployment fehl.
+
+## Umgesetzte Architektur (v1.9.0)
+
+- **Custom Claims** (`approved`, `admin`, `department`) sind die einzige
+  Quelle für Berechtigungen. Sie werden ausschließlich serverseitig gesetzt:
+  bei der Registrierung (`registerUser`), bei Profil-Änderungen durch Admins
+  (Trigger `onUserProfileWritten`) und zur Migration von Bestandsnutzern
+  (`syncMyClaims`, wird vom Client automatisch aufgerufen, wenn Claims fehlen).
+- **`firestore.rules` / `storage.rules`** liegen im Repo und werden per CI
+  mit deployt (`--only functions,firestore,storage`).
+- Der Client lädt Berichte über **fünf gefilterte Queries** (eigene, Verfasser,
+  „alle", team_only der eigenen Abteilung, selected_teams mit eigener
+  Abteilung), die exakt zu den Read-Rules passen; Admins und Abteilung „All"
+  lesen weiterhin die ganze Collection. Composite-Indexes:
+  `firestore.indexes.json`.
+- **Registrierung:** Callable `registerUser` prüft Invite-Code, @gea.com-Domain
+  und Passwort-Policy serverseitig, legt Auth-Konto + Profil + Claims an und
+  gibt ein Custom Token zurück. Direkt (per SDK) angelegte Konten erhalten
+  keine Claims und damit keinen Datenzugriff („nicht freigeschaltet").
+- **Gemini-Key:** `defineSecret('GEMINI_API_KEY')` – kein Firestore-Zugriff
+  mehr, Admin-Panel-Eingabefeld entfernt. Rate-Limit: 60 Anfragen/Nutzer/Stunde
+  (Zähler in `gemini_usage/{uid}`, für Clients unerreichbar).
+
+**Bekannte, bewusste Einschränkungen:**
+- Wer einen Bericht *lesen* darf, darf ihn auch *bearbeiten* (Punkte/Lösungen
+  pflegen – entspricht dem Kollaborations-Workflow); nur `created_by`/
+  `created_by_dept` sind unveränderlich, Löschen bleibt Admins vorbehalten.
+- Die `authors`-Zuordnung basiert auf dem Anzeigenamen (`token.name`) –
+  Namensgleichheit wäre theoretisch ausnutzbar, aber Konten entstehen nur noch
+  über die kontrollierte Registrierung.
+- Freigeschaltete Nutzer können Storage-Bilder anderer Berichte löschen
+  (Client tut das nur für eigene); Abhilfe bräuchte Metadaten pro Datei.
+- Alt-Berichte ohne `visibility`-Feld erscheinen für Nicht-Verfasser in keiner
+  Query → wirken wie `authors_only` (gewollt konservativ).
+
 Dieses Dokument beschreibt alle bei der Code-Prüfung gefundenen Sicherheitsmängel –
 mit Fundstelle, Angriffsweg, Auswirkung und empfohlener Behebung. Die Punkte sind
 nach Priorität sortiert.
@@ -11,7 +52,7 @@ nach Priorität sortiert.
 
 ---
 
-## S1 · 🔴 Sichtbarkeitsregeln existieren nur im Client (Kritisch)
+## S1 · ✅ Sichtbarkeitsregeln existieren nur im Client (Kritisch – behoben in v1.9.0)
 
 **Fundstelle:** `index.html` → `setupRealtimeListener()` (lädt per `onSnapshot` die
 komplette Collection `artifacts/{appId}/public/data/reports`), Filterung erst in
@@ -45,7 +86,7 @@ suggeriert eine Schutzwirkung, die technisch nicht existiert.
 
 ---
 
-## S2 · 🔴 Gemini-API-Key liegt clientseitig lesbar in Firestore (Kritisch)
+## S2 · ✅ Gemini-API-Key liegt clientseitig lesbar in Firestore (Kritisch – behoben in v1.9.0, Key-Rotation manuell nötig)
 
 **Fundstelle:** `index.html` → `saveGlobalApiKey()` schreibt den Key per `setDoc`
 vom Browser aus nach `artifacts/{appId}/public/data/app_config/secrets`.
@@ -73,7 +114,7 @@ Quota-Verbrauch, ggf. Sperrung des Keys.
 
 ---
 
-## S3 · 🔴 Einladungscode-Prüfung ist umgehbar (Hoch)
+## S3 · ✅ Einladungscode-Prüfung ist umgehbar (Hoch – behoben in v1.9.0)
 
 **Fundstelle:** `index.html` → `doRegister()`.
 
@@ -128,7 +169,7 @@ oder ein gezielter Einsatz von `textContent` robuster als String-Konkatenation.
 
 ---
 
-## S5 · 🟡 Cloud Function ohne Missbrauchsschutz (Mittel)
+## S5 · ⏳ Cloud Function ohne Missbrauchsschutz (Mittel – Rate-Limit ✅ in v1.9.0, App Check offen)
 
 **Fundstelle:** `functions/index.js` → `callGemini`.
 
@@ -146,7 +187,7 @@ mit TTL oder `firebase-functions-rate-limiter`), Budget-Alarm im GCP-Projekt.
 
 ---
 
-## S6 · 🟡 Rollen-/Adminmodell clientseitig durchsetzbar (Mittel)
+## S6 · ✅ Rollen-/Adminmodell clientseitig durchsetzbar (Mittel – behoben in v1.9.0)
 
 **Fundstelle:** `index.html` → `isAdmin()`, `toggleUserRole()`,
 `deleteUserProfile()`, `changeUserDepartment()`, `askDeleteReport()`,
@@ -168,7 +209,7 @@ gelistete Autoren oder Admin-Claim.
 
 ---
 
-## S7 · 🟡 Firebase Storage: Bilder-URLs und Regeln (Mittel)
+## S7 · ✅ Firebase Storage: Bilder-URLs und Regeln (Mittel – Rules in v1.9.0; Token-URLs bleiben Restrisiko)
 
 **Fundstelle:** `index.html` → `processFiles()` (Upload nach
 `images/{reportId}/…`), `deleteStorageFolder()`, `deleteStorageImages()`.
@@ -187,7 +228,7 @@ gelistete Autoren oder Admin-Claim.
 
 ---
 
-## S8 · 🟡 CI/CD: Umgang mit dem Service-Account-Key (Niedrig–Mittel)
+## S8 · ✅ CI/CD: Umgang mit dem Service-Account-Key (Niedrig–Mittel – behoben; WIF-Umstieg empfohlen)
 
 **Fundstelle:** `.github/workflows/deploy-functions.yml`.
 
@@ -217,8 +258,33 @@ gelistete Autoren oder Admin-Claim.
 
 ## Empfohlene Reihenfolge der Umsetzung
 
-1. **S2** Key in Secret Manager + Key-Rotation (kleinster Eingriff, größter Schaden abgewendet)
-2. **S1 + S6 + S7** Firestore/Storage-Rules ins Repo, Rechte-Modell mit Custom Claims (eine zusammenhängende Baustelle)
-3. **S3** Registrierung serverseitig absichern
-4. **S5** App Check + Rate-Limit
-5. **S8, S9** CI-Härtung und Kleinigkeiten
+1. ✅ **S2** Key in Secret Manager (Key-Rotation: manueller Schritt, s. u.)
+2. ✅ **S1 + S6 + S7** Firestore/Storage-Rules im Repo, Rechte-Modell mit Custom Claims
+3. ✅ **S3** Registrierung serverseitig (`registerUser` + Custom Token)
+4. ⏳ **S5** Rate-Limit ✅ · App Check offen (braucht reCAPTCHA-Setup in der Console)
+5. ✅ **S8** CI-Härtung · ⏳ **S9** Kleinigkeiten offen (SRI, MFA/SSO, Log-Reduktion)
+
+---
+
+## ⚠️ Migrations-Checkliste (vor/nach dem Merge, in dieser Reihenfolge)
+
+1. **Secret anlegen (VOR dem Merge – sonst schlägt das CI-Deployment fehl):**
+   `npx firebase-tools functions:secrets:set GEMINI_API_KEY --project moomemo-a9012`
+   → dabei direkt einen **NEU erzeugten** Gemini-Key eingeben (der bisherige
+   in Firestore gespeicherte Key gilt als kompromittiert → in der Google-
+   AI-Konsole **rotieren/löschen**).
+2. **Merge nach `main`** → CI deployt Functions + Firestore-Rules/-Indexes +
+   Storage-Rules in einem Rutsch.
+3. **Neues `index.html` sofort auf das Hosting ausrollen** (wie gewohnt).
+   Wichtig: Das alte Frontend funktioniert mit den neuen Rules NICHT
+   (es liest die ganze Collection) – erst mit dem neuen Frontend inkl.
+   gefilterter Queries und Claims-Sync.
+4. **Altes Secret-Dokument löschen:** In der Firebase-Console das Dokument
+   `artifacts/moomemo-a9012/public/data/app_config/secrets` entfernen
+   (die Rules verwehren Clients ohnehin den Zugriff, aber weg ist weg).
+5. **Bestandsnutzer:** migrieren sich beim nächsten Login automatisch
+   (Client ruft `syncMyClaims` auf). Kein manueller Schritt nötig.
+6. **Kurztest:** Login als normaler Nutzer (sieht nur erlaubte Berichte),
+   Registrierung mit falschem Code (abgelehnt), KI-Zauberstab (funktioniert),
+   Bild-Upload (funktioniert), Admin: Rolle ändern (wirkt nach Re-Login des
+   Betroffenen).

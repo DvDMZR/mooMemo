@@ -1,0 +1,91 @@
+rules_version = '2';
+
+// mooMemo Firestore Security Rules
+//
+// Berechtigungen kommen aus Custom Claims (approved/admin/department), die
+// ausschließlich serverseitig gesetzt werden (registerUser / syncMyClaims /
+// onUserProfileWritten in functions/index.js). Das Firestore-Profil allein
+// gewährt keine Rechte.
+//
+// WICHTIG: Der Client fragt Berichte über mehrere gefilterte Queries ab
+// (setupRealtimeListener in index.html). Diese Queries müssen zu den
+// read-Bedingungen hier passen, sonst schlagen sie komplett fehl.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function approved() { return signedIn() && request.auth.token.get('approved', false) == true; }
+    function isAdmin() { return approved() && request.auth.token.get('admin', false) == true; }
+    function dept() { return request.auth.token.get('department', ''); }
+    function myName() { return request.auth.token.get('name', ''); }
+
+    // ---------------- BERICHTE ----------------
+    match /artifacts/{appId}/public/data/reports/{reportId} {
+
+      function hdr() { return resource.data.get('header', {}); }
+      function vis() { return hdr().get('visibility', 'authors_only'); }
+
+      // Lesen: Admin, Abteilung "All", Ersteller, gelisteter Verfasser,
+      // oder passend zur Sichtbarkeitsstufe des Berichts
+      function canRead() {
+        return isAdmin()
+          || dept() == 'All'
+          || resource.data.get('created_by', '') == request.auth.uid
+          || (myName() != '' && myName() in hdr().get('authors', []))
+          || vis() in ['all', 'published']
+          || (vis() == 'team_only' && resource.data.get('created_by_dept', '') == dept())
+          || (vis() == 'selected_teams' && dept() in hdr().get('visible_teams', []));
+      }
+
+      allow read: if approved() && canRead();
+
+      // Anlegen: created_by muss der eigene UID sein; Admins dürfen auch
+      // fremde created_by-Werte schreiben (Backup-Import)
+      allow create: if isAdmin()
+        || (approved()
+            && request.resource.data.get('created_by', '') == request.auth.uid);
+
+      // Bearbeiten: wer lesen darf, darf mitarbeiten (Punkte/Lösungen pflegen) –
+      // Herkunftsfelder sind unveränderlich; Admins ohne Einschränkung (Import)
+      allow update: if isAdmin()
+        || (approved() && canRead()
+            && request.resource.data.get('created_by', '') == resource.data.get('created_by', '')
+            && request.resource.data.get('created_by_dept', '') == resource.data.get('created_by_dept', ''));
+
+      // Löschen: nur Admins (entspricht der UI)
+      allow delete: if isAdmin();
+    }
+
+    // ---------------- BENUTZERPROFILE ----------------
+    match /artifacts/{appId}/public/data/users/{uid} {
+      // Lesen für alle Freigeschalteten (Namensvorschläge, Admin-Liste)
+      allow read: if approved();
+
+      // Anlegen ausschließlich serverseitig (registerUser-Function, Admin SDK)
+      allow create: if false;
+
+      // Eigenes Profil: nur settings + lastLogin änderbar (nie role/department);
+      // Admins dürfen alles (Rolle/Abteilung ändern)
+      allow update: if isAdmin()
+        || (approved() && request.auth.uid == uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['settings', 'lastLogin']));
+
+      // Löschen: nur Admins, nicht sich selbst
+      allow delete: if isAdmin() && request.auth.uid != uid;
+    }
+
+    // ---------------- APP-KONFIGURATION ----------------
+    // Invite-Code: nur Admins (die Registrierung prüft ihn serverseitig)
+    match /artifacts/{appId}/public/data/app_config/auth {
+      allow read, write: if isAdmin();
+    }
+
+    // app_config/secrets: KEIN Client-Zugriff (Default-Deny).
+    // Der Gemini-Key liegt im Secret Manager; das alte Firestore-Dokument
+    // sollte gelöscht werden (siehe SECURITY.md, Migrations-Checkliste).
+
+    // Alles andere: Default-Deny (kein match = kein Zugriff)
+  }
+}
