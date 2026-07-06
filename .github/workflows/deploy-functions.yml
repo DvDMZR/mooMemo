@@ -15,14 +15,18 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: functions/package.json
+          cache-dependency-path: functions/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         working-directory: functions
 
       - name: Write service account key
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
+        # Über env + printf statt Shell-Interpolation: robust gegen Sonderzeichen
+        # im JSON und kein Risiko, das Secret in Logs zu interpolieren.
+        run: printf '%s' "$FIREBASE_SA_JSON" > /tmp/sa.json
+        env:
+          FIREBASE_SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy Firebase Functions
         run: npx firebase-tools deploy --only functions --force --project moomemo-a9012

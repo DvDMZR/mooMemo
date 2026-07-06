@@ -200,6 +200,8 @@
         .search-container { width: 100%; margin-bottom: 10px; }
         .search-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 1rem; background: #f9fafb url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 10px center; padding-left: 36px; transition: all 0.2s; }
         .search-input:focus { outline: none; border-color: var(--primary); background-color: #fff; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
+        .search-clear-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: #e2e8f0; border: none; color: var(--text-sub); width: 24px; height: 24px; border-radius: 50%; font-size: 1rem; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center; }
+        .search-clear-btn:hover { background: #cbd5e1; color: var(--text-main); }
 
         .filter-tabs { display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px; gap: 4px; position: relative; }
         .filter-group-labeled { position: relative; border: 1px solid rgba(0, 51, 102, 0.25); border-radius: 10px; padding: 2px; }
@@ -394,6 +396,11 @@
         .img-lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9999; cursor: zoom-out; }
         .img-lightbox-overlay img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
         .img-lightbox-overlay .lightbox-close { position: absolute; top: 18px; right: 24px; color: white; font-size: 2rem; cursor: pointer; z-index: 10000; background: rgba(0,0,0,0.5); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+        .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: none; color: white; font-size: 1.3rem; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
+        .lightbox-prev { left: 16px; }
+        .lightbox-next { right: 16px; }
+        .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: white; font-size: 0.85rem; background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 20px; z-index: 10000; }
         .img-thumb { cursor: pointer; }
 
         .fab { position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; background-color: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 15px rgba(0, 51, 102, 0.4); cursor: pointer; z-index: 90; display: none; transition: transform 0.2s, background-color 0.2s; }
@@ -410,11 +417,23 @@
         .btn-secondary { background: white; color: var(--text-main); border: 1px solid var(--border-color); }
         .btn-success { background: var(--success); color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
 
+        /* --- UPLOAD-FORTSCHRITT --- */
+        .upload-bar-wrap { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+        .upload-bar-label { font-size: 0.7rem; color: var(--text-sub); min-width: 16px; text-align: right; }
+        .upload-bar-track { flex: 1; background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden; }
+        .upload-bar { height: 100%; width: 0%; background: var(--primary); border-radius: 4px; transition: width 0.2s; }
+
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: none; margin-left: 10px; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         #toast { visibility: hidden; min-width: 250px; margin-left: -140px; background-color: #1f2937; color: #fff; text-align: center; border-radius: 50px; padding: 12px 20px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; font-size: 0.95rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); font-weight: 500; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        /* --- UNDO TOAST (mit Aktions-Button, ohne Auto-Fadeout-Animation) --- */
+        #undo-toast { visibility: hidden; display: flex; align-items: center; gap: 14px; background: #1f2937; color: #fff; border-radius: 50px; padding: 10px 10px 10px 20px; position: fixed; z-index: 1001; left: 50%; transform: translateX(-50%); bottom: 30px; font-size: 0.95rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); font-weight: 500; }
+        #undo-toast.show { visibility: visible; animation: fadein 0.3s; }
+        #undo-toast button { background: var(--accent); color: white; border: none; border-radius: 50px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        #undo-toast button:hover { background: var(--accent-hover); }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
@@ -440,7 +459,7 @@
                 max-width: 100% !important;
             }
             #export > h2, #export > .ai-btn, #export > .btn,
-            .export-action-bar, .export-filter-bar, .readonly-banner { display: none !important; }
+            .export-action-bar, .export-filter-bar { display: none !important; }
 
             /* PDF Preview container */
             #pdf-preview {
@@ -546,21 +565,6 @@
             font-weight: 600;
         }
 
-        /* Read-only mode indicator */
-        .readonly-banner {
-            background: #fef3c7;
-            border: 1px solid #fcd34d;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-            color: #92400e;
-        }
-        .readonly-banner i { font-size: 1.1rem; }
-
         /* --- SHARED/PUBLIC VIEW MODE --- */
         .shared-mode .app-logo-header,
         .shared-mode .nav-header,
@@ -570,8 +574,7 @@
         .shared-mode #status,
         .shared-mode .fab,
         .shared-mode #sync-status,
-        .shared-mode .export-action-bar,
-        .shared-mode #readonly-banner {
+        .shared-mode .export-action-bar {
             display: none !important;
         }
 
@@ -1508,7 +1511,7 @@
             <!-- LOGIN FORM -->
             <div id="login-form">
                 <div id="login-error" class="login-error"></div>
-                <input type="email" id="login-email" placeholder="E-Mail Adresse" autocomplete="email">
+                <input type="email" id="login-email" placeholder="E-Mail Adresse" autocomplete="email" onkeydown="if(event.key==='Enter') window.doLogin()">
                 <input type="password" id="login-password" placeholder="Passwort" autocomplete="current-password" onkeydown="if(event.key==='Enter') window.doLogin()">
                 <button class="btn btn-primary" onclick="window.doLogin()" id="login-btn">
                     <i class="fa-solid fa-right-to-bracket"></i> <span id="login-btn-text">Anmelden</span>
@@ -1522,10 +1525,10 @@
             <!-- REGISTER FORM -->
             <div id="register-form" style="display:none;">
                 <div id="register-error" class="login-error"></div>
-                <input type="text" id="reg-name" placeholder="Vor- und Nachname" autocomplete="name">
-                <input type="email" id="reg-email" placeholder="vorname.nachname@gea.com" autocomplete="email">
-                <input type="password" id="reg-password" placeholder="Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)" autocomplete="new-password">
-                <input type="password" id="reg-password2" placeholder="Passwort wiederholen" autocomplete="new-password">
+                <input type="text" id="reg-name" placeholder="Vor- und Nachname" autocomplete="name" onkeydown="if(event.key==='Enter') window.doRegister()">
+                <input type="email" id="reg-email" placeholder="vorname.nachname@gea.com" autocomplete="email" onkeydown="if(event.key==='Enter') window.doRegister()">
+                <input type="password" id="reg-password" placeholder="Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)" autocomplete="new-password" onkeydown="if(event.key==='Enter') window.doRegister()">
+                <input type="password" id="reg-password2" placeholder="Passwort wiederholen" autocomplete="new-password" onkeydown="if(event.key==='Enter') window.doRegister()">
                 <select id="reg-department" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:12px; font-size:0.95rem; margin-bottom:8px;">
                     <option value="" disabled selected id="reg-department-placeholder">Abteilung wählen...</option>
                     <option value="TSS">TSS</option>
@@ -1533,7 +1536,7 @@
                     <option value="DV">DV</option>
                     <option value="R&C">R&C</option>
                 </select>
-                <input type="text" id="reg-invite" placeholder="Einladungscode">
+                <input type="text" id="reg-invite" placeholder="Einladungscode" onkeydown="if(event.key==='Enter') window.doRegister()">
                 <button class="btn btn-primary" onclick="window.doRegister()" id="register-btn">
                     <i class="fa-solid fa-user-plus"></i> <span id="register-btn-text">Registrieren</span>
                 </button>
@@ -1553,15 +1556,15 @@
                     <div class="shared-header-subtitle" id="shared-report-subtitle">Geteilter Bericht</div>
                 </div>
                 <div class="shared-header-badge" id="shared-open-badge" style="display:none;">
-                    <i class="fa-solid fa-circle-exclamation"></i> <span id="shared-open-count">0</span> Offen
+                    <i class="fa-solid fa-circle-exclamation"></i> <span id="shared-open-count">0</span> <span data-i18n="sidebar_open">Offen</span>
                 </div>
             </div>
             <div class="shared-header-actions">
                 <button class="shared-btn" onclick="window.printReport()">
-                    <i class="fa-solid fa-file-pdf"></i> PDF Speichern
+                    <i class="fa-solid fa-file-pdf"></i> <span data-i18n="btn_download_pdf">Als PDF speichern</span>
                 </button>
                 <a class="shared-btn shared-btn-primary" id="shared-back-link" href="?">
-                    <i class="fa-solid fa-arrow-right"></i> Zur App
+                    <i class="fa-solid fa-arrow-right"></i> <span data-i18n="back_to_app">Zur App</span>
                 </a>
             </div>
         </div>
@@ -1578,14 +1581,14 @@
                 <i class="fa-solid fa-chevron-left"></i> Übersicht
             </button>
             <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" alt="GEA" class="app-logo-img" id="header-logo">
-            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo (v1.8.5)</span>
+            <span id="app-title" class="header-title" data-i18n="app_title">mooMemo</span>
             <div id="header-report-info" style="display:none; line-height:1.2;">
                 <span id="hri-customer" style="font-weight:700; font-size:0.95rem; color:var(--text-main);"></span>
                 <span id="hri-meta" style="font-size:0.7rem; color:var(--text-sub); display:block;"></span>
             </div>
         </div>
         <div class="header-controls">
-            <button class="help-btn" id="visibility-help-btn" tabindex="0">
+            <button class="help-btn" id="visibility-help-btn" tabindex="0" onclick="window.dismissVisibilityHelp()" title="Zum Ausblenden klicken">
                 <i class="fa-solid fa-question"></i>
                 <span class="help-tooltip" id="visibility-help-tooltip" data-i18n="visibility_help_tooltip">Ab v1.8 ist die Sichtbarkeit der Berichte verändert: Nur Berichte, die für dein Team oder alle freigegeben wurden, sind für dich sichtbar.</span>
             </button>
@@ -1593,7 +1596,7 @@
                 <i class="fa-solid fa-user-circle"></i>
                 <span id="user-badge-name">User</span>
             </button>
-            <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary);" title="Settings"><i class="fa-solid fa-gear"></i></button>
+            <button class="icon-btn" onclick="window.openSettings()" style="color:var(--primary); position:relative;" title="Settings" aria-label="Einstellungen"><i class="fa-solid fa-gear"></i><span id="whatsnew-dot" style="display:none; position:absolute; top:4px; right:4px; width:9px; height:9px; background:var(--accent); border-radius:50%; border:1.5px solid white;"></span></button>
         </div>
         <!-- USER DROPDOWN MENU -->
         <div id="user-menu" class="user-menu">
@@ -1621,10 +1624,10 @@
 
     <!-- TABS -->
     <div class="nav-header" id="tab-navigation">
-        <div class="nav-item active" onclick="window.switchTab('header')"><i class="fa-solid fa-clipboard-user"></i> <span data-i18n="tab_base">Basis</span></div>
-        <div class="nav-item" onclick="window.switchTab('points')"><i class="fa-solid fa-list-check"></i> <span data-i18n="tab_points">Punkte</span></div>
-        <div class="nav-item" onclick="window.switchTab('status')"><i class="fa-solid fa-check-double"></i> <span data-i18n="tab_status">Status</span></div>
-        <div class="nav-item" onclick="window.switchTab('export')"><i class="fa-solid fa-file-pdf"></i> <span data-i18n="tab_export">Export</span></div>
+        <div class="nav-item active" role="button" tabindex="0" onclick="window.switchTab('header')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}"><i class="fa-solid fa-clipboard-user"></i> <span data-i18n="tab_base">Basis</span></div>
+        <div class="nav-item" role="button" tabindex="0" onclick="window.switchTab('points')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}"><i class="fa-solid fa-list-check"></i> <span data-i18n="tab_points">Punkte</span></div>
+        <div class="nav-item" role="button" tabindex="0" onclick="window.switchTab('status')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}"><i class="fa-solid fa-check-double"></i> <span data-i18n="tab_status">Status</span></div>
+        <div class="nav-item" role="button" tabindex="0" onclick="window.switchTab('export')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}"><i class="fa-solid fa-file-pdf"></i> <span data-i18n="tab_export">Export</span></div>
     </div>
 
     <!-- DASHBOARD -->
@@ -1634,8 +1637,9 @@
             <button class="icon-btn" id="admin-tools-btn" onclick="window.askAdminTools()" style="color:var(--primary); display:none;" title="Admin Tools"><i class="fa-solid fa-user-shield"></i></button>
         </div>
         <div class="filter-container" id="filter-container">
-             <div class="search-container">
-                <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, Verfasser)" data-i18n-placeholder="search_placeholder" oninput="window.renderReportList()">
+             <div class="search-container" style="position:relative;">
+                <input type="text" class="search-input" id="search-input" placeholder="Suchen... (ID, Kunde, Verfasser)" data-i18n-placeholder="search_placeholder" oninput="window.onSearchInput()">
+                <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="Suche löschen" onclick="window.clearSearch()">&times;</button>
             </div>
             <button class="mobile-filter-toggle" id="mobile-filter-toggle-btn" onclick="window.toggleMobileFilter()" aria-expanded="false">
                 <i class="fa-solid fa-sliders"></i> Filter
@@ -1652,10 +1656,10 @@
             <div class="filter-group-labeled label-right">
                 <span class="filter-group-label" data-i18n="filter_label_type">Anlage</span>
                 <div class="filter-tabs" id="filter-type-container">
-                    <button class="filter-pill active" onclick="window.setFilterType('all')" data-i18n="filter_all">Alle</button>
-                    <button class="filter-pill" onclick="window.setFilterType('AMS')">AMS</button>
-                    <button class="filter-pill" onclick="window.setFilterType('CMS')">CMS</button>
-                    <button class="filter-pill" onclick="window.setFilterType('AFS')">AFS</button>
+                    <button class="filter-pill active" data-type="all" onclick="window.setFilterType('all')" data-i18n="filter_all">Alle</button>
+                    <button class="filter-pill" data-type="AMS" onclick="window.setFilterType('AMS')">AMS</button>
+                    <button class="filter-pill" data-type="CMS" onclick="window.setFilterType('CMS')">CMS</button>
+                    <button class="filter-pill" data-type="AFS" onclick="window.setFilterType('AFS')">AFS</button>
                 </div>
             </div>
             <div class="filter-control-group">
@@ -1670,7 +1674,10 @@
         </div>
         <button class="btn btn-primary" onclick="window.createNewReport()"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_new">Neuer Bericht erstellen</span></button>
         <div id="report-list" style="margin-top:25px;">
-            <div style="text-align:center; padding: 20px; color: #64748b;"><i class="fas fa-circle-notch fa-spin"></i> <span data-i18n="loading">Lade Daten aus der Cloud...</span></div>
+            <!-- Skeleton-Platzhalter bis zum ersten Firestore-Snapshot -->
+            <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line"></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line"></div></div>
+            <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line"></div></div>
         </div>
         <input type="file" id="import-input" style="display:none" accept=".json" onchange="window.importBackup(this)">
     </div>
@@ -1682,9 +1689,9 @@
             <label data-i18n="lbl_area">Bereich</label>
             <select id="h_type" onchange="window.updateCurrentReportHeader()" style="margin-bottom: 20px;"><option value="AMS">AMS</option><option value="CMS">CMS</option><option value="AFS">AFS</option></select>
             <label data-i18n="lbl_customer">Kunde / Projekt</label>
-            <div class="input-group"><input type="text" id="h_customer" placeholder="z.B. Müller GmbH" data-i18n-placeholder="ph_customer" oninput="window.updateCurrentReportHeader()"><button class="mic-btn" onclick="window.listen('h_customer')"><i class="fa-solid fa-microphone"></i></button></div>
+            <div class="input-group"><input type="text" id="h_customer" placeholder="z.B. Müller GmbH" data-i18n-placeholder="ph_customer" oninput="window.updateCurrentReportHeader()"><button class="mic-btn" type="button" aria-label="Spracheingabe" onclick="window.listen('h_customer')"><i class="fa-solid fa-microphone"></i></button></div>
             <br><label data-i18n="lbl_date">Datum (von - bis)</label>
-            <div style="display:flex; gap:15px;"><input type="date" id="h_date_from" onchange="window.updateCurrentReportHeader()"><input type="date" id="h_date_to" onchange="window.updateCurrentReportHeader()"></div>
+            <div style="display:flex; gap:15px;"><input type="date" id="h_date_from" onchange="window.onDateFromChange()"><input type="date" id="h_date_to" onchange="window.updateCurrentReportHeader()"></div>
             
             <br><label data-i18n="lbl_author">Verfasser</label>
             <div id="authors-list" class="tag-list"></div>
@@ -1719,12 +1726,13 @@
         <h2><i class="fa-solid fa-list"></i> <span data-i18n="h_points">Besuchs-Punkte</span></h2>
         <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:15px;" data-i18n="points_hint">Tippe auf einen Punkt zum Bearbeiten.</p>
         <div id="points-list"></div>
-        <div class="fab" id="fab-btn" onclick="window.openModal()"><i class="fa-solid fa-plus"></i></div>
+        <div class="fab" id="fab-btn" role="button" tabindex="0" aria-label="Neuen Punkt hinzufügen" onclick="window.openModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); window.openModal();}"><i class="fa-solid fa-plus"></i></div>
     </div>
 
     <!-- STATUS OVERVIEW -->
     <div id="status" class="section">
         <h2><i class="fa-solid fa-tasks"></i> <span data-i18n="h_status">Status Übersicht</span></h2>
+        <select id="status-assignee-filter" onchange="window.renderStatusList()" style="max-width:280px; margin-bottom:15px;"></select>
         <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
             <div style="flex:1 1 300px;">
                 <div style="background:white; padding:20px; border-radius:16px; border-top:5px solid var(--danger); text-align:center; margin-bottom:20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);"><div style="font-size:2.5rem; font-weight:800; color:var(--danger); line-height:1;" id="count-open">0</div><div style="font-size:0.85rem; color:var(--text-sub); font-weight:600; margin-top:5px;" data-i18n="status_open_uc">OFFEN</div></div>
@@ -1741,12 +1749,6 @@
     <div id="export" class="section">
         <h2><i class="fa-solid fa-print"></i> <span data-i18n="h_export">Bericht Abschließen</span></h2>
 
-        <!-- READ-ONLY BANNER (shown when viewing shared link) -->
-        <div id="readonly-banner" class="readonly-banner" style="display:none;">
-            <i class="fa-solid fa-eye"></i>
-            <span data-i18n="readonly_info">Du siehst einen geteilten Bericht (Nur-Lesen-Modus).</span>
-        </div>
-
         <!-- EXPORT ACTION BAR -->
         <div class="export-action-bar" id="export-action-bar">
             <button class="export-action-btn" onclick="window.printReport()">
@@ -1754,6 +1756,9 @@
             </button>
             <button class="export-action-btn" id="share-link-btn" onclick="window.copyShareLink()">
                 <i class="fa-solid fa-copy"></i> <span data-i18n="share_title">Link kopieren</span>
+            </button>
+            <button class="export-action-btn" onclick="window.exportCSV()">
+                <i class="fa-solid fa-table-list"></i> <span data-i18n="btn_csv">CSV Export</span>
             </button>
         </div>
 
@@ -1786,7 +1791,7 @@
     </div>
 
     <!-- MODALS & TOAST -->
-    <div class="modal-overlay" id="settings-modal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="settings-modal">
         <div class="modal-content" style="max-width:350px; text-align:center;">
             <span class="close-modal" onclick="window.closeSettings()">&times;</span>
             <h3 style="color:var(--text-main)"><i class="fa-solid fa-gear"></i> <span data-i18n="settings_title">Einstellungen</span></h3>
@@ -1817,7 +1822,7 @@
                 <div id="info-content" class="info-content">
                     <div class="info-logo-area">
                         <img src="https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85" style="height:30px; opacity:0.8;">
-                        <div class="info-version">mooMemo v1.8.4</div>
+                        <div class="info-version" id="info-version">mooMemo</div>
                         <div class="info-author">© 2026 David Mazur</div>
                     </div>
                     
@@ -1839,7 +1844,7 @@
     </div>
     
     <!-- NEW CHANGELOG MODAL -->
-    <div class="modal-overlay" id="changelog-modal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="changelog-modal">
         <div class="modal-content" style="max-width:500px;">
             <span class="close-modal" onclick="document.getElementById('changelog-modal').style.display='none'">&times;</span>
             <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-rocket"></i> <span data-i18n="whats_new">Was ist neu?</span></h3>
@@ -1848,19 +1853,19 @@
         </div>
     </div>
     
-    <div class="modal-overlay" id="modal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="window.closeModal()">&times;</span><h3 id="modal-title" data-i18n="modal_new_point">Neuer Punkt</h3><input type="hidden" id="edit-index" value="-1">
-            <label data-i18n="lbl_ticket">Ticketnummer</label><div class="input-group"><input type="text" id="p_ticket" placeholder="z.B. 123456" data-i18n-placeholder="ph_ticket"><button class="mic-btn" onclick="window.listen('p_ticket')"><i class="fa-solid fa-microphone"></i></button></div><br>
-            <label data-i18n="lbl_title">Titel / Thema</label><div class="input-group"><input type="text" id="p_title" placeholder="..."><button class="mic-btn" onclick="window.listen('p_title')"><i class="fa-solid fa-microphone"></i></button></div><br>
-            <label data-i18n="lbl_desc">Beschreibung</label><div class="input-group"><textarea id="p_desc" rows="4" placeholder="..."></textarea><button class="mic-btn" onclick="window.listen('p_desc')"><i class="fa-solid fa-microphone"></i></button></div>
+            <label data-i18n="lbl_ticket">Ticketnummer</label><div class="input-group"><input type="text" id="p_ticket" placeholder="z.B. 123456" data-i18n-placeholder="ph_ticket"><button class="mic-btn" type="button" aria-label="Spracheingabe" onclick="window.listen('p_ticket')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_title">Titel / Thema</label><div class="input-group"><input type="text" id="p_title" placeholder="..."><button class="mic-btn" type="button" aria-label="Spracheingabe" onclick="window.listen('p_title')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_desc">Beschreibung</label><div class="input-group"><textarea id="p_desc" rows="4" placeholder="..."></textarea><button class="mic-btn" type="button" aria-label="Spracheingabe" onclick="window.listen('p_desc')"><i class="fa-solid fa-microphone"></i></button></div>
             <button id="btn-improve-text" class="ai-btn" onclick="window.improveDescription()" style="margin-top:5px;">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="ai-lang-hint-desc" style="font-size:0.7rem;"></span>
             </button>
             <br>
-            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." data-i18n-placeholder="ph_name" autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
+            <label data-i18n="lbl_assignee">Verantwortlich</label><div class="input-group"><input type="text" id="p_assignee" placeholder="Name wählen..." data-i18n-placeholder="ph_name" autocomplete="off" oninput="window.handleInputAutofill(this, 'list-assignees', null)"><button class="mic-btn" type="button" aria-label="Spracheingabe" onclick="window.listen('p_assignee')"><i class="fa-solid fa-microphone"></i></button></div><br>
             <label data-i18n="lbl_status">Status</label><select id="p_status"><option value="open" data-i18n="opt_open">Offen (Zu erledigen)</option><option value="resolved" data-i18n="opt_resolved">Gelöst / Info</option></select><br>
-            <label data-i18n="lbl_solution">Lösung</label><div class="input-group"><textarea id="p_solution" rows="3" placeholder="Lösung hier eingeben..." data-i18n-placeholder="solution_placeholder"></textarea><button class="mic-btn" onclick="window.listen('p_solution')"><i class="fa-solid fa-microphone"></i></button></div>
+            <label data-i18n="lbl_solution">Lösung</label><div class="input-group"><textarea id="p_solution" rows="3" placeholder="Lösung hier eingeben..." data-i18n-placeholder="solution_placeholder"></textarea><button class="mic-btn" type="button" aria-label="Spracheingabe" onclick="window.listen('p_solution')"><i class="fa-solid fa-microphone"></i></button></div>
             <button id="btn-improve-solution" class="ai-btn" onclick="window.improveSolution()" style="margin-top:5px;">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="ai-lang-hint-sol" style="font-size:0.7rem;"></span>
             </button>
@@ -1879,6 +1884,15 @@
                 <input type="file" id="p_images" multiple accept="image/*,.heic,.HEIC,.heif,.HEIF" style="display:none" onchange="window.handleImageUpload()">
             </div>
 
+            <!-- KAMERA-DIREKTAUFNAHME (öffnet auf Smartphones direkt die Kamera) -->
+            <button type="button" class="ai-btn" style="margin-bottom:10px;" onclick="document.getElementById('p_camera').click()">
+                <i class="fa-solid fa-camera"></i> <span data-i18n="btn_take_photo">Foto aufnehmen</span>
+            </button>
+            <input type="file" id="p_camera" accept="image/*" capture="environment" style="display:none" onchange="window.processFiles(this.files); this.value='';">
+
+            <!-- UPLOAD-FORTSCHRITT (ein Balken pro Bild) -->
+            <div id="upload-progress"></div>
+
             <div id="modal-img-preview" class="img-grid"></div>
             
             <button class="btn btn-success" onclick="window.savePoint()"><span data-i18n="btn_save">Speichern</span></button><button class="btn" style="background:#fee2e2; color:#991b1b; margin-top:10px;" onclick="window.askDeletePoint()" id="btn-delete"><span data-i18n="btn_delete">Löschen</span></button>
@@ -1886,11 +1900,24 @@
     </div>
     
     
-    <div class="modal-overlay" id="delete-point-confirm-modal">
+    <!-- GENERISCHER BESTÄTIGUNGS-DIALOG (ersetzt native confirm()-Boxen) -->
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="confirm-modal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <div style="font-size:3rem; color:var(--danger); margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 id="confirm-modal-title" style="color:var(--text-main)"></h3>
+            <p id="confirm-modal-msg" style="color:var(--text-sub)"></p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:25px;">
+                <button class="btn btn-secondary" style="margin-top:0" onclick="window.closeConfirmModal()"><span data-i18n="btn_cancel">Abbrechen</span></button>
+                <button class="btn" id="confirm-modal-ok" style="background:var(--danger); color:white; margin-top:0" onclick="window.execConfirmModal()"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="delete-point-confirm-modal">
         <div class="modal-content" style="max-width:400px; text-align:center;"><div style="font-size:3rem; color:var(--danger); margin-bottom:10px;"><i class="fa-solid fa-trash-can"></i></div><h3 style="color:var(--text-main)" data-i18n="confirm_del_title">Punkt löschen?</h3><p style="color:var(--text-sub)" data-i18n="confirm_del_msg">Möchtest du diesen Punkt unwiderruflich entfernen?</p><div style="display:flex; gap:10px; justify-content:center; margin-top:25px;"><button class="btn btn-secondary" onclick="window.closeDeletePointModal()" style="margin-top:0"><span data-i18n="btn_cancel">Abbrechen</span></button><button class="btn" style="background:var(--danger); color:white; margin-top:0" onclick="window.executeDeletePoint()"><span data-i18n="btn_delete_confirm">Ja, Löschen</span></button></div></div>
     </div>
     
-    <div class="modal-overlay" id="admin-tools-modal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="admin-tools-modal">
         <div class="modal-content" style="max-width:400px; text-align:center;">
             <span class="close-modal" onclick="window.closeAdminToolsModal()">&times;</span>
             <div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-toolbox"></i></div>
@@ -1925,7 +1952,7 @@
     </div>
 
     <!-- PASSWORD CHANGE MODAL -->
-    <div class="modal-overlay" id="password-change-modal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="password-change-modal">
         <div class="modal-content" style="max-width:400px; text-align:center;">
             <span class="close-modal" onclick="document.getElementById('password-change-modal').style.display='none'">&times;</span>
             <div style="font-size:3rem; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-key"></i></div>
@@ -1940,7 +1967,7 @@
     </div>
 
     <!-- USER MANAGEMENT MODAL (Admin only) -->
-    <div class="modal-overlay" id="user-mgmt-modal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="user-mgmt-modal">
         <div class="modal-content" style="max-width:500px;">
             <span class="close-modal" onclick="document.getElementById('user-mgmt-modal').style.display='none'">&times;</span>
             <h3 style="color:var(--primary); text-align:center;"><i class="fa-solid fa-users-gear"></i> <span data-i18n="user_mgmt">Benutzerverwaltung</span></h3>
@@ -1968,8 +1995,16 @@
 
     <div id="toast"></div>
 
+    <!-- UNDO-TOAST (Punkt gelöscht -> Rückgängig) -->
+    <div id="undo-toast">
+        <span id="undo-toast-text">Gelöscht</span>
+        <button type="button" onclick="window.undoDeletePoint()"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="btn_undo">Rückgängig</span></button>
+    </div>
+
     <!-- HEIC support for desktop browsers -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <!-- SortableJS: Punkte-Sortierung per Drag & Drop, auch auf Touch-Geräten -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
     <!-- LOGIC -->
     <script type="module">
@@ -1977,7 +2012,7 @@
         import { getAuth, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword as fbUpdatePassword, updateProfile, signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         // IMPORT STORAGE
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         // --- KONFIGURATION START ---
@@ -1991,7 +2026,7 @@
         };
         const myAppId = "moomemo-a9012"; 
         
-        const APP_VERSION = "1.8.4";
+        const APP_VERSION = "1.8.8";
         const APP_AUTHOR = "David Mazur";
         
         // --- KONFIGURATION NAMEN ---
@@ -2008,6 +2043,56 @@
 
         // CHANGELOG DEFINITION
         const CHANGELOG = [
+            {
+                ver: "1.8.8",
+                date: "2026-07-04",
+                changes: [
+                    "Punkte: Sortieren per Drag & Drop jetzt auch auf dem Smartphone (langes Drücken zum Ziehen).",
+                    "Bilder: Fortschrittsbalken pro Bild beim Hochladen.",
+                    "Bilder: In der Großansicht blättern – Pfeile, Pfeiltasten oder Wischen; mit Bildzähler.",
+                    "Status-Tab: Nach Verantwortlichem filtern.",
+                    "Punkte: Titel ist jetzt Pflichtfeld (keine leeren Punkte mehr).",
+                    "Basisdaten: 'Bis'-Datum kann nicht mehr vor dem 'Von'-Datum liegen.",
+                    "Dashboard: X-Button zum Leeren der Suche; Filter & Sortierung bleiben nach Neustart erhalten.",
+                    "Login: Enter-Taste funktioniert in allen Feldern (auch Registrierung).",
+                    "Punkt-Formular: Strg+Enter speichert.",
+                    "Sprache: Alle Meldungen (KI, Fehler, geteilte Ansicht) jetzt vollständig übersetzt.",
+                    "Einstellungen bleiben beim Sprachwechsel geöffnet.",
+                    "Update-Hinweis: Dezenter Punkt am Zahnrad statt Popup beim Start.",
+                    "Bedienung per Tastatur: Tabs und Berichtsliste sind mit Tab/Enter erreichbar."
+                ]
+            },
+            {
+                ver: "1.8.7",
+                date: "2026-07-04",
+                changes: [
+                    "NEU: Bericht duplizieren – Button in der Berichtsliste (übernimmt Kunde, Bereich & Teilnehmer für Folgebesuche).",
+                    "NEU: CSV-Export der Punkte im Export-Tab (öffnet direkt in Excel).",
+                    "NEU: Foto direkt mit der Kamera aufnehmen (Button im Punkt-Formular).",
+                    "NEU: Punkt gelöscht? 'Rückgängig'-Button erscheint für 6 Sekunden.",
+                    "NEU: Passwort selbst zurücksetzen – E-Mail-Link statt Admin-Kontakt.",
+                    "Spracheingabe: Stoppt nicht mehr bei kurzen Sprechpausen; nur noch eine Aufnahme gleichzeitig; Hinweis beim Start.",
+                    "Suche: Zeigt jetzt die Textstelle, warum ein Bericht gefunden wurde; flüssiger bei schnellem Tippen.",
+                    "Teilen: 'Nur Offene'-Filter wird im geteilten Link übernommen; kein ungewolltes Öffnen eines neuen Tabs mehr.",
+                    "Bedienung: ESC/Klick daneben schließt Dialoge; Zurück-Taste navigiert in der App statt Verlassen-Abfrage; keine unnötige Warnung beim Schließen mehr.",
+                    "Einheitliche Lösch-Dialoge statt Browser-Abfragen; klare Fehlermeldungen in Klartext.",
+                    "Aufgeräumt: Ungenutzter Code entfernt, Ladeanzeige mit Platzhalter-Karten."
+                ]
+            },
+            {
+                ver: "1.8.6",
+                date: "2026-07-04",
+                changes: [
+                    "Stabilität: Punkte lassen sich wieder per Drag & Drop sortieren (Fehler behoben).",
+                    "Stabilität: Punkt-Formular bleibt offen und zeigt eine Meldung, wenn der Bericht zwischenzeitlich gelöscht wurde – keine Eingaben mehr verloren.",
+                    "Stabilität: Doppelklick auf 'Neuer Bericht' erzeugt keine doppelten Berichte mehr.",
+                    "Stabilität: KI-Buttons sind während einer laufenden Anfrage gesperrt (keine Doppel-Anfragen).",
+                    "Export: Sonderzeichen in Kunde/Titel/Beschreibung (<, >, &) werden im PDF-Export korrekt dargestellt.",
+                    "Punkt-Formular: Titel zeigt jetzt 'Punkt bearbeiten' statt 'Neuer Punkt'; Löschen-Button nur noch bei bestehenden Punkten.",
+                    "Dashboard: Hinweis, wenn Suche/Filter keine Berichte finden.",
+                    "KI-Server: Zeitlimit und Größenbegrenzung für Anfragen (schnellere, klarere Fehlermeldungen)."
+                ]
+            },
             {
                 ver: "1.8.5",
                 date: "2026-04-08",
@@ -2200,6 +2285,21 @@
         ];
 
         console.log("mooMemo Version:", APP_VERSION);
+        // Versionsanzeige zentral aus APP_VERSION speisen (vorher drei
+        // unterschiedliche, hartkodierte Versionsstrings im Markup)
+        const infoVersionEl = document.getElementById('info-version');
+        if (infoVersionEl) infoVersionEl.textContent = `mooMemo v${APP_VERSION}`;
+
+        // Veralteten v1.8-Sichtbarkeits-Hinweis ausblenden, wenn bereits weggeklickt
+        if (localStorage.getItem('mooMemo_visHelpSeen')) {
+            const helpBtn = document.getElementById('visibility-help-btn');
+            if (helpBtn) helpBtn.style.display = 'none';
+        }
+        window.dismissVisibilityHelp = function() {
+            localStorage.setItem('mooMemo_visHelpSeen', '1');
+            const b = document.getElementById('visibility-help-btn');
+            if (b) b.style.display = 'none';
+        };
         // --- KONFIGURATION ENDE ---
 
         let isRegistering = false; // Flag to prevent onAuthStateChanged race condition during registration
@@ -2225,13 +2325,11 @@
         let points = []; 
         let tempImages = []; 
         let headerUpdateTimeout = null; 
-        const LOGO_SRC = "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgODUgMjciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTcxLjc2MSAwLjczMTM0Nkg2NS4zMzY5TDYxLjA1NDIgOS4yOTg4M0w2NS44MTkzIDkuMjk5ODNMNjguNTY2MSAzLjgxMjFMNzkuODU3NCAyNi40MzM4SDg0LjYyMjVMNzEuNzYxIDAuNzMxMzQ2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik02OS42MiAxMS40NDM2TDEzLjk0NDggMTEuNDQxNkwxMS44MDM0IDE1LjcyNTNIMjAuMzY4OVYyMi4xNTA5SDEyLjc3N0M4LjA4Mjc4IDIyLjE1MDkgNC4yNjM2OCAxOC4zMjQ2IDQuMjYzNjggMTMuNTg2NUM0LjI2MzY4IDguODQ4NDEgOC4wODI3OCA1LjAxNDg5IDEyLjc3NyA1LjAxNDg5SDIyLjUwMjJWMC43MjkwNzNMMTIuNzc3IDAuNzI5MDc0QzUuNzMxNzMgMC43MjkwNzQgMCA2LjQ5Njk0IDAgMTMuNTg2NUMwIDIwLjY3NjEgNS43MzE3MyAyNi40MzQ3IDEyLjc3NyAyNi40MzQ3SDI0LjY1MTZWMTUuNzI1M0gzMS4wNzU2VjI2LjQzNDdINDguMjA2NEw1MC4zNDc4IDIyLjE1MDlIMzUuMzU4M1YxNS43MjUzSDU3LjgxNTdMNTIuNDg5MSAyNi40MzQ3SDU3LjI1MTlMNjIuNjA2IDE1LjcyNTNINzEuNzYxM0w2OS42MiAxMS40NDM2WiIgZmlsbD0iIzAzMDNCOCIvPjxwYXRoIGQ9Ik0zNS4zNTg0IDUuMDEzOTZMNTAuMzQ3NiA1LjAxNTA0VjAuNzMxMjkyTDMxLjA3MzIgMC43MjgxNDJMMzEuMDczNiA5LjI5OTc3SDM1LjM1ODRWNS4wMTM5NloiIGZpbGw9IiMwMzAzQjgiLz48L3N2Zz4K";
-        let LOGO_PNG = null; // Will be set at runtime by converting SVG to PNG
-        
-        let filterType = 'all';
-        let filterYear = 'all';
-        let sortMethod = 'date_desc';
-        let filterScope = 'all';
+        // Filtereinstellungen überleben den Reload (wie die Sprache)
+        let filterType = localStorage.getItem('mooMemo_filterType') || 'all';
+        let filterYear = localStorage.getItem('mooMemo_filterYear') || 'all';
+        let sortMethod = localStorage.getItem('mooMemo_sortMethod') || 'date_desc';
+        let filterScope = localStorage.getItem('mooMemo_filterScope') || 'all';
         let currentLang = 'de';
         let aiTargetLang = 'de';
 
@@ -2245,10 +2343,10 @@
 
         const translations = {
             de: {
-                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Globaler API Key (Cloud)", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Zuletzt Online:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode...", lbl_department: "Abteilung:", lbl_visibility: "Sichtbarkeit", vis_authors_only: "Nur Verfasser", vis_team_only: "Mein Team", vis_selected_teams: "Ausgewählte Teams", vis_all: "Alle", btn_publish: "Für alle freigeben", toast_published: "Bericht für alle freigegeben", toast_dept_changed: "Abteilung geändert", scope_mine: "Meine", scope_team: "Mein Team", scope_all: "Alle", filter_label_scope: "Rolle", filter_label_type: "Anlage", err_no_self_remove: "Du kannst dich nicht selbst als Verfasser entfernen.", visibility_help_tooltip: "Ab v1.8 ist die Sichtbarkeit der Berichte verändert: Nur Berichte, die für dein Team oder alle freigegeben wurden, sind für dich sichtbar.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin Rolle kann nicht geändert werden."
+                app_title: "mooMemo", overview: "Übersicht", tab_base: "Basis", tab_points: "Punkte", tab_status: "Status", tab_export: "Export", dash_title: "Berichte (Cloud)", filter_all: "Alle", filter_all_years: "Alle Jahre", sort_date_desc: "Datum (Neu)", sort_date_asc: "Datum (Alt)", sort_author: "Ersteller", sort_open: "Offene Punkte", btn_new: "Neuer Bericht erstellen", loading: "Lade Daten aus der Cloud...", tools_title: "Tools", btn_import: "Bericht importieren / Update", h_base: "Basisdaten", lbl_area: "Bereich", lbl_customer: "Kunde / Projekt", lbl_date: "Datum (von - bis)", lbl_author: "Verfasser", lbl_participants: "Teilnehmer", btn_next_points: "Weiter zu den Punkten", h_points: "Besuchs-Punkte", points_hint: "Tippe auf einen Punkt zum Bearbeiten.", h_status: "Status Übersicht", status_open_uc: "OFFEN", status_resolved_uc: "GELÖST / INFO", h_export: "Bericht Abschließen", btn_download_pdf: "Als PDF speichern", modal_new_point: "Neuer Punkt", modal_edit_point: "Punkt bearbeiten", btn_undo: "Rückgängig", btn_take_photo: "Foto aufnehmen", btn_csv: "CSV Export", btn_duplicate: "Bericht duplizieren", toast_duplicated: "Bericht dupliziert", mic_recording: "Aufnahme läuft – zum Stoppen Mikrofon erneut antippen", err_title_required: "Bitte einen Titel eingeben.", toast_ai_corrected: "Rechtschreibung korrigiert!", toast_ai_title_created: "Überschrift erstellt & Text korrigiert!", toast_ai_improved: "Text überarbeitet!", err_ai_failed: "KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.", err_ai_more_text: "Bitte mehr Text zur Überarbeitung eingeben.", ai_retry: "KI: Warte {s}s … (Versuch {a}/{m})", err_upload_failed: "{n} Bild(er) konnten nicht hochgeladen werden.", err_save_relogin: "Speichern fehlgeschlagen – bitte neu anmelden (Code S02)", err_storage_full: "Cloud-Speicher voll – bitte Admin kontaktieren (Code S03)", err_save_generic: "Speichern fehlgeschlagen – bitte Admin kontaktieren (Code S04)", err_sync_relogin: "Verbindung verloren – bitte neu anmelden (Code S01)", err_delete_failed: "Löschen fehlgeschlagen – bitte Admin kontaktieren (Code D01)", err_user_delete_failed: "Benutzer konnte nicht entfernt werden (Code U01)", tooltip_toggle_role: "Klicken zum Ändern", tooltip_remove_profile: "Profil entfernen", filter_all_assignees: "Alle Verantwortlichen", lbl_ticket: "Ticketnummer", lbl_title: "Titel / Thema", lbl_desc: "Beschreibung", lbl_assignee: "Verantwortlich", lbl_status: "Status", opt_open: "Offen (Zu erledigen)", opt_resolved: "Gelöst / Info", lbl_images: "Bilder hinzufügen", btn_save: "Speichern", btn_delete: "Löschen", btn_delete_confirm: "Ja, Löschen", btn_cancel: "Abbrechen", btn_confirm: "Bestätigen", admin_title: "Admin Zugriff", admin_desc: "Bitte Admin-PIN eingeben.", confirm_del_title: "Punkt löschen?", confirm_del_msg: "Möchtest du diesen Punkt unwiderruflich entfernen?", admin_area: "Admin Bereich", data_backup: "Datensicherung & Wiederherstellung", backup_save: "Backup speichern (Export)", backup_load: "Backup importieren", status_open: "OFFEN", status_resolved: "GELÖST / INFO", no_assignee: "Nicht zugewiesen", no_points: "Keine Punkte.", no_reports: "Noch keine Berichte vorhanden.", no_reports_found: "Keine Berichte gefunden. Suche oder Filter anpassen.", no_open_points: "Keine offenen Punkte", no_resolved_points: "Keine gelösten Punkte", overdue: "Überfällig", months_short: "Mon.", new: "Neu", settings_title: "Einstellungen", settings_lang: "Sprache / Language", delete_report_title: "Bericht löschen?", delete_report_msg: "Möchtest du diesen Bericht unwiderruflich aus der Cloud löschen?", toast_saved: "Gespeichert", toast_deleted: "Gelöscht", toast_removed: "Bericht wurde entfernt", ai_generating: "Generiere Titel...", ai_improving: "Überarbeite Text...", ai_error: "Fehler bei der Überarbeitung.", pdf_title: "Besuchsbericht", lbl_responsible: "Verantwortlich", search_placeholder: "Suchen... (ID, Kunde, Verfasser)", ai_translating: "Übersetze Bericht...", share_title: "Link kopieren", share_desc: "Link kopieren und versenden", btn_copy: "Kopieren", toast_copied: "Link kopiert!", readonly_info: "Du siehst einen geteilten Bericht (Nur-Lesen-Modus).", exit_confirm: "Möchtest du mooMemo wirklich verlassen?", lbl_solution: "Lösung", solution_placeholder: "Lösung hier eingeben...", solution_last_edited: "Zuletzt bearbeitet", lbl_solution_export: "Lösung", menu_change_pw: "Passwort ändern", menu_settings: "Einstellungen", menu_admin: "Admin-Bereich", menu_logout: "Abmelden", sync_online: "Cloud Verbunden", sync_offline: "Offline", export_show: "Anzeigen:", filter_all_export: "Alle", filter_open_only: "Nur Offene", related_reports: "Weitere Berichte", whats_new: "Was ist neu?", btn_understood: "Verstanden", drop_zone_text: "Bilder hier ablegen oder klicken", admin_api_key: "Globaler API Key (Cloud)", admin_save_cloud: "In Cloud speichern", admin_key_desc: "Dieser Key wird zentral gespeichert. Alle Mitarbeiter nutzen ihn automatisch.", user_mgmt: "Benutzerverwaltung", user_mgmt_desc: "Benutzer verwalten, Einladungscode setzen, Rollen zuweisen.", pw_change_title: "Passwort ändern", invite_code: "Einladungscode", invite_code_desc: "Neue Benutzer benötigen diesen Code zur Registrierung.", registered_users: "Registrierte Benutzer", settings_ai_lang: "KI Zielsprache (Textverbesserung)", btn_changelog: "Was ist neu? (Changelog)", app_info_legal: "App-Info & Rechtliches", err_pw_current: "Aktuelles Passwort eingeben.", err_pw_requirements: "Neues Passwort muss mind. 8 Zeichen haben, mit 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen.", err_pw_mismatch: "Neue Passwörter stimmen nicht überein.", toast_pw_changed: "Passwort erfolgreich geändert!", err_pw_wrong: "Aktuelles Passwort ist falsch.", role_admin: "Admin", role_user: "Benutzer", err_invite_empty: "Bitte Einladungscode eingeben.", toast_invite_saved: "Einladungscode gespeichert!", loading_short: "Lade...", no_users: "Keine Benutzer", lbl_registered: "Registriert:", lbl_last_login: "Zuletzt Online:", err_admin_only_roles: "Nur Admins können Rollen ändern.", err_own_role: "Du kannst deine eigene Rolle nicht ändern.", toast_role_changed: "Rolle geändert zu:", confirm_delete_user: "Benutzer-Profil aus mooMemo entfernen?", toast_user_removed: "Benutzer entfernt", err_self_delete: "Du kannst dich nicht selbst löschen.", new_report: "Neuer Bericht", no_participants: "Keine Teilnehmer", no_authors: "Keine Verfasser", img_large: "GROSS", img_normal: "NORMAL", no_related_reports: "Keine weiteren Berichte", sidebar_open: "Offen", sidebar_done: "Erledigt", open_suffix: "offen", err_key_empty: "Bitte Key eingeben", toast_key_saved: "Key erfolgreich in der Cloud gespeichert. Alle Nutzer haben nun Zugriff.", err_save_failed: "Fehler beim Speichern:", err_report_too_large: "Der Bericht ist zu groß (max. 1 MB). Bitte lösche ein paar Bilder.", err_admin_only_delete: "Nur Admins können Berichte löschen.", err_admin_only_access: "Nur Admins haben Zugriff auf diesen Bereich.", err_admin_only_backup: "Nur Admins können Backups erstellen.", err_admin_only_import: "Nur Admins können Backups importieren.", import_overwrite_confirm: "OK=Überschreiben, Abbrechen=Anfügen", toast_import_done: "Import verarbeitet.", toast_imported: "Importiert.", err_generic: "Fehler", report_not_found: "Bericht nicht gefunden", report_not_found_desc: "Der angeforderte Bericht existiert nicht oder wurde gelöscht.", back_to_app: "Zur App", err_browser_unsupported: "Browser nicht unterstützt", err_loading: "Fehler beim Laden", func_disabled: "Funktion aktuell deaktiviert.", err_no_api_key: "Kein API Key. Bitte als Admin im Admin-Bereich einen Key hinterlegen.", err_api_key_invalid: "API Key ungültig oder gesperrt.", ph_customer: "z.B. Müller GmbH", ph_name: "Name wählen...", ph_ticket: "z.B. 123456", ph_api_key: "Hier Key eingeben...", ph_current_pw: "Aktuelles Passwort", ph_new_pw: "Neues Passwort (mind. 8 Zeichen, A-z, 0-9, Sonderz.)", ph_new_pw2: "Neues Passwort wiederholen", ph_invite_code: "Einladungscode...", lbl_department: "Abteilung:", lbl_visibility: "Sichtbarkeit", vis_authors_only: "Nur Verfasser", vis_team_only: "Mein Team", vis_selected_teams: "Ausgewählte Teams", vis_all: "Alle", btn_publish: "Für alle freigeben", toast_published: "Bericht für alle freigegeben", toast_dept_changed: "Abteilung geändert", scope_mine: "Meine", scope_team: "Mein Team", scope_all: "Alle", filter_label_scope: "Rolle", filter_label_type: "Anlage", err_no_self_remove: "Du kannst dich nicht selbst als Verfasser entfernen.", visibility_help_tooltip: "Ab v1.8 ist die Sichtbarkeit der Berichte verändert: Nur Berichte, die für dein Team oder alle freigegeben wurden, sind für dich sichtbar.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin Rolle kann nicht geändert werden."
             },
             en: {
-                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Global API Key (Cloud)", admin_save_cloud: "Save to Cloud", admin_key_desc: "This key is stored centrally. All employees use it automatically.", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Online:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code...", lbl_department: "Department:", lbl_visibility: "Visibility", vis_authors_only: "Authors Only", vis_team_only: "My Team", vis_selected_teams: "Selected Teams", vis_all: "All", btn_publish: "Make visible to all", toast_published: "Report visible to all", toast_dept_changed: "Department changed", scope_mine: "My Reports", scope_team: "My Team", scope_all: "All", filter_label_scope: "Role", filter_label_type: "System", err_no_self_remove: "You cannot remove yourself as author.", visibility_help_tooltip: "Since v1.8, report visibility has changed: Only reports shared with your team or everyone are visible to you.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin role cannot be changed."
+                app_title: "mooMemo", overview: "Overview", tab_base: "Basic", tab_points: "Points", tab_status: "Status", tab_export: "Export", dash_title: "Reports (Cloud)", filter_all: "All", filter_all_years: "All Years", sort_date_desc: "Date (New)", sort_date_asc: "Date (Old)", sort_author: "Author", sort_open: "Open Points", btn_new: "Create New Report", loading: "Loading cloud data...", tools_title: "Tools", btn_import: "Import Report / Update", h_base: "Basic Data", lbl_area: "Area", lbl_customer: "Customer / Project", lbl_date: "Date (from - to)", lbl_author: "Author", lbl_participants: "Participants", btn_next_points: "Go to Points", h_points: "Visit Points", points_hint: "Tap on a point to edit.", h_status: "Status Overview", status_open_uc: "OPEN", status_resolved_uc: "RESOLVED / INFO", h_export: "Complete Report", btn_download_pdf: "Save as PDF", modal_new_point: "New Point", modal_edit_point: "Edit Point", btn_undo: "Undo", btn_take_photo: "Take Photo", btn_csv: "CSV Export", btn_duplicate: "Duplicate report", toast_duplicated: "Report duplicated", mic_recording: "Recording – tap the microphone again to stop", err_title_required: "Please enter a title.", toast_ai_corrected: "Spelling corrected!", toast_ai_title_created: "Headline created & text corrected!", toast_ai_improved: "Text improved!", err_ai_failed: "AI correction failed. Original text restored.", err_ai_more_text: "Please enter more text to improve.", ai_retry: "AI: waiting {s}s … (attempt {a}/{m})", err_upload_failed: "{n} image(s) could not be uploaded.", err_save_relogin: "Saving failed – please sign in again (code S02)", err_storage_full: "Cloud storage full – please contact an admin (code S03)", err_save_generic: "Saving failed – please contact an admin (code S04)", err_sync_relogin: "Connection lost – please sign in again (code S01)", err_delete_failed: "Delete failed – please contact an admin (code D01)", err_user_delete_failed: "Could not remove user (code U01)", tooltip_toggle_role: "Click to change", tooltip_remove_profile: "Remove profile", filter_all_assignees: "All responsibles", lbl_ticket: "Ticket Number", lbl_title: "Title / Topic", lbl_desc: "Description", lbl_assignee: "Responsible", lbl_status: "Status", opt_open: "Open (To do)", opt_resolved: "Resolved / Info", lbl_images: "Add Images", btn_save: "Save", btn_delete: "Delete", btn_delete_confirm: "Yes, Delete", btn_cancel: "Cancel", btn_confirm: "Confirm", admin_title: "Admin Access", admin_desc: "Please enter Admin PIN.", confirm_del_title: "Delete Point?", confirm_del_msg: "Do you want to permanently delete this point?", admin_area: "Admin Area", data_backup: "Backup & Restore", backup_save: "Save Backup (Export)", backup_load: "Import Backup", status_open: "OPEN", status_resolved: "RESOLVED / INFO", no_assignee: "Unassigned", no_points: "No points yet.", no_reports: "No reports yet.", no_reports_found: "No reports found. Adjust search or filters.", no_open_points: "No open points", no_resolved_points: "No resolved points", overdue: "Overdue", months_short: "mo.", new: "New", settings_title: "Settings", settings_lang: "Sprache / Language", delete_report_title: "Delete Report?", delete_report_msg: "Do you want to permanently delete this report from the cloud?", toast_saved: "Saved", toast_deleted: "Deleted", toast_removed: "Report was removed", ai_generating: "Generating Title...", ai_improving: "Improving Text...", ai_error: "Error improving text.", pdf_title: "Visit Report", lbl_responsible: "Responsible", search_placeholder: "Search... (ID, Customer, Author)", ai_translating: "Translating Report...", share_title: "Copy link", share_desc: "Copy and send link", btn_copy: "Copy", toast_copied: "Link copied!", readonly_info: "You are viewing a shared report (Read-only mode).", exit_confirm: "Do you really want to leave mooMemo?", lbl_solution: "Solution", solution_placeholder: "Enter solution here...", solution_last_edited: "Last edited", lbl_solution_export: "Solution", menu_change_pw: "Change Password", menu_settings: "Settings", menu_admin: "Admin Area", menu_logout: "Sign Out", sync_online: "Cloud Connected", sync_offline: "Offline", export_show: "Show:", filter_all_export: "All", filter_open_only: "Open Only", related_reports: "More Reports", whats_new: "What's new?", btn_understood: "Got it", drop_zone_text: "Drop images here or click", admin_api_key: "Global API Key (Cloud)", admin_save_cloud: "Save to Cloud", admin_key_desc: "This key is stored centrally. All employees use it automatically.", user_mgmt: "User Management", user_mgmt_desc: "Manage users, set invite codes, assign roles.", pw_change_title: "Change Password", invite_code: "Invite Code", invite_code_desc: "New users need this code to register.", registered_users: "Registered Users", settings_ai_lang: "AI Target Language (Text Improvement)", btn_changelog: "What's new? (Changelog)", app_info_legal: "App Info & Legal", err_pw_current: "Please enter current password.", err_pw_requirements: "New password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character.", err_pw_mismatch: "New passwords do not match.", toast_pw_changed: "Password changed successfully!", err_pw_wrong: "Current password is incorrect.", role_admin: "Admin", role_user: "User", err_invite_empty: "Please enter an invite code.", toast_invite_saved: "Invite code saved!", loading_short: "Loading...", no_users: "No users", lbl_registered: "Registered:", lbl_last_login: "Last Online:", err_admin_only_roles: "Only admins can change roles.", err_own_role: "You cannot change your own role.", toast_role_changed: "Role changed to:", confirm_delete_user: "Remove user profile from mooMemo?", toast_user_removed: "User removed", err_self_delete: "You cannot delete yourself.", new_report: "New Report", no_participants: "No participants", no_authors: "No authors", img_large: "LARGE", img_normal: "NORMAL", no_related_reports: "No more reports", sidebar_open: "Open", sidebar_done: "Done", open_suffix: "open", err_key_empty: "Please enter a key", toast_key_saved: "Key saved to cloud. All users now have access.", err_save_failed: "Error saving:", err_report_too_large: "Report is too large (max. 1 MB). Please remove some images.", err_admin_only_delete: "Only admins can delete reports.", err_admin_only_access: "Only admins have access to this area.", err_admin_only_backup: "Only admins can create backups.", err_admin_only_import: "Only admins can import backups.", import_overwrite_confirm: "OK=Overwrite, Cancel=Append", toast_import_done: "Import processed.", toast_imported: "Imported.", err_generic: "Error", report_not_found: "Report not found", report_not_found_desc: "The requested report does not exist or has been deleted.", back_to_app: "To App", err_browser_unsupported: "Browser not supported", err_loading: "Error loading", func_disabled: "Feature currently disabled.", err_no_api_key: "No API key. Please ask an admin to set a key in the Admin Area.", err_api_key_invalid: "API key invalid or blocked.", ph_customer: "e.g. Miller Ltd", ph_name: "Choose name...", ph_ticket: "e.g. 123456", ph_api_key: "Enter key here...", ph_current_pw: "Current Password", ph_new_pw: "New Password (min. 8 chars, A-z, 0-9, special)", ph_new_pw2: "Repeat New Password", ph_invite_code: "Invite code...", lbl_department: "Department:", lbl_visibility: "Visibility", vis_authors_only: "Authors Only", vis_team_only: "My Team", vis_selected_teams: "Selected Teams", vis_all: "All", btn_publish: "Make visible to all", toast_published: "Report visible to all", toast_dept_changed: "Department changed", scope_mine: "My Reports", scope_team: "My Team", scope_all: "All", filter_label_scope: "Role", filter_label_type: "System", err_no_self_remove: "You cannot remove yourself as author.", visibility_help_tooltip: "Since v1.8, report visibility has changed: Only reports shared with your team or everyone are visible to you.", role_sadmin: "S-Admin", err_sadmin_protected: "S-Admin role cannot be changed."
             }
         };
 
@@ -2260,6 +2358,22 @@
 
         window.getCurrentReport = function() {
             return allReports.find(r => r.id === currentReportId);
+        };
+
+        // Zentrale Migration alter Sichtbarkeitswerte (published/draft) –
+        // vorher an vier Stellen identisch dupliziert
+        window.normalizeVisibility = function(header) {
+            let vis = (header && header.visibility) || 'authors_only';
+            if (vis === 'published') vis = 'all';
+            if (vis === 'draft') vis = 'authors_only';
+            return vis;
+        };
+
+        // Zentrales Datumsformat (TT.MM.JJJJ) – vorher dreimal lokal definiert
+        window.formatDateDE = function(d) {
+            if(!d) return '';
+            const p = String(d).split('-');
+            return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d;
         };
 
         window.getAgeInMonths = function(dateStr) {
@@ -2303,31 +2417,6 @@
             return [Math.ceil((((d - yearStart) / 86400000) + 1) / 7), d.getUTCFullYear()];
         };
 
-        // --- CONVERT SVG LOGO TO PNG AT STARTUP (html2canvas can't render SVGs reliably) ---
-        window.prepareLogo = function() {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = function() {
-                    // Render at 4x for crisp PDF output (85*4=340, 27*4=108)
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 340;
-                    canvas.height = 108;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, 340, 108);
-                    LOGO_PNG = canvas.toDataURL('image/png');
-                    console.log('Logo PNG prepared for PDF export');
-                    resolve();
-                };
-                img.onerror = function() {
-                    console.warn('Could not prepare logo PNG');
-                    resolve();
-                };
-                img.src = LOGO_SRC;
-            });
-        };
-        // Run immediately
-        window.prepareLogo();
-
         // --- UI HELPERS ---
         window.updateSyncStatus = function(isOnline) {
             const el = document.getElementById('sync-status');
@@ -2340,16 +2429,18 @@
 
         const toastQueue = [];
         let toastActive = false;
-        window.showToast = function(message) {
-            toastQueue.push(message);
+        // type: '' (neutral) | 'success' | 'error' – nutzt die vorhandenen #toast.success/.error Styles
+        window.showToast = function(message, type) {
+            toastQueue.push({ message, type: type || '' });
             if (!toastActive) processToastQueue();
         };
         function processToastQueue() {
             const x = document.getElementById("toast");
-            if (!x || toastQueue.length === 0) { toastActive = false; return; }
+            if (!x || toastQueue.length === 0) { toastActive = false; x && (x.className = ""); return; }
             toastActive = true;
-            x.textContent = toastQueue.shift();
-            x.className = "show";
+            const item = toastQueue.shift();
+            x.textContent = item.message;
+            x.className = ("show " + item.type).trim();
             setTimeout(() => { x.className = x.className.replace("show", ""); setTimeout(processToastQueue, 350); }, 2500);
         }
 
@@ -2442,7 +2533,9 @@
                 err_reg_fail: 'Registrierung fehlgeschlagen.',
                 err_email_used: 'Diese E-Mail wird bereits verwendet.',
                 err_pw_weak: 'Passwort ist zu schwach.',
-                pw_reset_msg: 'Passwort vergessen?\n\nBitte wende dich an David.Mazur@gea.com.\nDein Konto wird dann zurückgesetzt und du kannst dich neu registrieren.'
+                pw_reset_prompt: 'Bitte E-Mail Adresse eingeben:',
+                pw_reset_sent: 'E-Mail zum Zurücksetzen des Passworts wurde versendet. Bitte Postfach (und Spam-Ordner) prüfen.',
+                pw_reset_error: 'Zurücksetzen fehlgeschlagen. Ist die E-Mail Adresse korrekt?'
             },
             en: {
                 subtitle: 'Visit Reports & Task Management',
@@ -2480,7 +2573,9 @@
                 err_reg_fail: 'Registration failed.',
                 err_email_used: 'This email is already in use.',
                 err_pw_weak: 'Password is too weak.',
-                pw_reset_msg: 'Forgot your password?\n\nPlease contact David.Mazur@gea.com.\nYour account will be reset and you can re-register.'
+                pw_reset_prompt: 'Please enter your email address:',
+                pw_reset_sent: 'Password reset email sent. Please check your inbox (and spam folder).',
+                pw_reset_error: 'Reset failed. Is the email address correct?'
             }
         };
 
@@ -2653,10 +2748,19 @@
             }
         };
 
-        // --- PASSWORD RESET ---
-        window.doPasswordReset = function() {
+        // --- PASSWORD RESET (Self-Service per E-Mail statt "Admin kontaktieren") ---
+        window.doPasswordReset = async function() {
             const lt = loginTranslations[loginLang];
-            alert(lt.pw_reset_msg);
+            let email = document.getElementById('login-email').value.trim();
+            if (!email) email = (prompt(lt.pw_reset_prompt) || '').trim();
+            if (!email) return;
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert(lt.pw_reset_sent);
+            } catch(e) {
+                console.error('Password reset failed:', e);
+                alert(lt.pw_reset_error);
+            }
         };
 
         // --- PASSWORD CHANGE ---
@@ -2823,6 +2927,36 @@
             }
         });
 
+        // --- MODAL KOMFORT: ESC + Klick auf Overlay schließt Modals ---
+        // Ausnahme: der Punkt-Editor (#modal), damit Eingaben nicht versehentlich
+        // verloren gehen – der schließt nur über X, Speichern oder Zurück-Geste.
+        document.addEventListener('keydown', function(e) {
+            // Pfeiltasten blättern in der offenen Lightbox
+            const lightboxEl = document.getElementById('img-lightbox');
+            const lightboxOpen = lightboxEl && lightboxEl.style.display === 'flex';
+            if (lightboxOpen && e.key === 'ArrowRight') { window.lightboxNav(1); return; }
+            if (lightboxOpen && e.key === 'ArrowLeft') { window.lightboxNav(-1); return; }
+            if (e.key !== 'Escape') return;
+            if (lightboxOpen) { window.closeLightbox(); return; }
+            const open = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => m.style.display === 'flex');
+            if (open.length) {
+                const top = open[open.length - 1];
+                if (top.id !== 'modal') top.style.display = 'none';
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (e.target.classList && e.target.classList.contains('modal-overlay') && e.target.id !== 'modal') {
+                e.target.style.display = 'none';
+            }
+        });
+        // Strg/Cmd+Enter im Punkt-Editor speichert (Desktop-Komfort)
+        document.getElementById('modal').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                window.savePoint();
+            }
+        });
+
         // --- INVITE CODE MANAGEMENT ---
         window.loadInviteCode = async function() {
             try {
@@ -2884,7 +3018,7 @@
                 container.innerHTML = users.map(u => {
                     const isSelf = u.uid === currentUser.uid;
                     const isSA = window.isSuperAdmin(u);
-                    const deleteBtn = (isSelf || isSA) ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="Profil entfernen" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
+                    const deleteBtn = (isSelf || isSA) ? '' : `<button onclick="window.deleteUserProfile('${u.uid}')" title="${t.tooltip_remove_profile}" aria-label="${t.tooltip_remove_profile}" style="background:none; border:none; color:var(--danger); cursor:pointer; padding:4px 8px; font-size:0.85rem; opacity:0.6; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"><i class="fa-solid fa-trash"></i></button>`;
                     const createdStr = u.created_at ? new Date(u.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
                     const lastLoginTs = u.lastLogin || u.created_at;
                     const lastLoginStr = lastLoginTs ? new Date(lastLoginTs).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
@@ -2914,7 +3048,7 @@
                                 ? `<span class="role-badge sadmin" title="Super Admin">${t.role_sadmin || 'S-Admin'}</span>`
                                 : `<span class="role-badge ${u.role === 'admin' ? 'admin' : 'user'}"
                                       onclick="window.toggleUserRole('${u.uid}')"
-                                      title="Klicken zum Ändern">
+                                      title="${t.tooltip_toggle_role}">
                                     ${u.role === 'admin' ? t.role_admin : t.role_user}
                                   </span>`
                             }
@@ -2969,14 +3103,18 @@
                 const targetSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
                 if (targetSnap.exists() && window.isSuperAdmin(targetSnap.data())) { alert(t.err_sadmin_protected || 'S-Admin kann nicht entfernt werden.'); return; }
             } catch(e) { /* ignore */ }
-            if (!confirm(t.confirm_delete_user)) return;
+            window.showConfirm(t.user_mgmt, t.confirm_delete_user, t.btn_delete_confirm, () => window.execDeleteUserProfile(uid));
+        };
+
+        window.execDeleteUserProfile = async function(uid) {
+            const t = translations[currentLang];
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid));
                 window.showToast(t.toast_user_removed);
                 await window.loadUserList();
             } catch(e) {
                 console.warn("[ERR-U01] Delete user profile failed:", e.code);
-                window.showToast('Fehler U01 - Console prüfen');
+                window.showToast(translations[currentLang].err_user_delete_failed, 'error');
             }
         };
 
@@ -3002,8 +3140,7 @@
             const h = r.header;
             const customer = h.customer || translations[currentLang].new_report;
             const authors = (h.authors && h.authors.length) ? h.authors.join(', ') : (h.author || '');
-            const formatDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d; };
-            const dateStr = h.date_from ? formatDate(h.date_from) : '';
+            const dateStr = h.date_from ? window.formatDateDE(h.date_from) : '';
             const displayId = r.readable_id ? `#${r.readable_id}` : '';
             const openCount = (r.points || []).filter(p => p.status === 'open').length;
             const meta = [displayId, authors, dateStr, h.type || 'AMS'].filter(Boolean).join(' · ') + (openCount > 0 ? ` · ${openCount} ${translations[currentLang].open_suffix}` : '');
@@ -3050,7 +3187,7 @@
                 const moveDown = i < points.length - 1 ? `<button class="sort-btn" onclick="event.stopPropagation(); window.movePoint(${i}, 1)"><i class="fa-solid fa-chevron-down"></i></button>` : '';
 
                 return `
-                <div class="point-item ${statusClass}" draggable="true" ondragstart="window.handleDragStart(event, ${i})" ondragover="window.handleDragOver(event)" ondrop="window.handleDrop(event, ${i})" ondragend="window.handleDragEnd(event)" onclick="window.openModal(${i})">
+                <div class="point-item ${statusClass}" onclick="window.openModal(${i})">
                     <div class="point-content-wrapper">
                         <div class="point-header-row">
                             <div class="point-title">
@@ -3059,13 +3196,39 @@
                             </div>
                             <div>${badge}</div>
                         </div>
-                        <div class="point-desc">${window.escapeHtml((p.desc||'').substring(0,80))}...</div>
+                        <div class="point-desc">${window.escapeHtml((p.desc||'').substring(0,80))}${(p.desc||'').length>80?'...':''}</div>
                         ${p.solution && p.solution.trim() ? `<div style="font-size:0.75rem; color:#1d4ed8; margin-top:2px;"><i class="fa-solid fa-lightbulb"></i> ${t.lbl_solution}: ${window.escapeHtml(p.solution.substring(0,60))}${p.solution.length>60?'...':''}</div>` : ''}
                         <div class="point-meta-row"><span><i class="fa-solid fa-user"></i> ${window.escapeHtml(p.assignee)||t.no_assignee}</span>${p.images&&p.images.length?`<span><i class="fa-solid fa-image"></i> ${p.images.length}</span>`:''}</div>
                     </div>
                     <div class="point-sort-column">${moveUp}${moveDown}</div>
                 </div>`;
             }).join('');
+
+            window.initPointsSortable(container);
+        };
+
+        // SortableJS statt nativem HTML5-Drag&Drop: funktioniert auch auf
+        // Touch-Geräten (langes Drücken startet das Ziehen, kurzes Tippen öffnet).
+        // Die Pfeil-Buttons bleiben als tastatur-/fallback-freundliche Alternative.
+        let pointsSortable = null;
+        window.initPointsSortable = function(container) {
+            if (pointsSortable) { pointsSortable.destroy(); pointsSortable = null; }
+            if (!window.Sortable || points.length < 2) return;
+            pointsSortable = Sortable.create(container, {
+                animation: 150,
+                delay: 200,
+                delayOnTouchOnly: true,
+                touchStartThreshold: 5,
+                ghostClass: 'dragging',
+                onEnd: (evt) => {
+                    if (evt.oldIndex === evt.newIndex || evt.oldIndex == null || evt.newIndex == null) return;
+                    const item = points.splice(evt.oldIndex, 1)[0];
+                    points.splice(evt.newIndex, 0, item);
+                    const r = window.getCurrentReport();
+                    if (r) { r.points = points; window.saveReportToFirestore(r); }
+                    window.renderPointsList();
+                }
+            });
         };
 
         window.renderStatusList = function() {
@@ -3074,8 +3237,24 @@
             if(!listOpen || !listResolved) return;
             
             const t = translations[currentLang];
+
+            // Verantwortlichen-Filter: Optionen aus den Punkten aufbauen, Auswahl erhalten
+            const assigneeFilter = document.getElementById('status-assignee-filter');
+            let selectedAssignee = 'all';
+            if (assigneeFilter) {
+                selectedAssignee = assigneeFilter.value || 'all';
+                const assignees = [...new Set(points.map(p => (p.assignee || '').trim()).filter(Boolean))].sort();
+                assigneeFilter.innerHTML = `<option value="all">${t.filter_all_assignees}</option>` +
+                    assignees.map(a => `<option value="${window.escapeHtml(a)}">${window.escapeHtml(a)}</option>`).join('');
+                if (selectedAssignee !== 'all' && !assignees.includes(selectedAssignee)) selectedAssignee = 'all';
+                assigneeFilter.value = selectedAssignee;
+                // Filter nur anzeigen, wenn es überhaupt mehrere Verantwortliche gibt
+                assigneeFilter.style.display = assignees.length > 1 ? '' : 'none';
+            }
+
             let htmlOpen='', htmlResolved='', cOpen=0, cRes=0;
             points.forEach((p,i) => {
+                if (selectedAssignee !== 'all' && (p.assignee || '').trim() !== selectedAssignee) return;
                 const btnText = p.status==='open' ? t.status_open : t.status_resolved;
                 const btnBg = p.status==='open' ? 'var(--danger-bg)' : 'var(--success-bg)';
                 const btnColor = p.status==='open' ? '#991b1b' : '#065f46';
@@ -3091,10 +3270,10 @@
 
         window.renderPDFPreviewWithData = function(r) {
              if(!r) return;
-             const h=r.header; const pList=r.header.participants?r.header.participants.join(', '):'-';
-             const aList=r.header.authors?r.header.authors.join(', '):(r.header.author || '-');
+             const h=r.header; const pList=window.escapeHtml(r.header.participants?r.header.participants.join(', '):'-');
+             const aList=window.escapeHtml(r.header.authors?r.header.authors.join(', '):(r.header.author || '-'));
              const t=translations[currentLang];
-             const formatDate=(d)=>{if(!d)return'';const p=d.split('-');if(p.length===3)return`${p[2]}.${p[1]}.${p[0]}`;return d;};
+             const formatDate=window.formatDateDE;
 
              // Use SVG logo directly - native browser print handles SVGs perfectly
              const logoSrc = "https://cdn.gea.com/-/jssmedia/common/logos/gea-logo.svg?mw=85";
@@ -3113,18 +3292,18 @@
                  });
                  const stTxt = p.status==='open'?t.status_open:t.status_resolved;
                  const badgeStyle = p.status==='open' ? 'background:#fef2f2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#065f46; border:1px solid #bbf7d0;';
-                 const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${p.assignee}</p>` : '';
+                 const assHtml = p.assignee ? `<p style="font-size:0.9rem;"><strong>${t.lbl_responsible}:</strong> ${window.escapeHtml(p.assignee)}</p>` : '';
                  let solutionHtml = '';
                  if (p.solution && p.solution.trim()) {
                      const solDateStr = p.solutionDate ? ` <span style="font-size:0.75rem; color:#666;">(${t.solution_last_edited}: ${new Date(p.solutionDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })})</span>` : '';
                      solutionHtml = `<div style="margin-top:10px; padding:10px; background:#eff6ff; border-left:3px solid #3b82f6; border-radius:4px;"><strong style="color:#1d4ed8;">${t.lbl_solution_export}:</strong>${solDateStr}<p style="margin:5px 0 0 0; white-space:pre-wrap;">${window.escapeHtml(p.solution)}</p></div>`;
                  }
-                 return `<div style="margin-bottom:25px;"><div style="page-break-inside: avoid; page-break-after: avoid; break-after: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${p.ticket}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${p.title}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${p.desc}</p>${assHtml}${solutionHtml}</div><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
+                 return `<div style="margin-bottom:25px;"><div style="page-break-inside: avoid; page-break-after: avoid; break-after: avoid;"><div style="border-bottom:1px solid #ddd; padding-bottom:5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;"><div>${p.ticket?`<b><i class="fa-solid fa-ticket" style="color:#666; margin-right:4px;"></i> CRM ${window.escapeHtml(p.ticket)}</b> `:''}<span style="font-size:1.2rem; font-weight:bold; color:${p.status==='open'?'#dc2626':'#16a34a'}${clickStyle}" ${clickAttr}>${window.escapeHtml(p.title)}</span></div><span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:4px 10px; border-radius:99px; ${badgeStyle}">${stTxt}</span></div><p style="white-space:pre-wrap;">${window.escapeHtml(p.desc)}</p>${assHtml}${solutionHtml}</div><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">${safeImages.map(img=>{ const s=img.isLarge?'width:100%; height:auto; margin-bottom:10px; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;' : 'width:48%; height:auto; border:1px solid #ddd; border-radius:4px; max-height: 250mm; object-fit: contain; page-break-inside: avoid; display: block;'; return `<img src="${img.src}" style="${s} cursor:pointer;" onclick="window.openLightbox(this.src)">`; }).join('')}</div></div>`;
              }).join('');
 
              const devBuild = "DEV-20260316A";
              const previewEl = document.getElementById('pdf-preview');
-             if(previewEl) previewEl.innerHTML = `<div style="margin-bottom:28px; page-break-after:avoid; break-after:avoid;"><div style="display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:14px; margin-bottom:14px; border-bottom:2.5px solid #111827;"><div><div style="font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9ca3af; margin-bottom:6px;">${t.pdf_title}</div><div style="font-size:1.5rem; font-weight:800; color:#111827; line-height:1.15;">${h.customer}</div><div style="font-size:0.82rem; color:#6b7280; margin-top:4px;">${formatDate(h.date_from)}${h.date_to && h.date_to !== h.date_from ? ' \u2013 ' + formatDate(h.date_to) : ''}</div></div><img src="${logoSrc}" style="height:32px; width:auto; object-fit:contain; flex-shrink:0; margin-bottom:4px;"></div><div style="display:flex; gap:32px; flex-wrap:wrap; font-size:0.82rem; color:#374151;"><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_author}</span><strong>${aList}</strong></div><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_participants}</span><strong>${pList}</strong></div></div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
+             if(previewEl) previewEl.innerHTML = `<div style="margin-bottom:28px; page-break-after:avoid; break-after:avoid;"><div style="display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:14px; margin-bottom:14px; border-bottom:2.5px solid #111827;"><div><div style="font-size:0.62rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#9ca3af; margin-bottom:6px;">${t.pdf_title}</div><div style="font-size:1.5rem; font-weight:800; color:#111827; line-height:1.15;">${window.escapeHtml(h.customer)}</div><div style="font-size:0.82rem; color:#6b7280; margin-top:4px;">${formatDate(h.date_from)}${h.date_to && h.date_to !== h.date_from ? ' \u2013 ' + formatDate(h.date_to) : ''}</div></div><img src="${logoSrc}" style="height:32px; width:auto; object-fit:contain; flex-shrink:0; margin-bottom:4px;"></div><div style="display:flex; gap:32px; flex-wrap:wrap; font-size:0.82rem; color:#374151;"><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_author}</span><strong>${aList}</strong></div><div><span style="color:#9ca3af; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.08em; display:block; margin-bottom:2px;">${t.lbl_participants}</span><strong>${pList}</strong></div></div></div>${html}<div style="margin-top:30px; text-align:right; font-size:0.55rem; color:#ccc;">${devBuild}</div>`;
         };
         
         window.renderPDFPreview = () => window.renderPDFPreviewWithData(window.getCurrentReport());
@@ -3169,9 +3348,7 @@
                 if (!isAdm && !isAuthor) {
                     const userDept = currentUserProfile ? currentUserProfile.department : null;
                     if (!userDept) return false;
-                    let vis = r.header.visibility || 'authors_only';
-                    if (vis === 'published') vis = 'all';
-                    if (vis === 'draft') vis = 'authors_only';
+                    const vis = window.normalizeVisibility(r.header);
                     if (vis === 'authors_only') return false;
                     else if (vis === 'team_only') {
                         if (userDept !== 'All' && userDept !== (r.created_by_dept || '')) return false;
@@ -3237,7 +3414,7 @@
                             <span class="related-report-date">${kwStr}</span>
                             <span class="related-report-id">${displayId}</span>
                         </div>
-                        <span class="related-report-meta"><i class="fa-solid fa-user"></i> ${authorsStr}</span>
+                        <span class="related-report-meta"><i class="fa-solid fa-user"></i> ${window.escapeHtml(authorsStr)}</span>
                         <span class="related-report-badge ${badgeClass}">${badgeText}</span>
                     </div>
                 `;
@@ -3247,11 +3424,6 @@
         window.openRelatedReport = function(id) {
             window.openReport(id);
             window.switchTab('export');
-        };
-
-        window.translateReport = async function() {
-            // DEPRECATED / DISABLED
-            window.showToast(translations[currentLang].func_disabled);
         };
 
         // --- SAVE GLOBAL API KEY (read server-side by Cloud Function, never sent to browser) ---
@@ -3289,10 +3461,16 @@
                     if (e.code === 'functions/not-found')       throw new Error("API-Key nicht konfiguriert. Bitte im Admin-Panel eintragen.");
                     if (e.code === 'functions/permission-denied') throw new Error(translations[currentLang].err_api_key_invalid);
 
+                    const retryToast = (waitMs) => window.showToast(
+                        translations[currentLang].ai_retry
+                            .replace('{s}', Math.round(waitMs / 1000))
+                            .replace('{a}', attempt + 1)
+                            .replace('{m}', MAX_ATTEMPTS));
+
                     if (e.code === 'functions/resource-exhausted') {
                         if (attempt >= MAX_ATTEMPTS - 1) throw new Error("Rate-Limit der KI-API erreicht. Bitte kurz warten und erneut versuchen.");
                         const waitMs = Math.pow(2, attempt + 1) * 1000;
-                        window.showToast(`KI: Zu viele Anfragen – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                        retryToast(waitMs);
                         await new Promise(r => setTimeout(r, waitMs));
                         continue;
                     }
@@ -3300,14 +3478,14 @@
                     if (e.code === 'functions/unavailable') {
                         if (attempt >= MAX_ATTEMPTS - 1) throw new Error("KI-Server nicht erreichbar. Bitte später erneut versuchen.");
                         const waitMs = Math.pow(2, attempt + 1) * 1000;
-                        window.showToast(`KI: Server-Fehler – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                        retryToast(waitMs);
                         await new Promise(r => setTimeout(r, waitMs));
                         continue;
                     }
 
                     if (attempt >= MAX_ATTEMPTS - 1) throw e;
                     const waitMs = Math.pow(2, attempt + 1) * 1000;
-                    window.showToast(`KI: Verbindungsfehler – warte ${Math.round(waitMs / 1000)}s … (Versuch ${attempt + 1}/${MAX_ATTEMPTS})`);
+                    retryToast(waitMs);
                     await new Promise(r => setTimeout(r, waitMs));
                 }
             }
@@ -3319,7 +3497,7 @@
             const titleField = document.getElementById('p_title');
             const desc = descField.value.trim();
             const title = titleField.value.trim();
-            if (desc.length < 10) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+            if (desc.length < 10) { window.showToast(translations[currentLang].err_ai_more_text); return; }
 
             const originalDesc = descField.value;
             const originalTitle = titleField.value;
@@ -3327,6 +3505,7 @@
             const btn = document.getElementById('btn-improve-text');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
 
             const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
             const context = "GEA FarmTechnologies Melktechnik/Fütterungstechnik";
@@ -3364,34 +3543,36 @@ Text: "${desc}"`;
                         const parsed = JSON.parse(jsonMatch[0]);
                         if (parsed.headline) titleField.value = parsed.headline;
                         if (parsed.text) descField.value = parsed.text;
-                        window.showToast(title ? "Rechtschreibung korrigiert!" : "Überschrift erstellt & Text korrigiert!");
+                        window.showToast(title ? translations[currentLang].toast_ai_corrected : translations[currentLang].toast_ai_title_created, 'success');
                     } catch(parseErr) {
                         descField.value = aiResponse;
-                        window.showToast("Text überarbeitet!");
+                        window.showToast(translations[currentLang].toast_ai_improved, 'success');
                     }
                 } else {
                     descField.value = aiResponse;
-                    window.showToast("Text überarbeitet!");
+                    window.showToast(translations[currentLang].toast_ai_improved, 'success');
                 }
             } catch(e) {
                 descField.value = originalDesc;
                 titleField.value = originalTitle;
-                window.showToast("KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.");
+                window.showToast(translations[currentLang].err_ai_failed, 'error');
             }
 
             btn.innerHTML = originalHTML;
+            btn.disabled = false;
         };
 
         window.improveSolution = async function() {
             const field = document.getElementById('p_solution');
             const text = field.value.trim();
-            if (text.length < 5) { window.showToast("Bitte geben Sie mehr Text zur Überarbeitung ein."); return; }
+            if (text.length < 5) { window.showToast(translations[currentLang].err_ai_more_text); return; }
 
             const originalText = field.value;
 
             const btn = document.getElementById('btn-improve-solution');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
 
             const targetLang = aiTargetLang === 'de' ? 'German' : 'English';
 
@@ -3403,13 +3584,14 @@ Antworte NUR mit dem korrigierten Text (kein JSON, keine Erklärungen).
 
 Text: "${text}"`);
                 field.value = result;
-                window.showToast("Rechtschreibung korrigiert!");
+                window.showToast(translations[currentLang].toast_ai_corrected, 'success');
             } catch(e) {
                 field.value = originalText;
-                window.showToast("KI-Korrektur fehlgeschlagen. Originaltext wiederhergestellt.");
+                window.showToast(translations[currentLang].err_ai_failed, 'error');
             }
 
             btn.innerHTML = originalHTML;
+            btn.disabled = false;
         };
 
         window.renderReportList = function() {
@@ -3423,7 +3605,7 @@ Text: "${text}"`);
             const searchInput = document.getElementById('search-input');
             const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             const list = document.getElementById('report-list');
-            if(allReports.length === 0) { list.innerHTML = `<div style="text-align:center; padding:20px;">${t.no_points}</div>`; return; }
+            if(allReports.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-folder-open"></i></div><div class="empty-state-desc">${t.no_reports}</div></div>`; return; }
 
             let filteredReports = allReports.filter(r => {
                 const rType = r.header.type || 'AMS';
@@ -3446,9 +3628,7 @@ Text: "${text}"`);
                         if (!userDept) return false;
                         const creatorDept = r.created_by_dept || '';
                         const visibleTeams = r.header.visible_teams || [];
-                        let vis = r.header.visibility || 'authors_only';
-                        if (vis === 'published') vis = 'all';
-                        if (vis === 'draft') vis = 'authors_only';
+                        const vis = window.normalizeVisibility(r.header);
                         const createdBySameDept = userDept === 'All' || userDept === creatorDept;
                         const sharedWithDept = vis === 'all' || (vis === 'team_only' && (userDept === 'All' || userDept === creatorDept)) || (vis === 'selected_teams' && (userDept === 'All' || visibleTeams.includes(userDept)));
                         if (!createdBySameDept && !sharedWithDept) return false;
@@ -3462,9 +3642,7 @@ Text: "${text}"`);
                     if (!userDept) {
                         return false;
                     }
-                    let vis = r.header.visibility || 'authors_only';
-                    if (vis === 'published') vis = 'all';
-                    if (vis === 'draft') vis = 'authors_only';
+                    const vis = window.normalizeVisibility(r.header);
 
                     if (vis === 'authors_only') {
                         return false;
@@ -3513,6 +3691,11 @@ Text: "${text}"`);
                 });
             }
 
+            if(filteredReports.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fa-solid fa-magnifying-glass"></i></div><div class="empty-state-desc">${t.no_reports_found}</div></div>`;
+                return;
+            }
+
             list.innerHTML = filteredReports.map(r => {
                 let title = window.escapeHtml(r.header.customer) || t.new_report;
                 if(r.header.date_from) { const d = new Date(r.header.date_from); if(!isNaN(d)) { const [w,y] = window.getWeekNumber(d); title = `KW ${w} ${y} - ${window.escapeHtml(r.header.customer)}`; } }
@@ -3533,15 +3716,31 @@ Text: "${text}"`);
                 const pointsTxt = total > 0 ? `${total} ${t.tab_points}` : t.no_points;
                 // Use authors array, fallback to deprecated author field
                 const authorsDisplay = window.escapeHtml((r.header.authors && r.header.authors.length) ? r.header.authors.join(', ') : (r.header.author || '-'));
-                const deleteBtnHtml = window.isAdmin() ? `<button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="Löschen"><i class="fa-solid fa-trash"></i></button>` : '';
-                let rVis = r.header.visibility || 'authors_only';
-                if (rVis === 'published') rVis = 'all';
-                if (rVis === 'draft') rVis = 'authors_only';
+                const deleteBtnHtml = window.isAdmin() ? `<button type="button" class="btn-action delete" onclick="window.askDeleteReport(event, '${r.id}')" title="${t.btn_delete}" aria-label="${t.btn_delete}"><i class="fa-solid fa-trash"></i></button>` : '';
+                const dupBtnHtml = `<button type="button" class="btn-action" onclick="window.duplicateReport(event, '${r.id}')" title="${t.btn_duplicate}" aria-label="${t.btn_duplicate}"><i class="fa-solid fa-copy"></i></button>`;
+                // Suchtreffer-Kontext: zeigen, WARUM ein Bericht matcht, wenn der
+                // Treffer in einem Punkt (Titel/Beschreibung/Lösung) liegt
+                let snippetHtml = '';
+                if (searchQuery) {
+                    const mp = (r.points || []).find(p =>
+                        (p.title && p.title.toLowerCase().includes(searchQuery)) ||
+                        (p.desc && p.desc.toLowerCase().includes(searchQuery)) ||
+                        (p.solution && p.solution.toLowerCase().includes(searchQuery)));
+                    if (mp) {
+                        const src = [mp.title, mp.desc, mp.solution].find(s => s && s.toLowerCase().includes(searchQuery)) || '';
+                        const pos = src.toLowerCase().indexOf(searchQuery);
+                        const start = Math.max(0, pos - 30);
+                        const end = pos + searchQuery.length + 30;
+                        const excerpt = (start > 0 ? '…' : '') + src.substring(start, end) + (end < src.length ? '…' : '');
+                        snippetHtml = `<p style="font-size:0.8rem; color:var(--text-sub); font-style:italic;"><i class="fa-solid fa-magnifying-glass" style="font-size:0.7rem;"></i> ${window.escapeHtml(excerpt)}</p>`;
+                    }
+                }
+                const rVis = window.normalizeVisibility(r.header);
                 const visLabels = { authors_only: t.vis_authors_only || 'Nur Verfasser', team_only: t.vis_team_only || 'Mein Team', selected_teams: (r.header.visible_teams || []).join(', ') || (t.vis_selected_teams || 'Teams'), all: t.vis_all || 'Alle' };
                 const visIcon = rVis === 'authors_only' ? '<i class="fa-solid fa-lock" style="font-size:0.55rem;margin-right:3px;"></i>' : rVis === 'all' ? '<i class="fa-solid fa-globe" style="font-size:0.55rem;margin-right:3px;"></i>' : '<i class="fa-solid fa-users" style="font-size:0.55rem;margin-right:3px;"></i>';
                 const visBadge = `<span class="vis-badge vis-${rVis}">${visIcon}${visLabels[rVis]}</span>`;
                 const restrictedClass = rVis !== 'all' ? ` restricted-${rVis}` : '';
-                return `<div class="report-list-item ${statusClass}${restrictedClass}"><div class="report-clickable-area" onclick="window.openReport('${r.id}')"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}${visBadge}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p></div></div>${deleteBtnHtml ? '<div class="report-actions">' + deleteBtnHtml + '</div>' : ''}</div>`;
+                return `<div class="report-list-item ${statusClass}${restrictedClass}"><div class="report-clickable-area" role="button" tabindex="0" onclick="window.openReport('${r.id}')" onkeydown="if(event.key==='Enter'){this.click();}"><div class="report-info"><h3><span><span class="report-type-badge">${r.header.type||'AMS'}</span> ${title}${visBadge}</span><span class="report-id">${displayId}</span></h3><p><i class="fa-solid fa-user"></i> ${authorsDisplay}</p><p><i class="fa-solid fa-list-check"></i> <span>${pointsTxt}</span> ${pointsStatusBadge}${badge}</p>${snippetHtml}</div></div><div class="report-actions">${dupBtnHtml}${deleteBtnHtml}</div></div>`;
             }).join('');
         };
 
@@ -3562,13 +3761,13 @@ Text: "${text}"`);
                      alert(translations[currentLang].err_report_too_large);
                 } else if(e.code === 'permission-denied') {
                      console.warn("[ERR-S02] Firestore write permission denied");
-                     window.showToast("Fehler S02 - Bitte neu anmelden");
+                     window.showToast(translations[currentLang].err_save_relogin, 'error');
                 } else if(e.code === 'storage/quota-exceeded') {
                      console.warn("[ERR-S03] Storage quota exceeded");
-                     window.showToast("Fehler S03 - Admin kontaktieren");
+                     window.showToast(translations[currentLang].err_storage_full, 'error');
                 } else {
                      console.warn("[ERR-S04] Save failed:", e.code, e.message);
-                     window.showToast("Fehler S04 - Admin kontaktieren");
+                     window.showToast(translations[currentLang].err_save_generic, 'error');
                 }
             }
         };
@@ -3608,7 +3807,7 @@ Text: "${text}"`);
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
             } catch(e) {
                 console.warn("[ERR-D01] Delete failed:", e.code, e.message);
-                window.showToast("Fehler D01 - Admin kontaktieren");
+                window.showToast(translations[currentLang].err_delete_failed, 'error');
             }
         };
         
@@ -3670,7 +3869,7 @@ Text: "${text}"`);
             }, (error) => {
                 console.error("Sync error:", error);
                 if (error.code === 'permission-denied') {
-                    console.warn("[ERR-S01] Firestore permission denied on realtime listener"); if (currentUser) window.showToast("Fehler S01 - Bitte neu anmelden");
+                    console.warn("[ERR-S01] Firestore permission denied on realtime listener"); if (currentUser) window.showToast(translations[currentLang].err_sync_relogin, 'error');
                 }
                 window.updateSyncStatus(false);
             });
@@ -3678,18 +3877,48 @@ Text: "${text}"`);
         
         window.setFilterScope = function(scope) {
             filterScope = scope;
-            document.querySelectorAll('#filter-scope-container .filter-pill').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.filter-pill').classList.add('active');
+            localStorage.setItem('mooMemo_filterScope', scope);
+            // Über data-Attribut statt globalem `event` (deprecated, nicht in allen Browsern zuverlässig)
+            document.querySelectorAll('#filter-scope-container .filter-pill').forEach(btn =>
+                btn.classList.toggle('active', btn.dataset.scope === scope));
             window.renderReportList();
         };
         window.setFilterType = function(type) {
             filterType = type;
-            document.querySelectorAll('#filter-type-container .filter-pill').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.filter-pill').classList.add('active');
+            localStorage.setItem('mooMemo_filterType', type);
+            document.querySelectorAll('#filter-type-container .filter-pill').forEach(btn =>
+                btn.classList.toggle('active', btn.dataset.type === type));
             window.renderReportList();
         };
-        window.setFilterYear = function(year) { filterYear = year; window.renderReportList(); };
-        window.setSortMethod = function(method) { sortMethod = method; window.renderReportList(); };
+        // Gespeicherte Filter beim Start in der UI spiegeln (Pills + Sortier-Select)
+        window.applyFilterUIState = function() {
+            document.querySelectorAll('#filter-scope-container .filter-pill').forEach(btn =>
+                btn.classList.toggle('active', btn.dataset.scope === filterScope));
+            document.querySelectorAll('#filter-type-container .filter-pill').forEach(btn =>
+                btn.classList.toggle('active', btn.dataset.type === filterType));
+            const sortSelect = document.getElementById('sort-filter');
+            if (sortSelect) sortSelect.value = sortMethod;
+        };
+        window.applyFilterUIState();
+        // Suche debouncen: vorher wurde bei jedem Tastendruck die komplette Liste
+        // inkl. aller Filter neu gerendert
+        let searchDebounceTimer = null;
+        window.onSearchInput = function() {
+            const clearBtn = document.getElementById('search-clear-btn');
+            if (clearBtn) clearBtn.style.display = document.getElementById('search-input').value ? 'flex' : 'none';
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => window.renderReportList(), 200);
+        };
+        window.clearSearch = function() {
+            const input = document.getElementById('search-input');
+            input.value = '';
+            const clearBtn = document.getElementById('search-clear-btn');
+            if (clearBtn) clearBtn.style.display = 'none';
+            window.renderReportList();
+            input.focus();
+        };
+        window.setFilterYear = function(year) { filterYear = year; localStorage.setItem('mooMemo_filterYear', year); window.renderReportList(); };
+        window.setSortMethod = function(method) { sortMethod = method; localStorage.setItem('mooMemo_sortMethod', method); window.renderReportList(); };
         window.toggleMobileFilter = function() {
             const container = document.getElementById('filter-container');
             const btn = document.getElementById('mobile-filter-toggle-btn');
@@ -3735,7 +3964,7 @@ Text: "${text}"`);
             window.renderReportList();
             if(document.getElementById('points').classList.contains('active')) window.renderPointsList();
             if(document.getElementById('status').classList.contains('active')) window.renderStatusList();
-            window.closeSettings();
+            // Modal bewusst offen lassen – Nutzer will evtl. noch die KI-Sprache umstellen
         };
         
         window.setAiTargetLang = function(lang) {
@@ -3789,19 +4018,24 @@ Text: "${text}"`);
         };
 
         window.openReport = function(id) {
+            const report = allReports.find(r => String(r.id) === String(id));
+            // Erst prüfen, dann Zustand setzen – sonst zeigt der Header auf einen
+            // Bericht, der nicht (mehr) existiert, und localStorage restauriert ihn beim Reload
+            if(!report) return;
+
             currentReportId = id;
 
             // SAVE STATE for refresh
             localStorage.setItem('mooMemo_lastReport', id);
-
-            const report = allReports.find(r => String(r.id) === String(id));
-            if(!report) return;
             points = report.points || [];
 
             document.getElementById('h_type').value = report.header.type || 'AMS';
             document.getElementById('h_customer').value = report.header.customer || '';
             document.getElementById('h_date_from').value = report.header.date_from || '';
             document.getElementById('h_date_to').value = report.header.date_to || '';
+            // min-Attribut für "bis"-Datum passend zum geladenen Bericht setzen
+            const dateToEl = document.getElementById('h_date_to');
+            if (report.header.date_from) dateToEl.min = report.header.date_from; else dateToEl.removeAttribute('min');
             // AUTHOR HANDLING
             let auths = report.header.authors || [];
             if (!auths.length && report.header.author) auths = [report.header.author];
@@ -3810,9 +4044,7 @@ Text: "${text}"`);
             window.renderParticipantsList(report.header.participants || []);
 
             // Set visibility field (migrate legacy values)
-            let vis = report.header.visibility || 'authors_only';
-            if (vis === 'published') vis = 'all';
-            if (vis === 'draft') vis = 'authors_only';
+            const vis = window.normalizeVisibility(report.header);
             document.getElementById('h_visibility').value = vis;
             window.toggleTeamChips(vis, report);
 
@@ -3831,7 +4063,10 @@ Text: "${text}"`);
             window.switchTab(isBasisdatenComplete ? 'points' : 'header');
         };
         
+        let creatingReport = false; // Doppelklick-Schutz: sonst entstehen zwei Berichte
         window.createNewReport = function() {
+            if (creatingReport) return;
+            creatingReport = true;
             const readableId = Math.floor(10000 + Math.random() * 90000).toString();
             const authorName = currentUserProfile ? currentUserProfile.displayName : '';
             const initialAuthors = authorName ? [authorName] : [];
@@ -3846,10 +4081,11 @@ Text: "${text}"`);
                 header: { type: 'AMS', customer: '', date_from: new Date().toISOString().split('T')[0], date_to: '', authors: initialAuthors, author: authorName, participants: [], visibility: 'authors_only' },
                 points: []
             };
-            window.saveReportToFirestore(r).then(() => window.openReport(r.id));
+            window.saveReportToFirestore(r).then(() => window.openReport(r.id)).finally(() => { creatingReport = false; });
         };
 
-        // DEAKTIVIERT - Bericht duplizieren (Button ausgeblendet, Funktion bleibt für spätere Nutzung)
+        // Bericht duplizieren: Kopfdaten übernehmen (Kunde, Bereich, Teilnehmer),
+        // Punkte nicht – ideal für Folgebesuche beim selben Kunden
         window.duplicateReport = function(e, id) {
             if(e) e.stopPropagation();
             const source = allReports.find(x => x.id === id);
@@ -3862,18 +4098,20 @@ Text: "${text}"`);
                 created_at: Date.now(),
                 created_by: currentUser ? currentUser.uid : null,
                 created_by_name: currentUserProfile ? currentUserProfile.displayName : '',
+                created_by_dept: currentUserProfile ? (currentUserProfile.department || '') : '',
                 header: {
                     type: source.header.type || 'AMS',
                     customer: source.header.customer || '',
                     date_from: today,
                     date_to: '',
                     authors: source.header.authors ? [...source.header.authors] : [],
-                    participants: source.header.participants ? [...source.header.participants] : []
+                    participants: source.header.participants ? [...source.header.participants] : [],
+                    visibility: 'authors_only'
                 },
                 points: []
             };
             window.saveReportToFirestore(r).then(() => {
-                window.showToast('Bericht dupliziert');
+                window.showToast(translations[currentLang].toast_duplicated, 'success');
                 window.openReport(r.id);
             });
         };
@@ -3939,6 +4177,19 @@ Text: "${text}"`);
             });
         };
 
+        // Datumsplausibilität: "bis" darf nicht vor "von" liegen
+        window.onDateFromChange = function() {
+            const from = document.getElementById('h_date_from');
+            const to = document.getElementById('h_date_to');
+            if (from.value) {
+                to.min = from.value;
+                if (to.value && to.value < from.value) to.value = from.value;
+            } else {
+                to.removeAttribute('min');
+            }
+            window.updateCurrentReportHeader();
+        };
+
         window.updateCurrentReportHeader = function() {
             if(!currentReportId) return;
             if (headerUpdateTimeout) clearTimeout(headerUpdateTimeout);
@@ -3967,12 +4218,18 @@ Text: "${text}"`);
             if(id==='status') window.renderStatusList();
             if(id==='export') {
                 window.renderPDFPreview();
-                window.updateShareLink();
                 window.renderRelatedReports();
             }
         };
 
         window.savePoint = function() {
+             // Titel ist Pflichtfeld – leere Punkte erzeugen leere Karten in Liste & PDF
+             const titleVal = document.getElementById('p_title').value.trim();
+             if (!titleVal) {
+                 window.showToast(translations[currentLang].err_title_required, 'error');
+                 document.getElementById('p_title').focus();
+                 return;
+             }
              const idx = parseInt(document.getElementById('edit-index').value);
              const newSolution = document.getElementById('p_solution').value;
              const oldPoint = idx > -1 ? points[idx] : null;
@@ -3991,19 +4248,39 @@ Text: "${text}"`);
                 solutionDate: solutionDate,
                 images: tempImages
              };
-             if(idx === -1) points.push(p); else points[idx] = p;
+             // Bericht kann während der Bearbeitung gelöscht worden sein (Realtime-Sync):
+             // dann Modal offen lassen, damit keine Eingaben verloren gehen
              const r = window.getCurrentReport();
-             if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_saved)); }
+             if(!r) { window.showToast(translations[currentLang].toast_removed); return; }
+             if(idx === -1) points.push(p); else points[idx] = p;
+             r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_saved));
              window.closeModal(); window.renderPointsList(); window.renderStatusList();
         };
         
+        // --- GENERISCHES CONFIRM-MODAL (einheitlich statt native confirm()) ---
+        let confirmCallback = null;
+        window.showConfirm = function(title, msg, confirmLabel, onConfirm) {
+            document.getElementById('confirm-modal-title').textContent = title;
+            document.getElementById('confirm-modal-msg').textContent = msg;
+            document.getElementById('confirm-modal-ok').textContent = confirmLabel;
+            confirmCallback = onConfirm;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        };
+        window.closeConfirmModal = function() {
+            confirmCallback = null;
+            document.getElementById('confirm-modal').style.display = 'none';
+        };
+        window.execConfirmModal = function() {
+            const cb = confirmCallback;
+            window.closeConfirmModal();
+            if (cb) cb();
+        };
+
         window.askDeleteReport = function(e, id) {
             if(e) e.stopPropagation();
             if (!window.isAdmin()) { alert(translations[currentLang].err_admin_only_delete); return; }
             const t = translations[currentLang];
-            if (confirm(t.delete_report_msg)) {
-                window.deleteReportFromFirestore(id);
-            }
+            window.showConfirm(t.delete_report_title, t.delete_report_msg, t.btn_delete_confirm, () => window.deleteReportFromFirestore(id));
         };
         
         window.askAdminTools = function() {
@@ -4012,16 +4289,6 @@ Text: "${text}"`);
             } else {
                 alert(translations[currentLang].err_admin_only_access);
             }
-        };
-
-        window.exportSingleReport = function(e, id) {
-            if(e) e.stopPropagation();
-            const r = allReports.find(x => x.id === id);
-            if(!r) return;
-            const a = document.createElement('a');
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(r));
-            a.download = `bericht_${r.id}.json`;
-            document.body.appendChild(a); a.click(); a.remove();
         };
 
         window.closeAdminToolsModal = function() {
@@ -4161,6 +4428,11 @@ Text: "${text}"`);
             tempImages = [];
             const solutionDateEl = document.getElementById('solution-date-display');
             const solutionDateText = document.getElementById('solution-date-text');
+            // Titel je nach Modus; Löschen-Button nur für bestehende Punkte anzeigen
+            const modalTitleEl = document.getElementById('modal-title');
+            if (modalTitleEl) modalTitleEl.textContent = index > -1 ? translations[currentLang].modal_edit_point : translations[currentLang].modal_new_point;
+            const deleteBtnEl = document.getElementById('btn-delete');
+            if (deleteBtnEl) deleteBtnEl.style.display = index > -1 ? '' : 'none';
             if(index > -1) {
                 const p = points[index];
                 document.getElementById('p_ticket').value = p.ticket || "";
@@ -4195,6 +4467,11 @@ Text: "${text}"`);
             window.renderModalImages();
             window.updateAiLangHints();
             document.getElementById('modal').style.display = 'flex';
+            // Desktop: erstes Feld fokussieren (auf Mobile nicht – dort würde
+            // sofort die Tastatur über dem Bottom Sheet aufklappen)
+            if (window.matchMedia('(min-width: 768px)').matches) {
+                setTimeout(() => { const f = document.getElementById('p_title'); if (f) f.focus(); }, 50);
+            }
         };
 
         window.toggleImageSize = function(i) {
@@ -4209,14 +4486,56 @@ Text: "${text}"`);
             window.renderModalImages();
         };
 
+        // --- LIGHTBOX MIT GALERIE (Blättern per Pfeile, Tastatur, Wischgeste) ---
+        let lightboxImages = [];
+        let lightboxIndex = 0;
+
         window.openLightbox = function(src) {
-            const el = document.getElementById('img-lightbox');
-            document.getElementById('lightbox-img').src = src;
-            el.style.display = 'flex';
+            // Galerie aus dem aktuellen Kontext aufbauen: Punkt-Modal oder PDF-Vorschau
+            const modalOpen = document.getElementById('modal').style.display === 'flex';
+            const scope = modalOpen ? '#modal-img-preview img' : '#pdf-preview img';
+            lightboxImages = Array.from(document.querySelectorAll(scope))
+                .map(i => i.src)
+                .filter(s => !s.endsWith('.svg') && !s.includes('gea-logo'));
+            if (!lightboxImages.length) lightboxImages = [src];
+            lightboxIndex = Math.max(0, lightboxImages.indexOf(src));
+            window.updateLightboxView();
+            document.getElementById('img-lightbox').style.display = 'flex';
         };
+
+        window.updateLightboxView = function() {
+            document.getElementById('lightbox-img').src = lightboxImages[lightboxIndex];
+            const multi = lightboxImages.length > 1;
+            document.getElementById('lightbox-prev').style.display = multi ? 'flex' : 'none';
+            document.getElementById('lightbox-next').style.display = multi ? 'flex' : 'none';
+            const counter = document.getElementById('lightbox-counter');
+            counter.style.display = multi ? 'block' : 'none';
+            counter.textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+        };
+
+        window.lightboxNav = function(dir, e) {
+            if (e) e.stopPropagation();
+            if (lightboxImages.length < 2) return;
+            lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+            window.updateLightboxView();
+        };
+
         window.closeLightbox = function() {
             document.getElementById('img-lightbox').style.display = 'none';
         };
+
+        // Wischgeste (Touch) zum Blättern
+        (function() {
+            const lb = document.getElementById('img-lightbox');
+            let touchX = null;
+            lb.addEventListener('touchstart', e => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+            lb.addEventListener('touchend', e => {
+                if (touchX === null) return;
+                const dx = e.changedTouches[0].clientX - touchX;
+                touchX = null;
+                if (Math.abs(dx) > 50) window.lightboxNav(dx < 0 ? 1 : -1);
+            }, { passive: true });
+        })();
         
         window.askDeletePoint = function() {
             document.getElementById('delete-point-confirm-modal').style.display = 'flex';
@@ -4226,20 +4545,59 @@ Text: "${text}"`);
             document.getElementById('delete-point-confirm-modal').style.display = 'none';
         };
 
+        // --- PUNKT LÖSCHEN MIT UNDO ---
+        // Bilder werden erst nach Ablauf des Undo-Fensters endgültig aus dem
+        // Storage entfernt, damit "Rückgängig" den Punkt vollständig wiederherstellt.
+        let lastDeletedPoint = null;
+        let undoToastTimer = null;
+
         window.executeDeletePoint = function() {
              const idx = parseInt(document.getElementById('edit-index').value);
              if(idx > -1) {
                  const deletedPoint = points[idx];
-                 // Clean up images from Storage
-                 if (deletedPoint && deletedPoint.images && deletedPoint.images.length) {
-                     window.deleteStorageImages(deletedPoint.images);
-                 }
                  points.splice(idx, 1);
                  const r = window.getCurrentReport();
-                 if(r) { r.points = points; window.saveReportToFirestore(r).then(() => window.showToast(translations[currentLang].toast_deleted)); }
+                 if(r) { r.points = points; window.saveReportToFirestore(r); }
                  window.closeModal(); window.renderPointsList(); window.renderStatusList();
+                 window.showUndoDelete(deletedPoint, idx);
              }
              window.closeDeletePointModal();
+        };
+
+        window.showUndoDelete = function(point, index) {
+            // Vorheriges Undo-Fenster ggf. finalisieren (Bilder aufräumen)
+            if (lastDeletedPoint) window.finalizeDeletedPoint();
+            lastDeletedPoint = { point, index };
+            const el = document.getElementById('undo-toast');
+            if (!el) { window.finalizeDeletedPoint(); return; }
+            document.getElementById('undo-toast-text').textContent = translations[currentLang].toast_deleted;
+            el.classList.add('show');
+            clearTimeout(undoToastTimer);
+            undoToastTimer = setTimeout(() => {
+                el.classList.remove('show');
+                window.finalizeDeletedPoint();
+            }, 6000);
+        };
+
+        window.finalizeDeletedPoint = function() {
+            if (!lastDeletedPoint) return;
+            const imgs = lastDeletedPoint.point && lastDeletedPoint.point.images;
+            if (imgs && imgs.length) window.deleteStorageImages(imgs);
+            lastDeletedPoint = null;
+        };
+
+        window.undoDeletePoint = function() {
+            clearTimeout(undoToastTimer);
+            const el = document.getElementById('undo-toast');
+            if (el) el.classList.remove('show');
+            if (!lastDeletedPoint) return;
+            const { point, index } = lastDeletedPoint;
+            lastDeletedPoint = null;
+            points.splice(Math.min(index, points.length), 0, point);
+            const r = window.getCurrentReport();
+            if (r) { r.points = points; window.saveReportToFirestore(r); }
+            window.renderPointsList(); window.renderStatusList();
+            window.showToast(translations[currentLang].toast_saved, 'success');
         };
 
         window.toggleFullScreen = function() {
@@ -4247,21 +4605,6 @@ Text: "${text}"`);
             else if(document.exitFullscreen) document.exitFullscreen().catch(e=>{});
         };
 
-        window.handleDragStart = function(e, i) { draggedItemIndex = i; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', i); e.target.classList.add('dragging'); setTimeout(() => e.target.style.opacity = '0.5', 0); };
-        window.handleDragOver = function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; };
-        window.handleDragEnd = function(e) { e.target.classList.remove('dragging'); e.target.style.opacity = '1'; draggedItemIndex = null; };
-        window.handleDrop = function(e, newIndex) {
-            e.stopPropagation();
-            if (draggedItemIndex !== null && draggedItemIndex !== newIndex) {
-                const item = points[draggedItemIndex];
-                points.splice(draggedItemIndex, 1);
-                points.splice(newIndex, 0, item);
-                const r = window.getCurrentReport();
-                if(r) { r.points = points; window.saveReportToFirestore(r); }
-                window.renderPointsList();
-            }
-            return false;
-        };
         window.movePoint = function(index, direction) {
             const newIndex = index + direction;
             if (newIndex >= 0 && newIndex < points.length) {
@@ -4290,6 +4633,25 @@ Text: "${text}"`);
             r.readAsText(f); input.value='';
         };
         
+        // --- CSV EXPORT (offene/alle Punkte als Tabelle, z. B. für Excel-Nachverfolgung) ---
+        window.exportCSV = function() {
+            const r = window.getCurrentReport();
+            if (!r) return;
+            const t = translations[currentLang];
+            const pts = exportFilter === 'open' ? (r.points || []).filter(p => p.status === 'open') : (r.points || []);
+            const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const header = [t.lbl_ticket, t.lbl_title, t.lbl_desc, t.lbl_assignee, t.lbl_status, t.lbl_solution];
+            const rows = pts.map(p => [p.ticket, p.title, p.desc, p.assignee, p.status === 'open' ? t.status_open : t.status_resolved, p.solution]);
+            // BOM + Semikolon-Trenner, damit Excel (DE) die Datei direkt korrekt öffnet
+            const csv = '\uFEFF' + [header, ...rows].map(row => row.map(esc).join(';')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `mooMemo_${(r.header.customer || 'Bericht').replace(/[^\w\-]+/g, '_')}_${r.header.date_from || ''}.csv`;
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(a.href);
+        };
+
         // --- PRINT REPORT (Native Browser Print for better quality) ---
         window.printReport = async function() {
             // Re-render preview fresh
@@ -4330,14 +4692,14 @@ Text: "${text}"`);
         };
 
         // --- SHARE LINK FUNCTIONS ---
-        window.copyShareLink = function(tab) {
+        window.copyShareLink = function() {
             if (!currentReportId) return;
             const baseUrl = window.location.origin + window.location.pathname;
-            const link = `${baseUrl}?report=${currentReportId}`;
+            // Aktiven Export-Filter mitgeben, damit der Empfänger dieselbe Ansicht sieht
+            const link = `${baseUrl}?report=${currentReportId}` + (exportFilter === 'open' ? '&filter=open' : '');
 
-            navigator.clipboard.writeText(link).then(() => {
+            const showCopied = () => {
                 window.showToast(translations[currentLang].toast_copied);
-                window.open(link, '_blank');
                 const btn = document.getElementById('share-link-btn');
                 if (btn) {
                     btn.classList.add('copied');
@@ -4347,14 +4709,12 @@ Text: "${text}"`);
                         btn.innerHTML = `<i class="fa-solid fa-copy"></i> ${translations[currentLang].share_title}`;
                     }, 2000);
                 }
-            }).catch(() => {
-                window.open(link, '_blank');
-                window.showToast(translations[currentLang].toast_copied);
-            });
-        };
+            };
 
-        window.updateShareLink = function() {
-            // Share link is generated on-demand when button is clicked
+            navigator.clipboard.writeText(link).then(showCopied).catch(() => {
+                // Fallback ohne Clipboard-API: Link zum manuellen Kopieren anzeigen
+                prompt(translations[currentLang].share_desc, link);
+            });
         };
 
         // --- URL PARAMETER PARSING ---
@@ -4367,6 +4727,8 @@ Text: "${text}"`);
                 sharedReportId = reportId;
                 sharedTab = tab || 'export';
                 isReadOnly = true;
+                // Export-Filter aus dem Share-Link übernehmen (z. B. "Nur Offene")
+                if (params.get('filter') === 'open') exportFilter = 'open';
             }
         };
 
@@ -4395,7 +4757,7 @@ Text: "${text}"`);
 
             // Update shared header with report info
             const h = report.header;
-            const formatDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0]}` : d; };
+            const formatDate = window.formatDateDE;
             const titleEl = document.getElementById('shared-report-title');
             const subtitleEl = document.getElementById('shared-report-subtitle');
 
@@ -4463,25 +4825,36 @@ Text: "${text}"`);
         };
         
         window.toggleStatus = function(i) {
-            points[i].status = points[i].status==='open' ? 'resolved' : 'open'; 
+            if(!points[i]) return; // Punkt kann durch Realtime-Sync entfernt worden sein
+            points[i].status = points[i].status==='open' ? 'resolved' : 'open';
             const r = window.getCurrentReport(); 
             if(r) window.saveReportToFirestore(r); 
             setTimeout(()=>{window.renderStatusList();window.renderPointsList();},10); 
         };
         
+        let activeSpeechBtn = null; // Nur eine Aufnahme gleichzeitig (über alle Felder)
         window.listen = function(id) {
             const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
             if(!SpeechRecognitionAPI) return alert(translations[currentLang].err_browser_unsupported);
-            const btn = document.querySelector(`button[onclick*="${id}"]`);
+            // Präziser Selektor mit Quotes: 'p_title' darf nicht 'p_ticket' o.ä. matchen
+            const btn = document.querySelector(`button[onclick*="'${id}'"]`);
+            if(!btn) return;
             const icon = btn.querySelector('i');
             // Toggle: zweiter Klick stoppt die Aufnahme
             if(btn._recognition) {
                 btn._recognition.stop();
                 return;
             }
+            // Läuft bereits eine Aufnahme in einem anderen Feld? Erst stoppen –
+            // zwei parallele Recognition-Instanzen führen zu Fehlern/Doppeltext.
+            if (activeSpeechBtn && activeSpeechBtn._recognition) {
+                activeSpeechBtn._recognition.stop();
+            }
             const r = new SpeechRecognitionAPI();
             r.lang = currentLang === 'de' ? "de-DE" : "en-US";
-            r.continuous = false;
+            // Kontinuierlich zuhören: stoppt nicht mehr bei kurzen Sprechpausen,
+            // sondern nur per Klick, nach 8s Stille oder bei Fehler
+            r.continuous = true;
             r.interimResults = true;
 
             // Visuell: Stop-Icon + Tooltip
@@ -4489,6 +4862,8 @@ Text: "${text}"`);
             icon.className = 'fa-solid fa-stop';
             btn.title = currentLang === 'de' ? 'Zum Stoppen klicken' : 'Click to stop';
             btn._recognition = r;
+            activeSpeechBtn = btn;
+            window.showToast(translations[currentLang].mic_recording);
 
             const field = document.getElementById(id);
             let baseValue = field.value;
@@ -4504,6 +4879,7 @@ Text: "${text}"`);
                 icon.className = 'fa-solid fa-microphone';
                 btn.title = '';
                 btn._recognition = null;
+                if (activeSpeechBtn === btn) activeSpeechBtn = null;
             };
 
             r.onresult = e => {
@@ -4585,32 +4961,57 @@ Text: "${text}"`);
 
             document.getElementById('img-spinner').style.display = 'inline-block';
 
-            // Resize all images in parallel
-            const resizeResults = await Promise.allSettled(Array.from(files).map(f => resizeImage(f)));
+            try {
+                // Resize all images in parallel
+                const resizeResults = await Promise.allSettled(Array.from(files).map(f => resizeImage(f)));
 
-            // Upload all successfully resized images in parallel
-            const reportId = currentReportId || 'temp_uploads';
-            const uploadPromises = resizeResults
-                .filter(r => r.status === 'fulfilled')
-                .map(async (r) => {
-                    const { blob: processedBlob, base64 } = r.value;
-                    const path = `images/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
-                    const storageRef = ref(storage, path);
-                    await uploadBytes(storageRef, processedBlob);
-                    const downloadURL = await getDownloadURL(storageRef);
-                    return { src: downloadURL, base64, isLarge: false };
+                // Upload all successfully resized images in parallel
+                const reportId = currentReportId || 'temp_uploads';
+                const progContainer = document.getElementById('upload-progress');
+                if (progContainer) progContainer.innerHTML = '';
+
+                const uploadPromises = resizeResults
+                    .filter(r => r.status === 'fulfilled')
+                    .map(async (r, i) => {
+                        const { blob: processedBlob, base64 } = r.value;
+                        const path = `images/${reportId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
+                        const storageRef = ref(storage, path);
+                        // Fortschrittsbalken pro Bild – bei mehreren Handyfotos wirkte
+                        // der globale Spinner wie eingefroren
+                        let bar = null;
+                        if (progContainer) {
+                            const wrap = document.createElement('div');
+                            wrap.className = 'upload-bar-wrap';
+                            wrap.innerHTML = `<span class="upload-bar-label">${i + 1}</span><div class="upload-bar-track"><div class="upload-bar"></div></div>`;
+                            progContainer.appendChild(wrap);
+                            bar = wrap.querySelector('.upload-bar');
+                        }
+                        const task = uploadBytesResumable(storageRef, processedBlob);
+                        if (bar) {
+                            task.on('state_changed', snap => {
+                                bar.style.width = Math.round((snap.bytesTransferred / snap.totalBytes) * 100) + '%';
+                            });
+                        }
+                        await task;
+                        if (bar) bar.style.width = '100%';
+                        const downloadURL = await getDownloadURL(storageRef);
+                        return { src: downloadURL, base64, isLarge: false };
+                    });
+
+                const uploadResults = await Promise.allSettled(uploadPromises);
+                uploadResults.forEach(r => {
+                    if (r.status === 'fulfilled') tempImages.push(r.value);
+                    else console.error("Upload failed", r.reason);
                 });
 
-            const uploadResults = await Promise.allSettled(uploadPromises);
-            uploadResults.forEach(r => {
-                if (r.status === 'fulfilled') tempImages.push(r.value);
-                else console.error("Upload failed", r.reason);
-            });
-
-            const failCount = resizeResults.filter(r => r.status === 'rejected').length + uploadResults.filter(r => r.status === 'rejected').length;
-            if (failCount > 0) alert(`${failCount} Bild(er) konnten nicht hochgeladen werden.`);
-
-            document.getElementById('img-spinner').style.display = 'none';
+                const failCount = resizeResults.filter(r => r.status === 'rejected').length + uploadResults.filter(r => r.status === 'rejected').length;
+                if (failCount > 0) window.showToast(translations[currentLang].err_upload_failed.replace('{n}', failCount), 'error');
+            } finally {
+                // Spinner + Fortschrittsbalken immer ausblenden – auch bei unerwarteten Fehlern
+                document.getElementById('img-spinner').style.display = 'none';
+                const pc = document.getElementById('upload-progress');
+                if (pc) pc.innerHTML = '';
+            }
             window.renderModalImages();
         };
 
@@ -4649,18 +5050,28 @@ Text: "${text}"`);
             });
             container.innerHTML = html;
             document.getElementById('changelog-modal').style.display = 'flex';
+            // Version als gesehen markieren, Hinweis-Punkt ausblenden
+            localStorage.setItem('mooMemo_version', APP_VERSION);
+            const dot = document.getElementById('whatsnew-dot');
+            if (dot) dot.style.display = 'none';
         };
 
         window.checkVersion = function() {
             const storedVer = localStorage.getItem('mooMemo_version');
             if (!storedVer || storedVer !== APP_VERSION) {
-                // New version detected!
-                localStorage.setItem('mooMemo_version', APP_VERSION);
-                window.openChangelog();
+                // Neue Version: dezenter Hinweis-Punkt am Zahnrad statt
+                // unterbrechendem Popup direkt beim Start. Als "gesehen"
+                // markiert wird erst, wenn der Changelog geöffnet wurde.
+                const dot = document.getElementById('whatsnew-dot');
+                if (dot) dot.style.display = 'block';
             }
         };
 
-        // --- MOBILE BACK BUTTON EXIT CONFIRMATION ---
+        // --- MOBILE BACK BUTTON: IN-APP-NAVIGATION ---
+        // Statt Exit-Bestätigung: Zurück-Geste schließt zuerst offene Modals,
+        // dann den Bericht (-> Dashboard). Erst auf Dashboard-Ebene verlässt
+        // "Zurück" die App normal. Keine beforeunload-Warnung mehr – alle
+        // Änderungen werden ohnehin automatisch gespeichert.
         let backButtonInitialized = false;
 
         window.initBackButtonHandler = function() {
@@ -4670,26 +5081,18 @@ Text: "${text}"`);
             // Push a state to history so we can intercept back button
             history.pushState({ mooMemo: true }, '', window.location.href);
 
-            window.addEventListener('popstate', function(e) {
-                const t = translations[currentLang];
-                // Show confirmation dialog
-                if (confirm(t.exit_confirm || 'Möchtest du mooMemo wirklich verlassen?')) {
-                    // User wants to leave - allow navigation
-                    history.back();
-                } else {
-                    // User wants to stay - push state again
+            window.addEventListener('popstate', function() {
+                const openModal = Array.from(document.querySelectorAll('.modal-overlay')).find(m => m.style.display === 'flex');
+                if (openModal) {
+                    openModal.style.display = 'none';
+                    history.pushState({ mooMemo: true }, '', window.location.href);
+                    return;
+                }
+                if (currentReportId) {
+                    window.goToDashboard();
                     history.pushState({ mooMemo: true }, '', window.location.href);
                 }
-            });
-
-            // Also handle browser close/refresh with beforeunload
-            window.addEventListener('beforeunload', function(e) {
-                // Only show warning if there's potentially unsaved data
-                if (currentReportId && points.length > 0) {
-                    e.preventDefault();
-                    e.returnValue = '';
-                    return '';
-                }
+                // sonst: Dashboard-Ebene -> Browser navigiert normal zurück
             });
         };
 
@@ -4781,8 +5184,11 @@ Text: "${text}"`);
         });
     </script>
     <div class="img-lightbox-overlay" id="img-lightbox" onclick="window.closeLightbox()">
-        <div class="lightbox-close" onclick="window.closeLightbox()">&times;</div>
-        <img id="lightbox-img" src="" alt="Bild Vorschau">
+        <div class="lightbox-close" onclick="window.closeLightbox()" aria-label="Schließen">&times;</div>
+        <button type="button" class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Vorheriges Bild" onclick="window.lightboxNav(-1, event)"><i class="fa-solid fa-chevron-left"></i></button>
+        <img id="lightbox-img" src="" alt="Bild Vorschau" onclick="event.stopPropagation()">
+        <button type="button" class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Nächstes Bild" onclick="window.lightboxNav(1, event)"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="lightbox-counter" id="lightbox-counter"></div>
     </div>
 </body>
 </html>
